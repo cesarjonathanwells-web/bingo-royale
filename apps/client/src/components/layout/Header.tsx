@@ -21,7 +21,7 @@ export function Header() {
   };
 
   return (
-    <header className="sticky top-0 z-30 bg-[var(--color-bg-primary)]/80 backdrop-blur-lg border-b border-[var(--color-border)]">
+    <header className="sticky top-0 z-30 bg-[var(--color-bg-primary)]/85 backdrop-blur-xl border-b border-[var(--color-border)]/60">
       <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 max-w-5xl mx-auto">
         {/* Logo */}
         <div className="flex items-center gap-3">
@@ -159,11 +159,16 @@ export function Header() {
             </button>
           )}
 
-          {/* Player Name */}
+          {/* Player Name with avatar */}
           {user && (
-            <span className="ml-2 px-2.5 py-1 rounded-lg bg-[var(--color-bg-tertiary)] text-xs font-medium text-[var(--color-text-secondary)] max-w-[100px] truncate">
-              {user.name}
-            </span>
+            <div className="ml-2 flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[var(--color-bg-tertiary)]/80 border border-[var(--color-border)]/40">
+              <div className="w-5 h-5 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-[10px] font-bold text-white shrink-0">
+                {user.name.charAt(0).toUpperCase()}
+              </div>
+              <span className="text-xs font-medium text-[var(--color-text-secondary)] max-w-[80px] truncate">
+                {user.name}
+              </span>
+            </div>
           )}
         </div>
       </div>

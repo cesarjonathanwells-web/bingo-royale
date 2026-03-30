@@ -77,11 +77,11 @@ export const AFK_TIMEOUT = 300_000;
  * Used by the UI to style called balls.
  */
 export const BALL_COLORS: Record<string, string> = {
-  B: '#0047AB', // blue
-  I: '#DC143C', // red
-  N: '#C0C0C0', // silver
-  G: '#228B22', // green
-  O: '#FFD700', // gold
+  B: '#3b82f6', // vivid blue
+  I: '#ef4444', // vivid red
+  N: '#a78bfa', // vivid violet
+  G: '#22c55e', // vivid green
+  O: '#f59e0b', // vivid amber
 } as const;
 
 // --------------- Emoji reactions ---------------

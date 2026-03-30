@@ -85,19 +85,19 @@ export function RoomLobby({ room }: RoomLobbyProps) {
   const currentSpeed = SPEED_PRESETS.find((p) => p.ms === room.speed);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 w-full max-w-4xl mx-auto px-3 sm:p-4">
+    <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 w-full max-w-4xl mx-auto px-3 sm:p-4 animate-page-enter">
       {/* Left / Main */}
       <div className="flex-1 space-y-6">
         {/* Room Code */}
         <div className="text-center space-y-2">
-          <p className="text-sm font-medium text-[var(--color-text-secondary)]">
+          <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.15em]">
             {t("lobby.roomCode")}
           </p>
           <button
             onClick={copyInviteLink}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] hover:bg-[var(--color-bg-tertiary)] transition-colors group"
+            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-b from-[var(--color-bg-secondary)] to-[var(--color-bg-tertiary)]/50 border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 hover:shadow-lg hover:shadow-[var(--color-accent)]/10 transition-all duration-200 group"
           >
-            <span className="text-2xl sm:text-3xl font-mono font-extrabold tracking-widest sm:tracking-[0.3em] text-[var(--color-text-primary)]">
+            <span className="text-3xl sm:text-4xl font-mono font-extrabold tracking-[0.3em] sm:tracking-[0.4em] text-[var(--color-text-primary)]">
               {generateRoomCode(room.code)}
             </span>
             <svg

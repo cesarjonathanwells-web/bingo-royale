@@ -81,8 +81,8 @@ function MiniGrid({ cells }: { cells: number[] }) {
           className={cn(
             "w-[8px] h-[8px] rounded-[2px] transition-colors",
             cellSet.has(i)
-              ? "bg-[var(--color-accent)]"
-              : "bg-[var(--color-bg-tertiary)]",
+              ? "bg-[var(--color-accent)] shadow-[0_0_3px_var(--color-accent)]"
+              : "bg-[var(--color-bg-tertiary)]/60",
           )}
         />
       ))}

@@ -31,14 +31,25 @@ export function PlayerList({ players, className }: PlayerListProps) {
             key={player.id}
             className="flex items-center gap-3 px-4 py-2.5"
           >
-            {/* Status dot */}
+            {/* Avatar circle with first letter */}
             <div
               className={cn(
-                "w-2 h-2 rounded-full shrink-0",
-                player.connected ? "bg-emerald-400" : "bg-red-400",
+                "w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold text-white relative",
+                player.connected
+                  ? "bg-[var(--color-accent)]"
+                  : "bg-[var(--color-text-muted)]",
               )}
-              title={player.connected ? t("lobby.connected") : t("lobby.disconnected")}
-            />
+            >
+              {player.name.charAt(0).toUpperCase()}
+              {/* Connection status indicator */}
+              <div
+                className={cn(
+                  "absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-[var(--color-bg-secondary)]",
+                  player.connected ? "bg-emerald-400" : "bg-red-400",
+                )}
+                title={player.connected ? t("lobby.connected") : t("lobby.disconnected")}
+              />
+            </div>
 
             {/* Name */}
             <span

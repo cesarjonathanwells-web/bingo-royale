@@ -56,25 +56,29 @@ export function Home() {
   }, [joinRoom, roomCode, t, toast]);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 bg-gradient-game">
-      {/* Decorative background circles */}
+    <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 bg-gradient-game relative">
+      {/* Decorative background orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        <div className="absolute -top-20 -left-20 w-64 h-64 rounded-full bg-[var(--color-ball-b)]/5 blur-3xl" />
-        <div className="absolute -bottom-20 -right-20 w-64 h-64 rounded-full bg-[var(--color-ball-o)]/5 blur-3xl" />
-        <div className="absolute top-1/3 right-1/4 w-40 h-40 rounded-full bg-[var(--color-ball-i)]/5 blur-3xl" />
+        <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-[var(--color-ball-b)]/8 blur-3xl animate-pulse" style={{ animationDuration: '6s' }} />
+        <div className="absolute -bottom-20 -right-20 w-80 h-80 rounded-full bg-[var(--color-ball-o)]/8 blur-3xl animate-pulse" style={{ animationDuration: '8s' }} />
+        <div className="absolute top-1/4 right-1/4 w-56 h-56 rounded-full bg-[var(--color-ball-i)]/6 blur-3xl animate-pulse" style={{ animationDuration: '7s' }} />
+        <div className="absolute bottom-1/3 left-1/5 w-48 h-48 rounded-full bg-[var(--color-ball-g)]/5 blur-3xl animate-pulse" style={{ animationDuration: '9s' }} />
       </div>
 
-      <div className="relative z-10 w-full max-w-sm space-y-8">
+      <div className="relative z-10 w-full max-w-sm space-y-8 animate-page-enter">
         {/* Title */}
-        <div className="text-center space-y-2">
-          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight">
-            <span className="bg-gradient-to-r from-[var(--color-ball-b)] via-[var(--color-ball-i)] via-[var(--color-ball-g)] to-[var(--color-ball-o)] bg-clip-text text-transparent">
+        <div className="text-center space-y-3">
+          <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight">
+            <span
+              className="bg-gradient-to-r from-[var(--color-ball-b)] via-[var(--color-ball-i)] via-[var(--color-ball-g)] to-[var(--color-ball-o)] bg-clip-text text-transparent drop-shadow-lg"
+              style={{ textShadow: '0 4px 24px rgba(99, 102, 241, 0.3)' }}
+            >
               BINGO
             </span>
             <br />
-            <span className="text-[var(--color-text-primary)]">ROYALE</span>
+            <span className="text-[var(--color-text-primary)] tracking-widest text-3xl sm:text-4xl lg:text-5xl">ROYALE</span>
           </h1>
-          <p className="text-sm text-[var(--color-text-secondary)]">
+          <p className="text-sm text-[var(--color-text-secondary)] font-medium tracking-wide">
             {t("app.tagline")}
           </p>
         </div>
@@ -139,22 +143,36 @@ export function Home() {
         )}
 
         {/* Decorative bingo balls */}
-        <div className="flex justify-center gap-3 opacity-60">
+        <div className="flex justify-center gap-3">
           {[
-            { n: 7, c: "#2563eb" },
-            { n: 22, c: "#dc2626" },
-            { n: 38, c: "#9ca3af" },
-            { n: 51, c: "#16a34a" },
-            { n: 65, c: "#eab308" },
-          ].map(({ n, c }) => (
+            { n: 7, c: "#3b82f6", l: "B" },
+            { n: 22, c: "#ef4444", l: "I" },
+            { n: 38, c: "#a78bfa", l: "N" },
+            { n: 51, c: "#22c55e", l: "G" },
+            { n: 65, c: "#f59e0b", l: "O" },
+          ].map(({ n, c, l }, idx) => (
             <div
               key={n}
-              className="w-10 h-10 rounded-full flex items-center justify-center text-white text-xs font-bold shadow-lg"
-              style={{
-                background: `radial-gradient(circle at 35% 35%, ${c}cc, ${c})`,
-              }}
+              className="relative"
+              style={{ animationDelay: `${idx * 0.1}s` }}
             >
-              {n}
+              <div
+                className="w-11 h-11 rounded-full flex items-center justify-center text-white shadow-lg"
+                style={{
+                  background: `radial-gradient(circle at 30% 25%, ${c}ff, ${c} 60%, ${c}99 100%)`,
+                  boxShadow: `0 3px 10px ${c}55, inset 0 -2px 4px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,0.3)`,
+                }}
+              >
+                <div
+                  className="w-7 h-7 rounded-full flex flex-col items-center justify-center"
+                  style={{
+                    background: "radial-gradient(circle at 50% 40%, #ffffff, #f0f0f0 70%, #e0e0e0 100%)",
+                  }}
+                >
+                  <span style={{ color: c, fontSize: '6px', fontWeight: 700, lineHeight: 1 }}>{l}</span>
+                  <span style={{ color: '#1e293b', fontSize: '11px', fontWeight: 800, lineHeight: 1 }}>{n}</span>
+                </div>
+              </div>
             </div>
           ))}
         </div>

@@ -12,13 +12,13 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-[var(--color-accent)] hover:bg-[var(--color-accent-hover)] text-white shadow-lg shadow-indigo-500/20 active:scale-95",
+    "bg-gradient-to-b from-[var(--color-accent-hover)] to-[var(--color-accent)] hover:from-[var(--color-accent)] hover:to-[var(--color-accent-hover)] text-white shadow-lg shadow-indigo-500/25 active:scale-[0.97] border-t border-white/10",
   secondary:
-    "bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-border-light)] text-[var(--color-text-primary)] border border-[var(--color-border)] active:scale-95",
+    "bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-border-light)] text-[var(--color-text-primary)] border border-[var(--color-border)] active:scale-[0.97] shadow-sm",
   danger:
-    "bg-[var(--color-error)] hover:bg-red-600 text-white shadow-lg shadow-red-500/20 active:scale-95",
+    "bg-gradient-to-b from-red-500 to-[var(--color-error)] hover:from-red-400 hover:to-red-600 text-white shadow-lg shadow-red-500/25 active:scale-[0.97] border-t border-red-300/20",
   ghost:
-    "bg-transparent hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] active:scale-95",
+    "bg-transparent hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] active:scale-[0.97]",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {

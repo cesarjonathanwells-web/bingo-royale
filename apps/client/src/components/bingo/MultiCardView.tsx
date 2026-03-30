@@ -81,13 +81,13 @@ function MiniCard75({ card, dabs, cardIndex, onDab, disabled, label }: MiniCard7
   );
 
   return (
-    <div className="rounded-xl overflow-hidden bg-[var(--color-bg-card)] border border-[var(--color-border)] shadow-md">
+    <div className="rounded-xl overflow-hidden bg-gradient-card border border-[var(--color-border)] shadow-md">
       {/* Condensed label + BINGO header */}
       <div className="flex items-center gap-0.5 px-1 pt-1">
         {LETTERS.map((letter) => (
           <div
             key={letter}
-            className="flex-1 text-center text-[8px] sm:text-[10px] font-black text-white rounded py-0.5"
+            className="flex-1 text-center text-[8px] sm:text-[10px] font-black text-white rounded py-0.5 col-header"
             style={{ backgroundColor: BALL_COLORS[letter] ?? "#6366f1" }}
           >
             {letter}
@@ -169,7 +169,7 @@ function MiniCard90({ card, dabs, cardIndex, onDab, disabled, label }: MiniCard9
   );
 
   return (
-    <div className="rounded-xl overflow-hidden bg-[var(--color-bg-card)] border border-[var(--color-border)] shadow-md">
+    <div className="rounded-xl overflow-hidden bg-gradient-card border border-[var(--color-border)] shadow-md">
       {/* Grid: 9 cols x 3 rows */}
       <div className="grid grid-cols-9 gap-[2px] p-1">
         {Array.from({ length: 3 }, (_, row) =>

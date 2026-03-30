@@ -93,7 +93,7 @@ export function Stats() {
   ];
 
   return (
-    <div className="flex-1 px-4 py-8 max-w-lg mx-auto w-full">
+    <div className="flex-1 px-4 py-8 max-w-lg mx-auto w-full animate-page-enter">
       <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-6 text-center">
         {t("stats.title")}
       </h2>
@@ -103,11 +103,11 @@ export function Stats() {
         {statCards.map((card) => (
           <div
             key={card.label}
-            className="rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-4 text-center space-y-1"
+            className="rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-4 text-center space-y-1 hover:shadow-lg transition-shadow duration-200"
           >
             <p
-              className="text-xs font-bold uppercase tracking-wide opacity-60"
-              style={{ color: card.color }}
+              className="text-xs font-bold uppercase tracking-wider"
+              style={{ color: card.color, opacity: 0.7 }}
             >
               {card.icon}
             </p>

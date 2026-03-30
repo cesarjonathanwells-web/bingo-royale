@@ -23,8 +23,8 @@ export function EmojiToast({ reactions }: EmojiToastProps) {
             "pointer-events-none",
           )}
         >
-          <span className="text-4xl">{reaction.emoji}</span>
-          <span className="text-xs font-medium text-[var(--color-text-secondary)] bg-[var(--color-bg-secondary)]/80 px-2 py-0.5 rounded-full backdrop-blur-sm">
+          <span className="text-4xl drop-shadow-lg">{reaction.emoji}</span>
+          <span className="text-[10px] font-semibold text-[var(--color-text-secondary)] bg-[var(--color-bg-secondary)]/90 px-2.5 py-0.5 rounded-full backdrop-blur-md border border-[var(--color-border)]/30 shadow-sm">
             {reaction.playerName}
           </span>
         </div>

@@ -37,20 +37,20 @@ export function BingoCard90({
       className={cn(
         "w-full max-w-[calc(100%-0.5rem)] sm:max-w-[500px] mx-auto",
         "rounded-2xl overflow-hidden",
-        "bg-[var(--color-bg-card)] border border-[var(--color-border)]",
-        "shadow-xl shadow-black/20",
+        "bg-gradient-card border border-[var(--color-border)]",
+        "shadow-xl shadow-black/25",
         className,
       )}
     >
       {/* Header */}
-      <div className="text-center py-2 px-1 bg-gradient-to-b from-[var(--color-bg-tertiary)] to-[var(--color-bg-card)]">
-        <h3 className="text-xs font-semibold text-[var(--color-text-secondary)] uppercase tracking-widest">
+      <div className="text-center py-2.5 px-1 bg-gradient-to-b from-[var(--color-bg-tertiary)]/60 to-transparent">
+        <h3 className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-[0.2em]">
           {t("game.yourCard")}
         </h3>
       </div>
 
       {/* Grid: 9 columns x 3 rows */}
-      <div className="grid grid-cols-9 gap-0.5 sm:gap-1 p-1 sm:p-2">
+      <div className="grid grid-cols-9 gap-0.5 sm:gap-1 p-1.5 sm:p-2.5">
         {Array.from({ length: 3 }, (_, row) =>
           Array.from({ length: 9 }, (_, col) => {
             const index = getCellIndex(row, col);
@@ -68,27 +68,27 @@ export function BingoCard90({
                 disabled={disabled || isBlank}
                 className={cn(
                   "relative flex items-center justify-center touch-target",
-                  "aspect-square w-full rounded font-bold text-[10px] sm:text-sm",
-                  "transition-transform duration-100 select-none",
-                  "border border-[var(--color-border)]/50",
+                  "aspect-square w-full rounded-md font-bold text-[10px] sm:text-sm",
+                  "transition-all duration-150 select-none",
+                  "border border-[var(--color-border)]/40 cell-depth",
                   isBlank
-                    ? "bg-[var(--color-bg-primary)]/50 cursor-default"
-                    : "bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] active:scale-90 cursor-pointer",
+                    ? "bg-[var(--color-bg-primary)]/30 cursor-default border-transparent"
+                    : "bg-[var(--color-cell-bg)] text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] active:scale-90 cursor-pointer",
                   disabled && !isBlank && "opacity-60 cursor-not-allowed",
                 )}
                 aria-label={isBlank ? "blank" : `${value} ${isDabbed ? "dabbed" : ""}`}
               >
                 {!isBlank && (
                   <>
-                    <span className={cn("z-10 relative", isDabbed && "text-white")}>
+                    <span className={cn("z-10 relative font-extrabold", isDabbed && "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]")}>
                       {value}
                     </span>
                     {isDabbed && (
                       <div
-                        className="absolute inset-1 rounded-full animate-dab"
+                        className="absolute inset-[3px] rounded-full animate-dab dab-stamp"
                         style={{
                           backgroundColor: "var(--color-dab)",
-                          opacity: 0.7,
+                          opacity: 0.75,
                         }}
                       />
                     )}

@@ -45,13 +45,13 @@ export function DialogContent({
 }: DialogContentProps) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/60 backdrop-blur-sm animate-fade-in" />
+      <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/65 backdrop-blur-md animate-fade-in" />
       <DialogPrimitive.Content
         className={cn(
           "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
           "w-[calc(100%-2rem)] max-w-md max-h-[85vh] overflow-y-auto",
           "rounded-2xl bg-[var(--color-bg-card)] border border-[var(--color-border)]",
-          "p-6 shadow-2xl animate-slide-down",
+          "p-6 shadow-2xl shadow-black/30 animate-slide-down",
           "focus:outline-none",
           className,
         )}

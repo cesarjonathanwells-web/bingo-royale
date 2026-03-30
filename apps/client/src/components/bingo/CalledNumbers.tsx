@@ -29,24 +29,26 @@ export function CalledNumbers({ gameState, variant }: CalledNumbersProps) {
   return (
     <div className="w-full">
       {/* Current number */}
-      <div className="flex flex-col items-center gap-2 mb-3">
+      <div className="flex flex-col items-center gap-2 mb-4">
         {gameState.currentNumber ? (
           <>
-            <NumberBall
-              number={gameState.currentNumber}
-              is75={is75}
-              size="lg"
-              animate
-              key={gameState.currentNumber}
-            />
+            <div className="animate-ball-pulse rounded-full">
+              <NumberBall
+                number={gameState.currentNumber}
+                is75={is75}
+                size="lg"
+                animate
+                key={gameState.currentNumber}
+              />
+            </div>
             {is75 && gameState.currentLetter && (
-              <span className="text-sm font-bold text-[var(--color-text-secondary)]">
+              <span className="text-sm font-bold text-[var(--color-text-secondary)] tracking-wide">
                 {gameState.currentLetter}-{gameState.currentNumber}
               </span>
             )}
           </>
         ) : (
-          <div className="w-20 h-20 rounded-full bg-[var(--color-bg-tertiary)] flex items-center justify-center">
+          <div className="w-20 h-20 rounded-full bg-[var(--color-bg-tertiary)]/60 border border-[var(--color-border)] flex items-center justify-center">
             <span className="text-xs text-[var(--color-text-muted)] text-center px-2">
               {t("game.noNumberYet")}
             </span>
@@ -54,11 +56,13 @@ export function CalledNumbers({ gameState, variant }: CalledNumbersProps) {
         )}
       </div>
 
-      {/* Last 5 called */}
+      {/* Last 5 called - fade as they go back */}
       {lastFive.length > 0 && (
         <div className="flex items-center justify-center gap-2 mb-3">
-          {lastFive.slice(1).map((n) => (
-            <NumberBall key={n} number={n} is75={is75} size="sm" />
+          {lastFive.slice(1).map((n, idx) => (
+            <div key={n} style={{ opacity: 1 - idx * 0.2 }}>
+              <NumberBall number={n} is75={is75} size="sm" />
+            </div>
           ))}
         </div>
       )}
@@ -98,7 +102,7 @@ function Board75({ calledSet }: { calledSet: Set<number> }) {
         {LETTERS.map((letter) => (
           <div
             key={letter}
-            className="text-center py-1 rounded font-bold text-sm text-white"
+            className="text-center py-1 rounded font-bold text-sm text-white col-header"
             style={{ backgroundColor: BALL_COLORS[letter] ?? "#6366f1" }}
           >
             {letter}

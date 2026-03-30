@@ -38,11 +38,12 @@ export function BingoCell({
       className={cn(
         "relative flex items-center justify-center touch-target",
         "aspect-square w-full rounded-lg font-bold text-base sm:text-lg",
-        "transition-transform duration-100 select-none",
-        "border border-[var(--color-border)]/50",
+        "transition-all duration-150 select-none",
+        "border border-[var(--color-border)]/40",
+        "cell-depth",
         isFree
-          ? "bg-[var(--color-accent)]/20 text-[var(--color-accent)] cursor-default"
-          : "bg-[var(--color-bg-secondary)] text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] active:scale-90 cursor-pointer",
+          ? "bg-[var(--color-accent)]/15 text-[var(--color-accent)] cursor-default border-[var(--color-accent)]/30"
+          : "bg-[var(--color-cell-bg)] text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border)]/60 active:scale-90 cursor-pointer",
         disabled && !isFree && "opacity-60 cursor-not-allowed",
       )}
       aria-label={
@@ -52,7 +53,13 @@ export function BingoCell({
       }
     >
       {/* Number or FREE text */}
-      <span className={cn("z-10 relative", dabbed && !isFree && "text-white")}>
+      <span
+        className={cn(
+          "z-10 relative font-extrabold",
+          dabbed && !isFree && "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]",
+          isFree && "text-xs sm:text-sm font-black tracking-wide",
+        )}
+      >
         {isFree ? t("game.free") : (value ?? "")}
       </span>
 
@@ -60,14 +67,15 @@ export function BingoCell({
       {(dabbed || isFree) && (
         <div
           className={cn(
-            "absolute inset-1 rounded-full",
-            !isFree && "animate-dab",
+            "absolute inset-[3px] rounded-full",
+            !isFree && "animate-dab dab-stamp",
+            isFree && "border border-[var(--color-accent)]/20",
           )}
           style={{
             backgroundColor: isFree
               ? "var(--color-accent)"
               : color ?? "var(--color-dab)",
-            opacity: isFree ? 0.3 : 0.7,
+            opacity: isFree ? 0.25 : 0.75,
           }}
         />
       )}

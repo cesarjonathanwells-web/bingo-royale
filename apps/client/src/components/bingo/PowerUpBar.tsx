@@ -34,29 +34,28 @@ export function PowerUpBar({ powerups, onUse }: PowerUpBarProps) {
                 "min-w-[60px] sm:min-w-[72px] min-h-[48px] transition-all duration-200",
                 "border select-none cursor-pointer",
                 pu.used
-                  ? "opacity-40 border-[var(--color-border)] bg-[var(--color-bg-tertiary)] cursor-not-allowed"
+                  ? "opacity-40 border-[var(--color-border)] bg-[var(--color-bg-tertiary)] cursor-not-allowed grayscale"
                   : [
-                      "border-[var(--color-accent)]/50 bg-[var(--color-bg-secondary)]",
+                      "border-[var(--color-accent)]/50 bg-gradient-to-b from-[var(--color-bg-secondary)] to-[var(--color-bg-tertiary)]/50",
                       "hover:bg-[var(--color-accent)]/20 hover:border-[var(--color-accent)]",
                       "hover:scale-105 active:scale-95",
-                      "shadow-md shadow-[var(--color-accent)]/10",
                       "animate-pulse-subtle",
                     ],
               )}
             >
-              <span className="text-xl leading-none">{def.icon}</span>
+              <span className={cn("text-xl leading-none", !pu.used && "drop-shadow-[0_0_6px_var(--color-accent)]")}>{def.icon}</span>
               <span
                 className={cn(
                   "text-[10px] font-semibold leading-tight whitespace-nowrap",
                   pu.used
-                    ? "text-[var(--color-text-muted)]"
+                    ? "text-[var(--color-text-muted)] line-through"
                     : "text-[var(--color-text-primary)]",
                 )}
               >
                 {t(`powerups.${pu.id}`)}
               </span>
               {pu.used && (
-                <span className="text-[9px] text-[var(--color-text-muted)] uppercase">
+                <span className="text-[9px] text-[var(--color-text-muted)] uppercase font-bold">
                   {t("powerups.used")}
                 </span>
               )}

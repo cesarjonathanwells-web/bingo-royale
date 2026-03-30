@@ -24,10 +24,10 @@ export function useToast() {
 
 const variantStyles: Record<ToastVariant, string> = {
   success:
-    "bg-emerald-900/90 border-emerald-500/40 text-emerald-100",
+    "bg-emerald-900/95 border-emerald-500/40 text-emerald-100 shadow-emerald-900/30",
   error:
-    "bg-red-900/90 border-red-500/40 text-red-100",
-  info: "bg-blue-900/90 border-blue-500/40 text-blue-100",
+    "bg-red-900/95 border-red-500/40 text-red-100 shadow-red-900/30",
+  info: "bg-blue-900/95 border-blue-500/40 text-blue-100 shadow-blue-900/30",
 };
 
 const variantIcons: Record<ToastVariant, ReactNode> = {

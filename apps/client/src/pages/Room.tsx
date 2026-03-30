@@ -210,38 +210,45 @@ export function Room({ code }: RoomPageProps) {
   // Finished
   if (room.state === "finished" && gameState) {
     const latestWinner = gameState.winners[gameState.winners.length - 1];
+    const confettiShapes = ['rounded-full', 'rounded-sm', 'rounded-none'];
     return (
-      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 gap-6">
-        {/* Confetti-like decoration */}
+      <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 gap-6 relative">
+        {/* Confetti decoration - more pieces, varied shapes */}
         <div className="absolute inset-0 overflow-hidden pointer-events-none">
-          {Array.from({ length: 20 }, (_, i) => (
+          {Array.from({ length: 40 }, (_, i) => (
             <div
               key={i}
-              className="absolute w-3 h-3 rounded-full"
+              className={cn("absolute", confettiShapes[i % 3])}
               style={{
                 left: `${Math.random() * 100}%`,
+                width: `${6 + Math.random() * 10}px`,
+                height: `${6 + Math.random() * 10}px`,
                 backgroundColor: [
-                  "#2563eb",
-                  "#dc2626",
-                  "#16a34a",
-                  "#eab308",
-                  "#6366f1",
-                ][i % 5],
-                animation: `confetti-fall ${2 + Math.random() * 3}s linear ${Math.random() * 2}s infinite`,
-                opacity: 0.7,
+                  "#3b82f6",
+                  "#ef4444",
+                  "#22c55e",
+                  "#f59e0b",
+                  "#a78bfa",
+                  "#ec4899",
+                  "#06b6d4",
+                ][i % 7],
+                animation: `confetti-fall ${2.5 + Math.random() * 4}s linear ${Math.random() * 3}s infinite`,
+                opacity: 0.8,
               }}
             />
           ))}
         </div>
 
-        <div className="relative z-10 text-center space-y-4">
-          <h2 className="text-4xl font-black text-[var(--color-ball-o)]">
+        <div className="relative z-10 text-center space-y-5 animate-page-enter">
+          <h2
+            className="text-5xl sm:text-6xl font-black text-[var(--color-ball-o)] animate-winner-glow"
+          >
             {t("game.gameOver")}
           </h2>
 
           {latestWinner ? (
-            <div className="space-y-2">
-              <p className="text-2xl font-bold text-[var(--color-text-primary)]">
+            <div className="space-y-3">
+              <p className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text-primary)]">
                 {t("game.winnerAnnouncement", {
                   name: latestWinner.playerName,
                   pattern: latestWinner.pattern,
@@ -260,9 +267,9 @@ export function Room({ code }: RoomPageProps) {
             })}
           </p>
 
-          <div className="flex flex-col gap-3 pt-4">
+          <div className="flex flex-col gap-3 pt-6">
             {isHost && (
-              <Button size="lg" onClick={newRound}>
+              <Button size="lg" onClick={newRound} className="text-lg">
                 {t("game.playAgain")}
               </Button>
             )}
@@ -279,7 +286,7 @@ export function Room({ code }: RoomPageProps) {
   if (!gameState) return null;
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row gap-2 sm:gap-3 px-1 sm:px-3 py-2 sm:py-3 max-w-6xl mx-auto w-full">
+    <div className="flex-1 flex flex-col lg:flex-row gap-2 sm:gap-3 px-1 sm:px-3 py-2 sm:py-3 max-w-6xl mx-auto w-full animate-page-enter">
       {/* Left: Called Numbers + Card */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
         {/* Paused banner */}
@@ -399,14 +406,18 @@ export function Room({ code }: RoomPageProps) {
         <button
           onClick={claimBingo}
           className={cn(
-            "w-full max-w-[calc(100%-0.5rem)] sm:max-w-[400px] mx-auto py-3 sm:py-5 rounded-2xl",
-            "text-2xl sm:text-3xl font-black tracking-wide sm:tracking-wider text-white uppercase",
+            "w-full max-w-[calc(100%-0.5rem)] sm:max-w-[400px] mx-auto py-4 sm:py-5 rounded-2xl",
+            "text-2xl sm:text-3xl font-black tracking-wider text-white uppercase",
             "bg-gradient-to-r from-amber-500 via-orange-500 to-red-500",
             "hover:from-amber-400 hover:via-orange-400 hover:to-red-400",
-            "active:scale-95 transition-all duration-150",
-            "shadow-xl shadow-orange-500/30",
+            "active:scale-[0.97] transition-all duration-150",
+            "animate-bingo-glow",
             "select-none cursor-pointer",
+            "border-t border-amber-300/30",
           )}
+          style={{
+            textShadow: '0 2px 4px rgba(0,0,0,0.3)',
+          }}
         >
           {t("game.bingo")}
         </button>
