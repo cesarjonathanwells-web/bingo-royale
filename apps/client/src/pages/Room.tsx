@@ -1,4 +1,4 @@
-import { useEffect, useCallback, useRef } from "react";
+import { useEffect, useCallback, useRef, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import { useRoomStore } from "@/stores/room-store";
@@ -12,6 +12,7 @@ import { CardTabs } from "@/components/bingo/CardTabs";
 import { CalledNumbers } from "@/components/bingo/CalledNumbers";
 import { PatternDisplay } from "@/components/bingo/PatternDisplay";
 import { PowerUpBar } from "@/components/bingo/PowerUpBar";
+import { MultiCardView } from "@/components/bingo/MultiCardView";
 import { PlayerList } from "@/components/room/PlayerList";
 import { RoomChat } from "@/components/room/RoomChat";
 import { EmojiBar } from "@/components/room/EmojiBar";
@@ -62,6 +63,7 @@ export function Room({ code }: RoomPageProps) {
   const isHost = user?.id === room?.hostId;
   const myCard = myCards.length > 0 ? (myCards[activeCardIndex] ?? myCards[0] ?? null) : null;
   const activeDabs = myDabs.length > 0 ? (myDabs[activeCardIndex] ?? myDabs[0] ?? new Set<number>()) : new Set<number>();
+  const [viewAll, setViewAll] = useState(myCards.length > 1);
 
   const handleLeave = useCallback(() => {
     leaveRoom();
@@ -155,6 +157,26 @@ export function Room({ code }: RoomPageProps) {
       dabCell(cellIndex);
     },
     [dabCell, play],
+  );
+
+  // For multi-card view: dab on a specific card by index
+  const handleDabMulti = useCallback(
+    (cardIndex: number, cellIndex: number) => {
+      play("cellDabbed");
+      const state = useRoomStore.getState();
+      const cardDabs = state.myDabs[cardIndex];
+      if (!cardDabs || cardDabs.has(cellIndex)) return;
+
+      const newCardDabs = new Set(cardDabs);
+      newCardDabs.add(cellIndex);
+      const newDabs = [...state.myDabs];
+      newDabs[cardIndex] = newCardDabs;
+      useRoomStore.setState({ myDabs: newDabs });
+
+      const socket = getSocket();
+      socket.emit("game:dab", { cellIndex, cardIndex });
+    },
+    [play],
   );
 
   const handleUsePowerUp = useCallback(
@@ -282,31 +304,69 @@ export function Room({ code }: RoomPageProps) {
           </div>
         )}
 
-        {/* Card Tabs (multi-card) */}
+        {/* View toggle for multi-card */}
         {myCards.length > 1 && (
-          <CardTabs
-            count={myCards.length}
-            activeIndex={activeCardIndex}
-            onSelect={setActiveCard}
-            dabs={myDabs}
-          />
+          <div className="flex items-center justify-center gap-2">
+            <button
+              onClick={() => setViewAll(false)}
+              className={cn(
+                "px-3 py-1 rounded-lg text-xs font-semibold transition-colors",
+                !viewAll
+                  ? "bg-[var(--color-accent)] text-white"
+                  : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
+              )}
+            >
+              {t("cards.singleView")}
+            </button>
+            <button
+              onClick={() => setViewAll(true)}
+              className={cn(
+                "px-3 py-1 rounded-lg text-xs font-semibold transition-colors",
+                viewAll
+                  ? "bg-[var(--color-accent)] text-white"
+                  : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
+              )}
+            >
+              {t("cards.allView")}
+            </button>
+          </div>
         )}
 
-        {/* Bingo Card */}
-        {myCard && (
+        {/* Multi-card grid view */}
+        {viewAll && myCards.length > 1 ? (
+          <MultiCardView
+            cards={myCards}
+            dabs={myDabs}
+            variant={room.variant}
+            onDab={handleDabMulti}
+          />
+        ) : (
           <>
-            {room.variant === "75" ? (
-              <BingoCard
-                card={myCard as BingoCard75}
-                dabs={activeDabs}
-                onDab={handleDab}
+            {/* Single card view with tabs */}
+            {myCards.length > 1 && (
+              <CardTabs
+                count={myCards.length}
+                activeIndex={activeCardIndex}
+                onSelect={setActiveCard}
+                dabs={myDabs}
               />
-            ) : (
-              <BingoCard90
-                card={myCard as BingoCard90Type}
-                dabs={activeDabs}
-                onDab={handleDab}
-              />
+            )}
+            {myCard && (
+              <>
+                {room.variant === "75" ? (
+                  <BingoCard
+                    card={myCard as BingoCard75}
+                    dabs={activeDabs}
+                    onDab={handleDab}
+                  />
+                ) : (
+                  <BingoCard90
+                    card={myCard as BingoCard90Type}
+                    dabs={activeDabs}
+                    onDab={handleDab}
+                  />
+                )}
+              </>
             )}
           </>
         )}

@@ -112,7 +112,9 @@
   "cards": {
     "count": "Number of Cards",
     "card": "Card {{n}}",
-    "selectCount": "How many cards?"
+    "selectCount": "How many cards?",
+    "singleView": "Single",
+    "allView": "All Cards"
   },
   "reactions": {
     "title": "Reactions",

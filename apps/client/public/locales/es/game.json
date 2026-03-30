@@ -112,7 +112,9 @@
   "cards": {
     "count": "Número de cartones",
     "card": "Cartón {{n}}",
-    "selectCount": "¿Cuántos cartones?"
+    "selectCount": "¿Cuántos cartones?",
+    "singleView": "Uno",
+    "allView": "Todos"
   },
   "reactions": {
     "title": "Reacciones",
