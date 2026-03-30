@@ -254,7 +254,7 @@ export function Room({ code }: RoomPageProps) {
   if (!gameState) return null;
 
   return (
-    <div className="flex-1 flex flex-col lg:flex-row gap-3 p-3 max-w-6xl mx-auto w-full">
+    <div className="flex-1 flex flex-col lg:flex-row gap-2 sm:gap-3 px-1 sm:px-3 py-2 sm:py-3 max-w-6xl mx-auto w-full">
       {/* Left: Called Numbers + Card */}
       <div className="flex-1 flex flex-col gap-3 min-w-0">
         {/* Paused banner */}
@@ -315,7 +315,7 @@ export function Room({ code }: RoomPageProps) {
 
         {/* Number Peek Overlay */}
         {peekedNumbers.length > 0 && (
-          <div className="w-full max-w-[400px] mx-auto px-3 py-2 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-accent)]/40">
+          <div className="w-full max-w-[calc(100%-0.5rem)] sm:max-w-[400px] mx-auto px-3 py-2 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-accent)]/40">
             <p className="text-xs font-semibold text-[var(--color-accent)] text-center mb-1">
               {t("powerups.number_peek")}
             </p>
@@ -336,8 +336,8 @@ export function Room({ code }: RoomPageProps) {
         <button
           onClick={claimBingo}
           className={cn(
-            "w-full max-w-[400px] mx-auto py-5 rounded-2xl",
-            "text-3xl font-black tracking-wider text-white uppercase",
+            "w-full max-w-[calc(100%-0.5rem)] sm:max-w-[400px] mx-auto py-3 sm:py-5 rounded-2xl",
+            "text-2xl sm:text-3xl font-black tracking-wide sm:tracking-wider text-white uppercase",
             "bg-gradient-to-r from-amber-500 via-orange-500 to-red-500",
             "hover:from-amber-400 hover:via-orange-400 hover:to-red-400",
             "active:scale-95 transition-all duration-150",

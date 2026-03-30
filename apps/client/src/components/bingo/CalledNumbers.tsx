@@ -93,7 +93,7 @@ export function CalledNumbers({ gameState, variant }: CalledNumbersProps) {
 function Board75({ calledSet }: { calledSet: Set<number> }) {
   return (
     <div className="rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-2 overflow-x-auto">
-      <div className="grid grid-cols-5 gap-1 min-w-[280px]">
+      <div className="grid grid-cols-5 gap-1 min-w-0">
         {/* Column headers */}
         {LETTERS.map((letter) => (
           <div
@@ -135,7 +135,7 @@ function Board75({ calledSet }: { calledSet: Set<number> }) {
 function Board90({ calledSet }: { calledSet: Set<number> }) {
   return (
     <div className="rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-2 overflow-x-auto">
-      <div className="grid grid-cols-10 gap-0.5 min-w-[300px]">
+      <div className="grid grid-cols-10 gap-0.5 min-w-0">
         {Array.from({ length: 90 }, (_, i) => {
           const n = i + 1;
           const called = calledSet.has(n);

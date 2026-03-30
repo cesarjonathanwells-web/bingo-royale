@@ -14,7 +14,7 @@ export function CardTabs({ count, activeIndex, onSelect, dabs }: CardTabsProps) 
   if (count <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center gap-2 w-full max-w-[400px] mx-auto">
+    <div className="flex items-center justify-center gap-1 sm:gap-2 w-full max-w-[calc(100%-0.5rem)] sm:max-w-[400px] mx-auto">
       {Array.from({ length: count }, (_, i) => {
         const isActive = i === activeIndex;
         const dabCount = dabs[i]?.size ?? 0;
@@ -25,7 +25,7 @@ export function CardTabs({ count, activeIndex, onSelect, dabs }: CardTabsProps) 
             type="button"
             onClick={() => onSelect(i)}
             className={cn(
-              "flex-1 py-2 px-3 rounded-xl text-sm font-semibold transition-all duration-150",
+              "flex-1 py-2 px-1 sm:px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150",
               "border select-none cursor-pointer",
               isActive
                 ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)] shadow-md shadow-[var(--color-accent)]/30"

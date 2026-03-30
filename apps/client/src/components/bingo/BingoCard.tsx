@@ -36,7 +36,7 @@ export function BingoCard({
   return (
     <div
       className={cn(
-        "w-full max-w-[400px] mx-auto",
+        "w-full max-w-[calc(100%-0.5rem)] sm:max-w-[400px] mx-auto",
         "rounded-2xl overflow-hidden",
         "bg-[var(--color-bg-card)] border border-[var(--color-border)]",
         "shadow-xl shadow-black/20",

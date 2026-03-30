@@ -22,10 +22,10 @@ export function Header() {
 
   return (
     <header className="sticky top-0 z-30 bg-[var(--color-bg-primary)]/80 backdrop-blur-lg border-b border-[var(--color-border)]">
-      <div className="flex items-center justify-between px-4 py-3 max-w-5xl mx-auto">
+      <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 max-w-5xl mx-auto">
         {/* Logo */}
         <div className="flex items-center gap-3">
-          <h1 className="text-lg font-extrabold tracking-tight bg-gradient-to-r from-[var(--color-ball-b)] via-[var(--color-ball-i)] to-[var(--color-ball-o)] bg-clip-text text-transparent">
+          <h1 className="text-sm sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-[var(--color-ball-b)] via-[var(--color-ball-i)] to-[var(--color-ball-o)] bg-clip-text text-transparent">
             {t("app.title")}
           </h1>
           {room && (

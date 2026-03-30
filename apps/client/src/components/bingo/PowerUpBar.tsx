@@ -14,11 +14,11 @@ export function PowerUpBar({ powerups, onUse }: PowerUpBarProps) {
   if (powerups.length === 0) return null;
 
   return (
-    <div className="w-full max-w-[400px] mx-auto">
+    <div className="w-full max-w-[calc(100%-0.5rem)] sm:max-w-[400px] mx-auto">
       <p className="text-xs font-semibold text-[var(--color-text-muted)] uppercase tracking-wider mb-1.5 text-center">
         {t("powerups.title")}
       </p>
-      <div className="flex gap-2 overflow-x-auto pb-1 justify-center">
+      <div className="flex gap-1.5 sm:gap-2 overflow-x-auto pb-1 justify-center">
         {powerups.map((pu) => {
           const def = POWER_UP_MAP[pu.id];
           if (!def) return null;
@@ -31,7 +31,7 @@ export function PowerUpBar({ powerups, onUse }: PowerUpBarProps) {
               title={def.description}
               className={cn(
                 "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl",
-                "min-w-[72px] min-h-[48px] transition-all duration-200",
+                "min-w-[60px] sm:min-w-[72px] min-h-[48px] transition-all duration-200",
                 "border select-none cursor-pointer",
                 pu.used
                   ? "opacity-40 border-[var(--color-border)] bg-[var(--color-bg-tertiary)] cursor-not-allowed"

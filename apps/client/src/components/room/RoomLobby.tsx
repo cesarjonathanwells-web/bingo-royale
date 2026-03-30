@@ -85,7 +85,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
   const currentSpeed = SPEED_PRESETS.find((p) => p.ms === room.speed);
 
   return (
-    <div className="flex flex-col lg:flex-row gap-6 w-full max-w-4xl mx-auto p-4">
+    <div className="flex flex-col lg:flex-row gap-4 sm:gap-6 w-full max-w-4xl mx-auto px-3 sm:p-4">
       {/* Left / Main */}
       <div className="flex-1 space-y-6">
         {/* Room Code */}
@@ -97,7 +97,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
             onClick={copyInviteLink}
             className="inline-flex items-center gap-2 px-6 py-3 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] hover:bg-[var(--color-bg-tertiary)] transition-colors group"
           >
-            <span className="text-3xl font-mono font-extrabold tracking-[0.3em] text-[var(--color-text-primary)]">
+            <span className="text-2xl sm:text-3xl font-mono font-extrabold tracking-widest sm:tracking-[0.3em] text-[var(--color-text-primary)]">
               {generateRoomCode(room.code)}
             </span>
             <svg

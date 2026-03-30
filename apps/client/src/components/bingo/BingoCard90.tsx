@@ -35,7 +35,7 @@ export function BingoCard90({
   return (
     <div
       className={cn(
-        "w-full max-w-[500px] mx-auto",
+        "w-full max-w-[calc(100%-0.5rem)] sm:max-w-[500px] mx-auto",
         "rounded-2xl overflow-hidden",
         "bg-[var(--color-bg-card)] border border-[var(--color-border)]",
         "shadow-xl shadow-black/20",
@@ -50,7 +50,7 @@ export function BingoCard90({
       </div>
 
       {/* Grid: 9 columns x 3 rows */}
-      <div className="grid grid-cols-9 gap-1 p-2">
+      <div className="grid grid-cols-9 gap-0.5 sm:gap-1 p-1 sm:p-2">
         {Array.from({ length: 3 }, (_, row) =>
           Array.from({ length: 9 }, (_, col) => {
             const index = getCellIndex(row, col);
@@ -68,7 +68,7 @@ export function BingoCard90({
                 disabled={disabled || isBlank}
                 className={cn(
                   "relative flex items-center justify-center touch-target",
-                  "aspect-square w-full rounded-lg font-bold text-sm sm:text-base",
+                  "aspect-square w-full rounded font-bold text-[10px] sm:text-sm",
                   "transition-transform duration-100 select-none",
                   "border border-[var(--color-border)]/50",
                   isBlank

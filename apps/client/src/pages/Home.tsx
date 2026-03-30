@@ -66,7 +66,7 @@ export function Home() {
       <div className="relative z-10 w-full max-w-sm space-y-8">
         {/* Title */}
         <div className="text-center space-y-2">
-          <h1 className="text-5xl sm:text-6xl font-black tracking-tight">
+          <h1 className="text-4xl sm:text-5xl lg:text-6xl font-black tracking-tight">
             <span className="bg-gradient-to-r from-[var(--color-ball-b)] via-[var(--color-ball-i)] via-[var(--color-ball-g)] to-[var(--color-ball-o)] bg-clip-text text-transparent">
               BINGO
             </span>

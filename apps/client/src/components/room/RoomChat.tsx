@@ -95,7 +95,7 @@ export function RoomChat({ messages, onSend, className }: RoomChatProps) {
     <div
       className={cn(
         "flex flex-col rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] overflow-hidden",
-        "h-[300px] lg:h-[400px]",
+        "h-[200px] sm:h-[300px] lg:h-[400px] max-h-[50vh]",
         className,
       )}
     >

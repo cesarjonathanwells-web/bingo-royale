@@ -45,7 +45,7 @@ export function EmojiBar({ onSend }: EmojiBarProps) {
             "flex flex-wrap justify-center gap-1 p-2",
             "bg-[var(--color-bg-secondary)] border border-[var(--color-border)]",
             "rounded-xl shadow-xl",
-            "max-w-[280px] w-max",
+            "max-w-[calc(100vw-2rem)] sm:max-w-[280px] w-max",
             "animate-slide-up z-50",
           )}
         >
