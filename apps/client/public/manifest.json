@@ -1,0 +1,17 @@
+{
+  "name": "Bingo Royale",
+  "short_name": "Bingo",
+  "description": "Modern online multiplayer bingo game",
+  "start_url": "/",
+  "display": "standalone",
+  "orientation": "portrait",
+  "background_color": "#0f172a",
+  "theme_color": "#0f172a",
+  "icons": [
+    {
+      "src": "/favicon.svg",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
