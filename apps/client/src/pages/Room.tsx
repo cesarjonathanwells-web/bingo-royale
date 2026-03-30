@@ -60,8 +60,8 @@ export function Room({ code }: RoomPageProps) {
   const joinAttempted = useRef(false);
 
   const isHost = user?.id === room?.hostId;
-  const myCard = myCards[activeCardIndex] ?? null;
-  const activeDabs = myDabs[activeCardIndex] ?? new Set<number>();
+  const myCard = myCards.length > 0 ? (myCards[activeCardIndex] ?? myCards[0] ?? null) : null;
+  const activeDabs = myDabs.length > 0 ? (myDabs[activeCardIndex] ?? myDabs[0] ?? new Set<number>()) : new Set<number>();
 
   const handleLeave = useCallback(() => {
     navigate({ to: "/" });
@@ -324,9 +324,9 @@ export function Room({ code }: RoomPageProps) {
               {t("powerups.number_peek")}
             </p>
             <div className="flex justify-center gap-3">
-              {peekedNumbers.map((num, i) => (
+              {peekedNumbers.map((num) => (
                 <span
-                  key={i}
+                  key={num}
                   className="text-lg font-bold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] rounded-lg px-3 py-1"
                 >
                   {num}

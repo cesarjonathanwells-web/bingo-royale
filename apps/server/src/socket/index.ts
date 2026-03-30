@@ -17,6 +17,24 @@ import * as roomStore from '../redis/room-store.js';
 
 const afkTimers = new Map<string, ReturnType<typeof setTimeout>>();
 
+// Track timer IDs that have already fired so periodic cleanup can remove stale entries.
+// The finally block in the AFK callback adds the user ID here; the periodic sweep
+// removes the corresponding (now-stale) afkTimers entry.
+const firedAfkTimers = new Set<string>();
+
+const AFK_CLEANUP_INTERVAL = 10 * 60 * 1000; // 10 minutes
+setInterval(() => {
+  // Sweep entries whose timer has already fired
+  for (const userId of firedAfkTimers) {
+    afkTimers.delete(userId);
+  }
+  firedAfkTimers.clear();
+
+  if (afkTimers.size > 0) {
+    console.log(`[Socket.IO] AFK timers map size: ${afkTimers.size}`);
+  }
+}, AFK_CLEANUP_INTERVAL).unref();
+
 export function createSocketServer(httpServer: HttpServer): Server {
   const io = new Server(httpServer, {
     cors: {
@@ -57,12 +75,14 @@ export function createSocketServer(httpServer: HttpServer): Server {
 
     console.log(`[Socket.IO] User connected: ${user.name} (${user.id})`);
 
-    // Clear any AFK timer for this user
+    // Clear any AFK timer for this user (reconnect before timeout)
     const existingTimer = afkTimers.get(user.id);
     if (existingTimer) {
       clearTimeout(existingTimer);
       afkTimers.delete(user.id);
     }
+    // Also remove from fired set in case cleanup hasn't run yet
+    firedAfkTimers.delete(user.id);
 
     // Register all event handlers
     registerRoomHandlers(socket, io);
@@ -117,6 +137,7 @@ export function createSocketServer(httpServer: HttpServer): Server {
               console.error('[Socket.IO] AFK cleanup error:', err);
             } finally {
               afkTimers.delete(user.id);
+              firedAfkTimers.add(user.id);
             }
           }, AFK_TIMEOUT);
 

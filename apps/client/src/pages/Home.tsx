@@ -33,7 +33,8 @@ export function Home() {
       try {
         await loginAsGuest(name, i18n.language as "en" | "es");
       } catch {
-        toast(t("errors.generic"), "error");
+        const storeError = useAuthStore.getState().error;
+        toast(storeError ?? t("errors.generic"), "error");
       }
     },
     [guestName, loginAsGuest, i18n.language, t, toast],
@@ -46,7 +47,7 @@ export function Home() {
 
   const handleJoinRoom = useCallback(() => {
     const code = roomCode.trim().replace(/-/g, "").toUpperCase();
-    if (code.length < 6) {
+    if (code.length < 6 || !/^[A-Z0-9]+$/.test(code)) {
       toast(t("errors.invalidRoom"), "error");
       return;
     }

@@ -14,6 +14,20 @@ const MAX_MESSAGE_LENGTH = 200;
 const reactionTimestamps = new Map<string, number[]>();
 const REACTION_LIMIT = 3;
 const REACTION_WINDOW_MS = 5000;
+const REACTION_STALE_MS = 60_000; // Remove entries after 60 seconds of inactivity
+
+// Periodic cleanup: remove entries for players who haven't reacted in 60+ seconds
+const REACTION_CLEANUP_INTERVAL = 60_000; // every 60 seconds
+setInterval(() => {
+  const now = Date.now();
+  for (const [userId, timestamps] of reactionTimestamps) {
+    // If the most recent timestamp is older than REACTION_STALE_MS, remove the entry
+    const mostRecent = timestamps.length > 0 ? Math.max(...timestamps) : 0;
+    if (now - mostRecent > REACTION_STALE_MS) {
+      reactionTimestamps.delete(userId);
+    }
+  }
+}, REACTION_CLEANUP_INTERVAL).unref();
 
 export function registerChatHandlers(
   socket: AuthenticatedSocket,
@@ -101,6 +115,12 @@ export function registerChatHandlers(
         if (typeof callback === 'function')
           callback({ success: false, error: 'Rate limited' });
         return;
+      }
+
+      // If no recent timestamps remain, the player has been idle; clean up
+      // to avoid indefinite growth. We re-add only the relevant entries.
+      if (recent.length === 0 && timestamps.length > 0) {
+        reactionTimestamps.delete(user.id);
       }
 
       recent.push(now);

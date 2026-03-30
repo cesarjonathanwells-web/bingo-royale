@@ -193,8 +193,14 @@ export function registerGameHandlers(
 
       const cellIndex = data?.cellIndex as number;
       const cardIndex = typeof data?.cardIndex === 'number' ? data.cardIndex : 0;
-      if (typeof cellIndex !== 'number' || cellIndex < 0) return;
+      if (typeof cellIndex !== 'number' || !Number.isInteger(cellIndex) || cellIndex < 0) return;
       if (cardIndex < 0 || cardIndex >= cards.length) return;
+
+      // Validate cellIndex upper bound based on card grid size
+      // 75-ball: 5x5 = 25 cells (0-24), 90-ball: 9x3 = 27 cells (0-26)
+      const card = cards[cardIndex];
+      const maxCell = card.grid.length === 5 ? 24 : 26;
+      if (cellIndex > maxCell) return;
 
       // Get current dabs (array of arrays) and add new one to the right card
       const allDabs = await roomStore.getDabs(code, user.id);
@@ -230,9 +236,14 @@ export function registerGameHandlers(
         return;
       }
 
-      const markedCells: number[] = Array.isArray(data?.markedCells)
-        ? data.markedCells
-        : [];
+      const rawMarkedCells = Array.isArray(data?.markedCells) ? data.markedCells : [];
+      // Validate markedCells: must be an array of integers
+      if (!rawMarkedCells.every((v: unknown) => typeof v === 'number' && Number.isInteger(v) && v >= 0)) {
+        if (typeof callback === 'function')
+          callback({ success: false, error: 'Invalid markedCells: must be an array of non-negative integers' });
+        return;
+      }
+      const markedCells: number[] = rawMarkedCells;
       const stage: WinStage90 | undefined = data?.stage;
       const cardIndex: number = typeof data?.cardIndex === 'number' ? data.cardIndex : 0;
 
@@ -425,7 +436,8 @@ export function registerGameHandlers(
       const powerupId = data?.powerupId as PowerUpId;
       const targetCellIndex = data?.targetCellIndex as number | undefined;
 
-      if (!powerupId || !POWER_UP_MAP[powerupId]) {
+      // Validate powerupId is a non-empty string and a known power-up
+      if (!powerupId || typeof powerupId !== 'string' || !POWER_UP_MAP[powerupId]) {
         if (typeof callback === 'function')
           callback({ success: false, error: 'Invalid power-up' });
         return;

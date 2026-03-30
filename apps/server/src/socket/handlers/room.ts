@@ -39,6 +39,12 @@ export function registerRoomHandlers(
 
   socket.on('room:create', async (data, callback) => {
     try {
+      // Validate variant is '75' or '90'
+      if (data?.variant !== undefined && data.variant !== '75' && data.variant !== '90') {
+        if (typeof callback === 'function')
+          callback({ success: false, error: 'Invalid variant: must be "75" or "90"' });
+        return;
+      }
       const variant: BingoVariant = data?.variant === '90' ? '90' : '75';
       const speed =
         typeof data?.speed === 'number'
@@ -109,6 +115,13 @@ export function registerRoomHandlers(
       const code = data?.code as string;
       if (!code) {
         const msg = 'Room code is required';
+        if (typeof callback === 'function') callback({ success: false, error: msg });
+        return;
+      }
+
+      // Validate code is a string, exactly 6 characters, alphanumeric
+      if (typeof code !== 'string' || code.length !== 6 || !/^[A-Za-z0-9]{6}$/.test(code)) {
+        const msg = 'Invalid room code: must be 6 alphanumeric characters';
         if (typeof callback === 'function') callback({ success: false, error: msg });
         return;
       }

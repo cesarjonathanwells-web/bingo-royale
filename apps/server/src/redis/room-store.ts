@@ -29,6 +29,79 @@ function memKeys(pattern: string): string[] {
   return Array.from(memoryStore.keys()).filter((k) => k.startsWith(prefix));
 }
 
+// --------------- Safe Redis helpers ---------------
+// Every Redis call goes through these helpers so that a Redis failure
+// is caught and the operation falls back to the in-memory store.
+
+async function safeGet(key: string): Promise<string | null> {
+  const redis = getRedis();
+  if (redis) {
+    try {
+      return await redis.get(key);
+    } catch (err) {
+      console.error('[RoomStore] Redis GET failed, falling back to memory:', (err as Error).message);
+    }
+  }
+  return memGet(key);
+}
+
+async function safeSet(key: string, value: string, ttl?: number): Promise<void> {
+  const redis = getRedis();
+  if (redis) {
+    try {
+      if (ttl) {
+        await redis.set(key, value, 'EX', ttl);
+      } else {
+        await redis.set(key, value);
+      }
+      return;
+    } catch (err) {
+      console.error('[RoomStore] Redis SET failed, falling back to memory:', (err as Error).message);
+    }
+  }
+  memSet(key, value);
+}
+
+async function safeDel(...keys: string[]): Promise<void> {
+  const redis = getRedis();
+  if (redis) {
+    try {
+      await redis.del(...keys);
+      return;
+    } catch (err) {
+      console.error('[RoomStore] Redis DEL failed, falling back to memory:', (err as Error).message);
+    }
+  }
+  for (const key of keys) {
+    memDel(key);
+  }
+}
+
+async function safeKeys(pattern: string): Promise<string[]> {
+  const redis = getRedis();
+  if (redis) {
+    try {
+      return await redis.keys(pattern);
+    } catch (err) {
+      console.error('[RoomStore] Redis KEYS failed, falling back to memory:', (err as Error).message);
+    }
+  }
+  return memKeys(pattern);
+}
+
+async function safeExpire(key: string, ttl: number): Promise<void> {
+  const redis = getRedis();
+  if (redis) {
+    try {
+      await redis.expire(key, ttl);
+      return;
+    } catch (err) {
+      console.error('[RoomStore] Redis EXPIRE failed:', (err as Error).message);
+    }
+  }
+  // In-memory store doesn't need TTL management
+}
+
 // --------------- Caller State ---------------
 
 export interface CallerState {
@@ -70,40 +143,17 @@ function powerupsKey(code: string, playerId: string): string {
 // --------------- Create Room ---------------
 
 export async function createRoom(room: Room): Promise<void> {
-  const redis = getRedis();
   const data = JSON.stringify(room);
-
-  if (redis) {
-    await redis.set(roomKey(room.code), data, 'EX', ROOM_TTL);
-    // Store players separately
-    if (room.players.length > 0) {
-      await redis.set(
-        playersKey(room.code),
-        JSON.stringify(room.players),
-        'EX',
-        ROOM_TTL,
-      );
-    }
-  } else {
-    memSet(roomKey(room.code), data);
-    if (room.players.length > 0) {
-      memSet(playersKey(room.code), JSON.stringify(room.players));
-    }
+  await safeSet(roomKey(room.code), data, ROOM_TTL);
+  if (room.players.length > 0) {
+    await safeSet(playersKey(room.code), JSON.stringify(room.players), ROOM_TTL);
   }
 }
 
 // --------------- Get Room ---------------
 
 export async function getRoom(code: string): Promise<Room | null> {
-  const redis = getRedis();
-
-  let data: string | null;
-  if (redis) {
-    data = await redis.get(roomKey(code));
-  } else {
-    data = memGet(roomKey(code));
-  }
-
+  const data = await safeGet(roomKey(code));
   if (!data) return null;
 
   const room = JSON.parse(data) as Room;
@@ -129,30 +179,15 @@ export async function updateRoom(
   const { players: _p, ...roomWithoutPlayers } = updated;
   const data = JSON.stringify(roomWithoutPlayers);
 
-  const redis = getRedis();
-  if (redis) {
-    await redis.set(roomKey(code), data, 'EX', ROOM_TTL);
-  } else {
-    memSet(roomKey(code), data);
-  }
+  await safeSet(roomKey(code), data, ROOM_TTL);
 }
 
 // --------------- Delete Room ---------------
 
 export async function deleteRoom(code: string): Promise<void> {
-  const redis = getRedis();
-
-  if (redis) {
-    // Delete room and all associated keys
-    const keys = await redis.keys(`${KEY_PREFIX}${code}*`);
-    if (keys.length > 0) {
-      await redis.del(...keys);
-    }
-  } else {
-    const keysToDelete = memKeys(`${KEY_PREFIX}${code}`);
-    for (const key of keysToDelete) {
-      memDel(key);
-    }
+  const keys = await safeKeys(`${KEY_PREFIX}${code}*`);
+  if (keys.length > 0) {
+    await safeDel(...keys);
   }
 }
 
@@ -168,14 +203,8 @@ export async function addPlayer(code: string, player: Player): Promise<void> {
     players.push(player);
   }
 
-  const redis = getRedis();
   const data = JSON.stringify(players);
-
-  if (redis) {
-    await redis.set(playersKey(code), data, 'EX', ROOM_TTL);
-  } else {
-    memSet(playersKey(code), data);
-  }
+  await safeSet(playersKey(code), data, ROOM_TTL);
 }
 
 export async function removePlayer(
@@ -185,35 +214,15 @@ export async function removePlayer(
   const players = await getPlayers(code);
   const filtered = players.filter((p) => p.id !== playerId);
 
-  const redis = getRedis();
   const data = JSON.stringify(filtered);
-
-  if (redis) {
-    await redis.set(playersKey(code), data, 'EX', ROOM_TTL);
-  } else {
-    memSet(playersKey(code), data);
-  }
+  await safeSet(playersKey(code), data, ROOM_TTL);
 
   // Also clean up card and dabs for this player
-  if (redis) {
-    await redis.del(cardKey(code, playerId));
-    await redis.del(dabsKey(code, playerId));
-  } else {
-    memDel(cardKey(code, playerId));
-    memDel(dabsKey(code, playerId));
-  }
+  await safeDel(cardKey(code, playerId), dabsKey(code, playerId));
 }
 
 export async function getPlayers(code: string): Promise<Player[]> {
-  const redis = getRedis();
-
-  let data: string | null;
-  if (redis) {
-    data = await redis.get(playersKey(code));
-  } else {
-    data = memGet(playersKey(code));
-  }
-
+  const data = await safeGet(playersKey(code));
   if (!data) return [];
   return JSON.parse(data) as Player[];
 }
@@ -228,27 +237,13 @@ export async function setCallerState(
 ): Promise<void> {
   const state: CallerState = { pool, called, paused };
   const data = JSON.stringify(state);
-  const redis = getRedis();
-
-  if (redis) {
-    await redis.set(callerKey(code), data, 'EX', ROOM_TTL);
-  } else {
-    memSet(callerKey(code), data);
-  }
+  await safeSet(callerKey(code), data, ROOM_TTL);
 }
 
 export async function getCallerState(
   code: string,
 ): Promise<CallerState | null> {
-  const redis = getRedis();
-
-  let data: string | null;
-  if (redis) {
-    data = await redis.get(callerKey(code));
-  } else {
-    data = memGet(callerKey(code));
-  }
-
+  const data = await safeGet(callerKey(code));
   if (!data) return null;
   return JSON.parse(data) as CallerState;
 }
@@ -274,28 +269,14 @@ export async function setCard(
   // Always store as an array
   const arr = Array.isArray(cards) ? cards : [cards];
   const data = JSON.stringify(arr);
-  const redis = getRedis();
-
-  if (redis) {
-    await redis.set(cardKey(code, playerId), data, 'EX', ROOM_TTL);
-  } else {
-    memSet(cardKey(code, playerId), data);
-  }
+  await safeSet(cardKey(code, playerId), data, ROOM_TTL);
 }
 
 export async function getCard(
   code: string,
   playerId: string,
 ): Promise<BingoCard[] | null> {
-  const redis = getRedis();
-
-  let data: string | null;
-  if (redis) {
-    data = await redis.get(cardKey(code, playerId));
-  } else {
-    data = memGet(cardKey(code, playerId));
-  }
-
+  const data = await safeGet(cardKey(code, playerId));
   if (!data) return null;
   const parsed = JSON.parse(data);
   // Backward compat: wrap single card object in array
@@ -320,28 +301,14 @@ export async function setDabs(
         ? dabs
         : [dabs]; // wrap single flat array for backward compat
   const data = JSON.stringify(arr);
-  const redis = getRedis();
-
-  if (redis) {
-    await redis.set(dabsKey(code, playerId), data, 'EX', ROOM_TTL);
-  } else {
-    memSet(dabsKey(code, playerId), data);
-  }
+  await safeSet(dabsKey(code, playerId), data, ROOM_TTL);
 }
 
 export async function getDabs(
   code: string,
   playerId: string,
 ): Promise<number[][]> {
-  const redis = getRedis();
-
-  let data: string | null;
-  if (redis) {
-    data = await redis.get(dabsKey(code, playerId));
-  } else {
-    data = memGet(dabsKey(code, playerId));
-  }
-
+  const data = await safeGet(dabsKey(code, playerId));
   if (!data) return [];
   const parsed = JSON.parse(data);
   if (!Array.isArray(parsed)) return [];
@@ -361,28 +328,14 @@ export async function setCardCount(
 ): Promise<void> {
   const clamped = Math.max(1, Math.min(4, count));
   const data = JSON.stringify(clamped);
-  const redis = getRedis();
-
-  if (redis) {
-    await redis.set(cardCountKey(code, playerId), data, 'EX', ROOM_TTL);
-  } else {
-    memSet(cardCountKey(code, playerId), data);
-  }
+  await safeSet(cardCountKey(code, playerId), data, ROOM_TTL);
 }
 
 export async function getCardCount(
   code: string,
   playerId: string,
 ): Promise<number> {
-  const redis = getRedis();
-
-  let data: string | null;
-  if (redis) {
-    data = await redis.get(cardCountKey(code, playerId));
-  } else {
-    data = memGet(cardCountKey(code, playerId));
-  }
-
+  const data = await safeGet(cardCountKey(code, playerId));
   if (!data) return 1; // default to 1 card
   const parsed = JSON.parse(data);
   return typeof parsed === 'number' ? Math.max(1, Math.min(4, parsed)) : 1;
@@ -396,28 +349,14 @@ export async function setPowerUps(
   powerups: PlayerPowerUp[],
 ): Promise<void> {
   const data = JSON.stringify(powerups);
-  const redis = getRedis();
-
-  if (redis) {
-    await redis.set(powerupsKey(code, playerId), data, 'EX', ROOM_TTL);
-  } else {
-    memSet(powerupsKey(code, playerId), data);
-  }
+  await safeSet(powerupsKey(code, playerId), data, ROOM_TTL);
 }
 
 export async function getPowerUps(
   code: string,
   playerId: string,
 ): Promise<PlayerPowerUp[]> {
-  const redis = getRedis();
-
-  let data: string | null;
-  if (redis) {
-    data = await redis.get(powerupsKey(code, playerId));
-  } else {
-    data = memGet(powerupsKey(code, playerId));
-  }
-
+  const data = await safeGet(powerupsKey(code, playerId));
   if (!data) return [];
   return JSON.parse(data) as PlayerPowerUp[];
 }
@@ -425,13 +364,8 @@ export async function getPowerUps(
 // --------------- TTL Management ---------------
 
 export async function extendTTL(code: string): Promise<void> {
-  const redis = getRedis();
-
-  if (redis) {
-    const keys = await redis.keys(`${KEY_PREFIX}${code}*`);
-    for (const key of keys) {
-      await redis.expire(key, ROOM_TTL);
-    }
+  const keys = await safeKeys(`${KEY_PREFIX}${code}*`);
+  for (const key of keys) {
+    await safeExpire(key, ROOM_TTL);
   }
-  // In-memory store doesn't need TTL management
 }

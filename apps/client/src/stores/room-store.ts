@@ -103,6 +103,9 @@ const initialState = {
   autoDaub: typeof window !== "undefined" && localStorage.getItem("bingo-auto-daub") === "true",
 };
 
+// Module-level variable for peek timeout (not reactive state)
+let _peekTimeoutId: ReturnType<typeof setTimeout> | null = null;
+
 export const useRoomStore = create<RoomState>()((set, get) => ({
   ...initialState,
 
@@ -487,9 +490,14 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     );
 
     socket.on("game:number_peek", (data: { numbers: number[] }) => {
+      // Clear any existing peek timeout before setting a new one
+      if (_peekTimeoutId !== null) {
+        clearTimeout(_peekTimeoutId);
+      }
       set({ peekedNumbers: data.numbers });
       // Auto-clear after 10 seconds
-      setTimeout(() => {
+      _peekTimeoutId = setTimeout(() => {
+        _peekTimeoutId = null;
         set({ peekedNumbers: [] });
       }, 10000);
     });
@@ -525,9 +533,10 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     );
 
     socket.on("chat:message", (message: ChatMessage) => {
-      set((state) => ({
-        chatMessages: [...state.chatMessages, message],
-      }));
+      set((state) => {
+        const msgs = [...state.chatMessages, message];
+        return { chatMessages: msgs.length > 100 ? msgs.slice(-100) : msgs };
+      });
     });
 
     socket.on("chat:reaction", (data: { playerId: string; playerName: string; emoji: string }) => {
@@ -574,6 +583,10 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
   },
 
   reset: () => {
+    if (_peekTimeoutId !== null) {
+      clearTimeout(_peekTimeoutId);
+      _peekTimeoutId = null;
+    }
     get().cleanupListeners();
     set({ ...initialState, myDabs: [], myCards: [], myPowerUps: [], peekedNumbers: [] });
   },

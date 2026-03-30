@@ -65,15 +65,22 @@ export async function createGuestUser(
     locale,
   };
 
-  // Persist to DB if available
+  // Persist to DB if available (non-fatal: guest can still play without persistence)
   const db = getDb();
   if (db) {
-    await db.insert(schema.users).values({
-      id,
-      displayName: name,
-      isGuest: true,
-      locale,
-    });
+    try {
+      await db.insert(schema.users).values({
+        id,
+        displayName: name,
+        isGuest: true,
+        locale,
+      });
+    } catch (err) {
+      console.error(
+        '[Auth] Failed to persist guest user to DB (non-fatal):',
+        err instanceof Error ? err.message : err,
+      );
+    }
   }
 
   const token = generateToken({ id, name, isGuest: true, locale });
