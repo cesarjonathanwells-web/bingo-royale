@@ -19,7 +19,6 @@ export function getRedis(): Redis | null {
 
   redisClient = new Redis(config.REDIS_URL, {
     maxRetriesPerRequest: 3,
-    lazyConnect: true,
   });
 
   redisClient.on('error', (err) => {

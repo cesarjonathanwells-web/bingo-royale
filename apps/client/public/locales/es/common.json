@@ -1,33 +1,33 @@
 {
   "app": {
     "title": "Bingo Royale",
-    "tagline": "La mejor experiencia de bingo en linea"
+    "tagline": "La mejor experiencia de bingo en línea"
   },
   "nav": {
     "home": "Inicio",
-    "stats": "Estadisticas",
-    "settings": "Configuracion"
+    "stats": "Estadísticas",
+    "settings": "Configuración"
   },
   "auth": {
     "guestName": "Tu nombre",
     "guestNamePlaceholder": "Escribe tu nombre",
     "playAsGuest": "Jugar como invitado",
-    "login": "Iniciar sesion",
+    "login": "Iniciar sesión",
     "register": "Registrarse",
-    "logout": "Cerrar sesion",
-    "email": "Correo electronico",
+    "logout": "Cerrar sesión",
+    "email": "Correo electrónico",
     "emailPlaceholder": "tu@ejemplo.com",
-    "password": "Contrasena",
-    "passwordPlaceholder": "Escribe tu contrasena",
-    "confirmPassword": "Confirmar contrasena",
+    "password": "Contraseña",
+    "passwordPlaceholder": "Escribe tu contraseña",
+    "confirmPassword": "Confirmar contraseña",
     "name": "Nombre de jugador",
     "namePlaceholder": "Elige un nombre",
-    "orContinueAs": "o continuar como",
-    "alreadyHaveAccount": "Ya tienes una cuenta?",
-    "dontHaveAccount": "No tienes cuenta?"
+    "orContinueAs": "Jugando como",
+    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
+    "dontHaveAccount": "¿No tienes cuenta?"
   },
   "settings": {
-    "title": "Configuracion",
+    "title": "Configuración",
     "language": "Idioma",
     "theme": "Tema",
     "dark": "Oscuro",
@@ -37,22 +37,22 @@
     "soundOff": "Desactivado"
   },
   "errors": {
-    "generic": "Algo salio mal. Intentalo de nuevo.",
-    "networkError": "Error de red. Verifica tu conexion.",
+    "generic": "Algo salió mal. Inténtalo de nuevo.",
+    "networkError": "Error de red. Verifica tu conexión.",
     "invalidRoom": "Sala no encontrada.",
-    "roomFull": "Esta sala esta llena.",
+    "roomFull": "Esta sala está llena.",
     "nameRequired": "Por favor escribe un nombre.",
     "nameTooShort": "El nombre debe tener al menos 2 caracteres.",
     "nameTooLong": "El nombre debe tener 20 caracteres o menos.",
-    "invalidEmail": "Por favor escribe un correo valido.",
-    "passwordTooShort": "La contrasena debe tener al menos 6 caracteres.",
-    "passwordMismatch": "Las contrasenas no coinciden.",
-    "invalidCredentials": "Correo o contrasena incorrectos.",
-    "connectionLost": "Conexion perdida. Reconectando..."
+    "invalidEmail": "Por favor escribe un correo válido.",
+    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres.",
+    "passwordMismatch": "Las contraseñas no coinciden.",
+    "invalidCredentials": "Correo o contraseña incorrectos.",
+    "connectionLost": "Conexión perdida. Reconectando..."
   },
   "actions": {
     "copy": "Copiar",
-    "copied": "Copiado!",
+    "copied": "¡Copiado!",
     "close": "Cerrar",
     "cancel": "Cancelar",
     "confirm": "Confirmar",
@@ -63,6 +63,6 @@
   },
   "language": {
     "en": "English",
-    "es": "Espanol"
+    "es": "Español"
   }
 }

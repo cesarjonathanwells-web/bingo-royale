@@ -52,6 +52,8 @@
     "winnerAnnouncement": "{{name}} won with {{pattern}}!",
     "playAgain": "Play Again",
     "backToLobby": "Back to Lobby",
+    "leaveGame": "Leave Game",
+    "noWinner": "No winner this round",
     "pattern": "Pattern",
     "activePattern": "Active Pattern",
     "noNumberYet": "Waiting for first number..."

@@ -132,8 +132,8 @@ export async function validateBingo90(
     const cellValue = card.grid[col]?.[row];
 
     if (cellValue === 0 || cellValue === undefined) {
-      // Blank cell shouldn't be marked
-      continue;
+      // Blank cell - player shouldn't have marked this
+      return { valid: false };
     }
 
     if (!calledSet.has(cellValue)) {

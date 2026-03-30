@@ -9,6 +9,7 @@ import {
   DEFAULT_PLAYER_LIMIT,
   MAX_PLAYERS,
   SPEED_PRESETS,
+  WIN_PATTERNS,
 } from '@bingo/shared';
 import type { AuthenticatedSocket } from '../../services/auth.js';
 import * as roomStore from '../../redis/room-store.js';
@@ -280,9 +281,24 @@ export function registerRoomHandlers(
         return;
       }
 
+      const validSpeeds = SPEED_PRESETS.map((p) => p.ms);
+      const validPatternIds = new Set([
+        ...WIN_PATTERNS.map((p) => p.id),
+        'one_line',
+        'two_lines',
+        'full_house',
+      ]);
+
       const updates: Partial<Room> = {};
-      if (typeof data?.speed === 'number') updates.speed = data.speed;
-      if (Array.isArray(data?.patterns)) updates.patterns = data.patterns;
+      if (typeof data?.speed === 'number' && validSpeeds.includes(data.speed)) {
+        updates.speed = data.speed;
+      }
+      if (Array.isArray(data?.patterns)) {
+        const filtered = data.patterns.filter(
+          (id: string) => typeof id === 'string' && validPatternIds.has(id),
+        );
+        if (filtered.length > 0) updates.patterns = filtered;
+      }
       if (typeof data?.playerLimit === 'number') {
         updates.playerLimit = Math.min(
           Math.max(data.playerLimit, 2),

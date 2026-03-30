@@ -77,6 +77,7 @@ export const CallerManager = {
           `[Caller] Error calling number for room ${roomCode}:`,
           err,
         );
+        this.stopCalling(roomCode);
       }
     };
 
@@ -152,6 +153,7 @@ export const CallerManager = {
           `[Caller] Error calling number for room ${roomCode}:`,
           err,
         );
+        this.stopCalling(roomCode);
       }
     };
 
