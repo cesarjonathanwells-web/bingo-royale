@@ -104,6 +104,13 @@ export interface PlayerCardState {
   dabbed: Set<number>; // set of cell indices that are dabbed
 }
 
+// --------------- Multi-card state ---------------
+
+export interface MultiCardState {
+  cards: BingoCard[];
+  dabs: Set<number>[]; // one Set per card
+}
+
 // --------------- Chat ---------------
 
 export interface ChatMessage {
@@ -148,4 +155,31 @@ export interface SpeedPreset {
   name: string;
   nameEs: string;
   ms: number;
+}
+
+// --------------- Power-ups ---------------
+
+export type PowerUpId =
+  | 'double_daub'
+  | 'number_peek'
+  | 'wild_square'
+  | 'shield'
+  | 'scramble'
+  | 'callers_choice'
+  | 'ink_blot'
+  | 'turbo_stamp';
+
+export interface PowerUpDef {
+  id: PowerUpId;
+  name: string;
+  nameEs: string;
+  description: string;
+  descriptionEs: string;
+  icon: string; // emoji for now
+  duration?: number; // turns it lasts (if applicable)
+}
+
+export interface PlayerPowerUp {
+  id: PowerUpId;
+  used: boolean;
 }

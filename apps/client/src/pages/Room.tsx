@@ -8,8 +8,10 @@ import { useToast } from "@/components/ui/Toast";
 import { RoomLobby } from "@/components/room/RoomLobby";
 import { BingoCard } from "@/components/bingo/BingoCard";
 import { BingoCard90 } from "@/components/bingo/BingoCard90";
+import { CardTabs } from "@/components/bingo/CardTabs";
 import { CalledNumbers } from "@/components/bingo/CalledNumbers";
 import { PatternDisplay } from "@/components/bingo/PatternDisplay";
+import { PowerUpBar } from "@/components/bingo/PowerUpBar";
 import { PlayerList } from "@/components/room/PlayerList";
 import { RoomChat } from "@/components/room/RoomChat";
 import { Button } from "@/components/ui/Button";
@@ -18,7 +20,9 @@ import { cn } from "@/lib/utils";
 import type {
   BingoCard75,
   BingoCard90 as BingoCard90Type,
+  PowerUpId,
 } from "@bingo/shared";
+import { POWER_UP_MAP } from "@bingo/shared";
 
 interface RoomPageProps {
   code: string;
@@ -28,9 +32,13 @@ export function Room({ code }: RoomPageProps) {
   const { t } = useTranslation("game");
   const room = useRoomStore((s) => s.room);
   const gameState = useRoomStore((s) => s.gameState);
-  const myCard = useRoomStore((s) => s.myCard);
+  const myCards = useRoomStore((s) => s.myCards);
   const myDabs = useRoomStore((s) => s.myDabs);
+  const activeCardIndex = useRoomStore((s) => s.activeCardIndex);
+  const setActiveCard = useRoomStore((s) => s.setActiveCard);
   const chatMessages = useRoomStore((s) => s.chatMessages);
+  const myPowerUps = useRoomStore((s) => s.myPowerUps);
+  const peekedNumbers = useRoomStore((s) => s.peekedNumbers);
   const dabCell = useRoomStore((s) => s.dabCell);
   const claimBingo = useRoomStore((s) => s.claimBingo);
   const pauseGame = useRoomStore((s) => s.pauseGame);
@@ -39,6 +47,7 @@ export function Room({ code }: RoomPageProps) {
   const leaveRoom = useRoomStore((s) => s.leaveRoom);
   const joinRoom = useRoomStore((s) => s.joinRoom);
   const newRound = useRoomStore((s) => s.newRound);
+  const usePowerUp = useRoomStore((s) => s.usePowerUp);
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const { play } = useSound();
@@ -47,6 +56,8 @@ export function Room({ code }: RoomPageProps) {
   const joinAttempted = useRef(false);
 
   const isHost = user?.id === room?.hostId;
+  const myCard = myCards[activeCardIndex] ?? null;
+  const activeDabs = myDabs[activeCardIndex] ?? new Set<number>();
 
   const handleLeave = useCallback(() => {
     leaveRoom();
@@ -106,12 +117,47 @@ export function Room({ code }: RoomPageProps) {
     };
   }, [play, toast, t, user?.id]);
 
+  // Listen for power-up used events
+  useEffect(() => {
+    const socket = getSocket();
+
+    const handlePowerUpUsed = (data: {
+      playerId: string;
+      playerName: string;
+      powerupId: string;
+    }) => {
+      const def = POWER_UP_MAP[data.powerupId as PowerUpId];
+      if (def) {
+        toast(
+          t("powerups.activated", {
+            name: data.playerName,
+            powerup: t(`powerups.${data.powerupId}`),
+          }),
+          "info",
+        );
+      }
+    };
+
+    socket.on("game:powerup_used", handlePowerUpUsed);
+
+    return () => {
+      socket.off("game:powerup_used", handlePowerUpUsed);
+    };
+  }, [toast, t]);
+
   const handleDab = useCallback(
     (cellIndex: number) => {
       play("cellDabbed");
       dabCell(cellIndex);
     },
     [dabCell, play],
+  );
+
+  const handleUsePowerUp = useCallback(
+    (powerupId: PowerUpId) => {
+      usePowerUp(powerupId);
+    },
+    [usePowerUp],
   );
 
   // Loading state
@@ -232,23 +278,57 @@ export function Room({ code }: RoomPageProps) {
           </div>
         )}
 
+        {/* Card Tabs (multi-card) */}
+        {myCards.length > 1 && (
+          <CardTabs
+            count={myCards.length}
+            activeIndex={activeCardIndex}
+            onSelect={setActiveCard}
+            dabs={myDabs}
+          />
+        )}
+
         {/* Bingo Card */}
         {myCard && (
           <>
             {room.variant === "75" ? (
               <BingoCard
                 card={myCard as BingoCard75}
-                dabs={myDabs}
+                dabs={activeDabs}
                 onDab={handleDab}
               />
             ) : (
               <BingoCard90
                 card={myCard as BingoCard90Type}
-                dabs={myDabs}
+                dabs={activeDabs}
                 onDab={handleDab}
               />
             )}
           </>
+        )}
+
+        {/* Power-Ups Bar */}
+        {myPowerUps.length > 0 && (
+          <PowerUpBar powerups={myPowerUps} onUse={handleUsePowerUp} />
+        )}
+
+        {/* Number Peek Overlay */}
+        {peekedNumbers.length > 0 && (
+          <div className="w-full max-w-[400px] mx-auto px-3 py-2 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-accent)]/40">
+            <p className="text-xs font-semibold text-[var(--color-accent)] text-center mb-1">
+              {t("powerups.number_peek")}
+            </p>
+            <div className="flex justify-center gap-3">
+              {peekedNumbers.map((num, i) => (
+                <span
+                  key={i}
+                  className="text-lg font-bold text-[var(--color-text-primary)] bg-[var(--color-bg-tertiary)] rounded-lg px-3 py-1"
+                >
+                  {num}
+                </span>
+              ))}
+            </div>
+          </div>
         )}
 
         {/* BINGO Button */}

@@ -20,7 +20,7 @@ export interface ValidationResult {
  * Validate a 75-ball bingo claim.
  *
  * Steps:
- * 1. Get the player's card from the store
+ * 1. Get the player's card from the store (by cardIndex)
  * 2. Get the called numbers for the room
  * 3. Verify all marked cells correspond to numbers that have been called (or FREE space)
  * 4. Check if the marked cells satisfy any active win pattern
@@ -29,9 +29,15 @@ export async function validateBingo75(
   roomCode: string,
   playerId: string,
   markedCells: number[],
+  cardIndex: number = 0,
 ): Promise<ValidationResult> {
-  // Get the player's card
-  const card = (await roomStore.getCard(roomCode, playerId)) as BingoCard75 | null;
+  // Get the player's cards array
+  const cards = await roomStore.getCard(roomCode, playerId);
+  if (!cards || cards.length === 0) {
+    return { valid: false };
+  }
+  const safeIndex = Math.max(0, Math.min(cardIndex, cards.length - 1));
+  const card = cards[safeIndex] as BingoCard75;
   if (!card) {
     return { valid: false };
   }
@@ -99,7 +105,7 @@ export async function validateBingo75(
  * Validate a 90-ball bingo claim.
  *
  * Steps:
- * 1. Get the player's card from the store
+ * 1. Get the player's card from the store (by cardIndex)
  * 2. Get the called numbers for the room
  * 3. Verify all marked cells correspond to called numbers
  * 4. Check if the marked cells satisfy the claimed win stage
@@ -109,9 +115,15 @@ export async function validateBingo90(
   playerId: string,
   markedCells: number[],
   stage: WinStage90,
+  cardIndex: number = 0,
 ): Promise<ValidationResult> {
-  // Get the player's card
-  const card = (await roomStore.getCard(roomCode, playerId)) as BingoCard90 | null;
+  // Get the player's cards array
+  const cards = await roomStore.getCard(roomCode, playerId);
+  if (!cards || cards.length === 0) {
+    return { valid: false };
+  }
+  const safeIndex = Math.max(0, Math.min(cardIndex, cards.length - 1));
+  const card = cards[safeIndex] as BingoCard90;
   if (!card) {
     return { valid: false };
   }

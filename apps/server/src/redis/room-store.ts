@@ -2,7 +2,7 @@
 // Bingo Royale - Room Store (Redis-backed with in-memory fallback)
 // ============================================================
 
-import type { Room, Player, BingoCard } from '@bingo/shared';
+import type { Room, Player, BingoCard, PlayerPowerUp } from '@bingo/shared';
 import { getRedis } from './index.js';
 
 const ROOM_TTL = 7200; // 2 hours in seconds
@@ -57,6 +57,14 @@ function cardKey(code: string, playerId: string): string {
 
 function dabsKey(code: string, playerId: string): string {
   return `${KEY_PREFIX}${code}:dabs:${playerId}`;
+}
+
+function cardCountKey(code: string, playerId: string): string {
+  return `${KEY_PREFIX}${code}:cardcount:${playerId}`;
+}
+
+function powerupsKey(code: string, playerId: string): string {
+  return `${KEY_PREFIX}${code}:powerups:${playerId}`;
 }
 
 // --------------- Create Room ---------------
@@ -261,9 +269,11 @@ export async function popNextNumber(code: string): Promise<number | null> {
 export async function setCard(
   code: string,
   playerId: string,
-  card: BingoCard,
+  cards: BingoCard | BingoCard[],
 ): Promise<void> {
-  const data = JSON.stringify(card);
+  // Always store as an array
+  const arr = Array.isArray(cards) ? cards : [cards];
+  const data = JSON.stringify(arr);
   const redis = getRedis();
 
   if (redis) {
@@ -276,7 +286,7 @@ export async function setCard(
 export async function getCard(
   code: string,
   playerId: string,
-): Promise<BingoCard | null> {
+): Promise<BingoCard[] | null> {
   const redis = getRedis();
 
   let data: string | null;
@@ -287,7 +297,12 @@ export async function getCard(
   }
 
   if (!data) return null;
-  return JSON.parse(data) as BingoCard;
+  const parsed = JSON.parse(data);
+  // Backward compat: wrap single card object in array
+  if (Array.isArray(parsed)) {
+    return parsed as BingoCard[];
+  }
+  return [parsed as BingoCard];
 }
 
 // --------------- Dab Storage ---------------
@@ -295,9 +310,16 @@ export async function getCard(
 export async function setDabs(
   code: string,
   playerId: string,
-  dabs: number[],
+  dabs: number[] | number[][],
 ): Promise<void> {
-  const data = JSON.stringify(dabs);
+  // Always store as array of arrays (one per card)
+  const arr =
+    dabs.length === 0
+      ? []
+      : Array.isArray(dabs[0])
+        ? dabs
+        : [dabs]; // wrap single flat array for backward compat
+  const data = JSON.stringify(arr);
   const redis = getRedis();
 
   if (redis) {
@@ -310,7 +332,7 @@ export async function setDabs(
 export async function getDabs(
   code: string,
   playerId: string,
-): Promise<number[]> {
+): Promise<number[][]> {
   const redis = getRedis();
 
   let data: string | null;
@@ -321,7 +343,83 @@ export async function getDabs(
   }
 
   if (!data) return [];
-  return JSON.parse(data) as number[];
+  const parsed = JSON.parse(data);
+  if (!Array.isArray(parsed)) return [];
+  // Backward compat: if first element is a number, it's a flat array
+  if (parsed.length > 0 && typeof parsed[0] === 'number') {
+    return [parsed as number[]];
+  }
+  return parsed as number[][];
+}
+
+// --------------- Card Count Preference ---------------
+
+export async function setCardCount(
+  code: string,
+  playerId: string,
+  count: number,
+): Promise<void> {
+  const clamped = Math.max(1, Math.min(4, count));
+  const data = JSON.stringify(clamped);
+  const redis = getRedis();
+
+  if (redis) {
+    await redis.set(cardCountKey(code, playerId), data, 'EX', ROOM_TTL);
+  } else {
+    memSet(cardCountKey(code, playerId), data);
+  }
+}
+
+export async function getCardCount(
+  code: string,
+  playerId: string,
+): Promise<number> {
+  const redis = getRedis();
+
+  let data: string | null;
+  if (redis) {
+    data = await redis.get(cardCountKey(code, playerId));
+  } else {
+    data = memGet(cardCountKey(code, playerId));
+  }
+
+  if (!data) return 1; // default to 1 card
+  const parsed = JSON.parse(data);
+  return typeof parsed === 'number' ? Math.max(1, Math.min(4, parsed)) : 1;
+}
+
+// --------------- Power-Up Storage ---------------
+
+export async function setPowerUps(
+  code: string,
+  playerId: string,
+  powerups: PlayerPowerUp[],
+): Promise<void> {
+  const data = JSON.stringify(powerups);
+  const redis = getRedis();
+
+  if (redis) {
+    await redis.set(powerupsKey(code, playerId), data, 'EX', ROOM_TTL);
+  } else {
+    memSet(powerupsKey(code, playerId), data);
+  }
+}
+
+export async function getPowerUps(
+  code: string,
+  playerId: string,
+): Promise<PlayerPowerUp[]> {
+  const redis = getRedis();
+
+  let data: string | null;
+  if (redis) {
+    data = await redis.get(powerupsKey(code, playerId));
+  } else {
+    data = memGet(powerupsKey(code, playerId));
+  }
+
+  if (!data) return [];
+  return JSON.parse(data) as PlayerPowerUp[];
 }
 
 // --------------- TTL Management ---------------

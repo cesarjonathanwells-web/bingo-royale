@@ -12,6 +12,8 @@ import { PatternDisplay } from "@/components/bingo/PatternDisplay";
 import { useToast } from "@/components/ui/Toast";
 import { generateRoomCode, cn } from "@/lib/utils";
 
+const CARD_COUNT_OPTIONS = [1, 2, 3, 4];
+
 interface RoomLobbyProps {
   room: Room;
 }
@@ -22,6 +24,8 @@ export function RoomLobby({ room }: RoomLobbyProps) {
   const startGame = useRoomStore((s) => s.startGame);
   const leaveRoom = useRoomStore((s) => s.leaveRoom);
   const updateSettings = useRoomStore((s) => s.updateSettings);
+  const cardCount = useRoomStore((s) => s.cardCount);
+  const setCardCount = useRoomStore((s) => s.setCardCount);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -240,6 +244,33 @@ export function RoomLobby({ room }: RoomLobbyProps) {
             )}
           </div>
         )}
+
+        {/* Card Count Selector (all players) */}
+        <div className="rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-4 space-y-3">
+          <label className="block text-sm font-semibold text-[var(--color-text-primary)]">
+            {t("cards.count")}
+          </label>
+          <p className="text-xs text-[var(--color-text-muted)]">
+            {t("cards.selectCount")}
+          </p>
+          <div className="flex gap-2">
+            {CARD_COUNT_OPTIONS.map((n) => (
+              <button
+                key={n}
+                type="button"
+                onClick={() => setCardCount(n)}
+                className={cn(
+                  "flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 border cursor-pointer",
+                  cardCount === n
+                    ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)] shadow-md shadow-[var(--color-accent)]/30"
+                    : "bg-[var(--color-bg-primary)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:bg-[var(--color-bg-tertiary)]",
+                )}
+              >
+                {n}
+              </button>
+            ))}
+          </div>
+        </div>
 
         {/* Actions */}
         <div className="flex flex-col gap-3">

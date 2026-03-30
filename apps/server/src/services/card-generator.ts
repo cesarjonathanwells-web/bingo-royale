@@ -18,19 +18,24 @@ export function generateCard(variant: BingoVariant): BingoCard {
 
 /**
  * Generate unique cards for all players in a room and store them.
- * Returns a map of playerId -> card.
+ * Supports 1-4 cards per player via playerCardCounts map.
+ * Returns a map of playerId -> cards array.
  */
 export async function generateCardsForRoom(
   variant: BingoVariant,
-  playerIds: string[],
+  playerCardCounts: Map<string, number>,
   roomCode: string,
-): Promise<Map<string, BingoCard>> {
-  const cards = new Map<string, BingoCard>();
+): Promise<Map<string, BingoCard[]>> {
+  const cards = new Map<string, BingoCard[]>();
 
-  for (const playerId of playerIds) {
-    const card = generateCard(variant);
-    cards.set(playerId, card);
-    await roomStore.setCard(roomCode, playerId, card);
+  for (const [playerId, count] of playerCardCounts) {
+    const playerCards: BingoCard[] = [];
+    const clampedCount = Math.max(1, Math.min(count, 4));
+    for (let i = 0; i < clampedCount; i++) {
+      playerCards.push(generateCard(variant));
+    }
+    cards.set(playerId, playerCards);
+    await roomStore.setCard(roomCode, playerId, playerCards);
   }
 
   return cards;

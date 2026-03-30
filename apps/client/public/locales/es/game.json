@@ -95,6 +95,25 @@
     "send": "Enviar",
     "unread": "{{count}} nuevos"
   },
+  "powerups": {
+    "title": "Poderes",
+    "double_daub": "Doble Marca",
+    "number_peek": "Espiar Numeros",
+    "wild_square": "Comodin",
+    "shield": "Escudo",
+    "scramble": "Revolver",
+    "callers_choice": "Eleccion del Cantor",
+    "ink_blot": "Mancha de Tinta",
+    "turbo_stamp": "Sello Turbo",
+    "used": "Usado",
+    "activated": "{{name}} uso {{powerup}}!",
+    "comingSoon": "Proximamente!"
+  },
+  "cards": {
+    "count": "Número de cartones",
+    "card": "Cartón {{n}}",
+    "selectCount": "¿Cuántos cartones?"
+  },
   "stats": {
     "title": "Tus estadísticas",
     "gamesPlayed": "Partidas jugadas",

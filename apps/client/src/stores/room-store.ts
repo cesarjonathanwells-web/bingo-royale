@@ -7,6 +7,8 @@ import type {
   BingoVariant,
   Player,
   WinEvent,
+  PlayerPowerUp,
+  PowerUpId,
 } from "@bingo/shared";
 import { FREE_SPACE_INDEX } from "@bingo/shared";
 import { getSocket } from "@/socket";
@@ -15,11 +17,15 @@ interface RoomState {
   // State
   room: Room | null;
   gameState: GameState | null;
-  myCard: BingoCard | null;
-  myDabs: Set<number>;
+  myCards: BingoCard[];
+  myDabs: Set<number>[];
+  activeCardIndex: number;
+  cardCount: number;
   chatMessages: ChatMessage[];
   isConnecting: boolean;
   error: string | null;
+  myPowerUps: PlayerPowerUp[];
+  peekedNumbers: number[];
 
   // Actions
   createRoom: (variant: BingoVariant) => void;
@@ -27,6 +33,8 @@ interface RoomState {
   leaveRoom: () => void;
   startGame: () => void;
   newRound: () => void;
+  setCardCount: (count: number) => void;
+  setActiveCard: (index: number) => void;
   dabCell: (cellIndex: number) => void;
   claimBingo: () => void;
   pauseGame: () => void;
@@ -37,6 +45,7 @@ interface RoomState {
     patterns?: string[];
     playerLimit?: number;
   }) => void;
+  usePowerUp: (powerupId: PowerUpId, targetCellIndex?: number) => void;
 
   // Internal
   setupListeners: () => void;
@@ -47,11 +56,15 @@ interface RoomState {
 const initialState = {
   room: null,
   gameState: null,
-  myCard: null,
-  myDabs: new Set<number>(),
+  myCards: [] as BingoCard[],
+  myDabs: [] as Set<number>[],
+  activeCardIndex: 0,
+  cardCount: 1,
   chatMessages: [],
   isConnecting: false,
   error: null,
+  myPowerUps: [] as PlayerPowerUp[],
+  peekedNumbers: [] as number[],
 };
 
 export const useRoomStore = create<RoomState>()((set, get) => ({
@@ -72,7 +85,7 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
   leaveRoom: () => {
     const socket = getSocket();
     socket.emit("room:leave");
-    set({ ...initialState, myDabs: new Set<number>() });
+    set({ ...initialState, myDabs: [], myCards: [] });
   },
 
   startGame: () => {
@@ -85,23 +98,44 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     socket.emit("game:new_round");
   },
 
+  setCardCount: (count) => {
+    const clamped = Math.max(1, Math.min(4, count));
+    set({ cardCount: clamped });
+    const socket = getSocket();
+    socket.emit("room:set_card_count", { count: clamped });
+  },
+
+  setActiveCard: (index) => {
+    const { myCards } = get();
+    if (index >= 0 && index < myCards.length) {
+      set({ activeCardIndex: index });
+    }
+  },
+
   // Dabs are one-way: once dabbed, a cell stays dabbed (matches server behavior)
   dabCell: (cellIndex) => {
-    const { myDabs } = get();
-    if (myDabs.has(cellIndex)) return; // Already dabbed, no-op
+    const { myDabs, activeCardIndex } = get();
+    const currentDabs = myDabs[activeCardIndex];
+    if (!currentDabs || currentDabs.has(cellIndex)) return; // Already dabbed, no-op
 
-    const newDabs = new Set(myDabs);
-    newDabs.add(cellIndex);
+    const newCardDabs = new Set(currentDabs);
+    newCardDabs.add(cellIndex);
+    const newDabs = [...myDabs];
+    newDabs[activeCardIndex] = newCardDabs;
     set({ myDabs: newDabs });
 
     const socket = getSocket();
-    socket.emit("game:dab", { cellIndex });
+    socket.emit("game:dab", { cellIndex, cardIndex: activeCardIndex });
   },
 
   claimBingo: () => {
-    const { myDabs } = get();
+    const { myDabs, activeCardIndex } = get();
+    const currentDabs = myDabs[activeCardIndex];
     const socket = getSocket();
-    socket.emit("game:claim_bingo", { markedCells: Array.from(myDabs) });
+    socket.emit("game:claim_bingo", {
+      markedCells: Array.from(currentDabs ?? []),
+      cardIndex: activeCardIndex,
+    });
   },
 
   pauseGame: () => {
@@ -125,6 +159,17 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     socket.emit("room:update_settings", settings);
   },
 
+  usePowerUp: (powerupId, targetCellIndex) => {
+    const socket = getSocket();
+    // Optimistically mark as used
+    set((state) => ({
+      myPowerUps: state.myPowerUps.map((p) =>
+        p.id === powerupId ? { ...p, used: true } : p,
+      ),
+    }));
+    socket.emit("game:use_powerup", { powerupId, targetCellIndex });
+  },
+
   setupListeners: () => {
     const socket = getSocket();
 
@@ -138,8 +183,11 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
         ...(room.state === "lobby"
           ? {
               gameState: null,
-              myCard: null,
-              myDabs: new Set<number>(),
+              myCards: [],
+              myDabs: [],
+              activeCardIndex: 0,
+              myPowerUps: [],
+              peekedNumbers: [],
               chatMessages: state.chatMessages, // Preserve chat
             }
           : {}),
@@ -218,14 +266,18 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       },
     );
 
-    // Server emits game:card_dealt to each player individually
-    socket.on("game:card_dealt", (data: { card: BingoCard }) => {
-      const dabs = new Set<number>();
-      // Auto-dab the FREE space for 75-ball cards
-      if ("grid" in data.card && data.card.grid.length === 5) {
-        dabs.add(FREE_SPACE_INDEX);
-      }
-      set({ myCard: data.card, myDabs: dabs });
+    // Server emits game:card_dealt to each player individually (multi-card)
+    socket.on("game:card_dealt", (data: { cards: BingoCard[] }) => {
+      const cards = data.cards;
+      // Initialize dab sets for each card, auto-dab FREE space on 75-ball cards
+      const dabSets: Set<number>[] = cards.map((card) => {
+        const dabs = new Set<number>();
+        if ("grid" in card && card.grid.length === 5) {
+          dabs.add(FREE_SPACE_INDEX);
+        }
+        return dabs;
+      });
+      set({ myCards: cards, myDabs: dabSets, activeCardIndex: 0 });
     });
 
     // Server emits game:started to entire room
@@ -339,6 +391,63 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       },
     );
 
+    // Power-up listeners
+    socket.on(
+      "game:powerups_dealt",
+      (data: { powerups: PlayerPowerUp[] }) => {
+        set({ myPowerUps: data.powerups });
+      },
+    );
+
+    socket.on(
+      "game:powerup_used",
+      (_data: {
+        playerId: string;
+        playerName: string;
+        powerupId: string;
+      }) => {
+        // Handled by Room.tsx for toast display
+      },
+    );
+
+    socket.on("game:number_peek", (data: { numbers: number[] }) => {
+      set({ peekedNumbers: data.numbers });
+      // Auto-clear after 10 seconds
+      setTimeout(() => {
+        set({ peekedNumbers: [] });
+      }, 10000);
+    });
+
+    socket.on(
+      "game:turbo_stamp_applied",
+      (data: { dabs: number[] }) => {
+        // Update local dabs for active card to match server
+        set((state) => {
+          const newDabs = [...state.myDabs];
+          if (newDabs.length > 0) {
+            newDabs[0] = new Set(data.dabs);
+          }
+          return { myDabs: newDabs };
+        });
+      },
+    );
+
+    socket.on(
+      "game:wild_square_applied",
+      (data: { cellIndex: number }) => {
+        set((state) => {
+          const newDabs = [...state.myDabs];
+          const idx = state.activeCardIndex;
+          if (newDabs[idx]) {
+            const updated = new Set(newDabs[idx]);
+            updated.add(data.cellIndex);
+            newDabs[idx] = updated;
+          }
+          return { myDabs: newDabs };
+        });
+      },
+    );
+
     socket.on("chat:message", (message: ChatMessage) => {
       set((state) => ({
         chatMessages: [...state.chatMessages, message],
@@ -365,6 +474,11 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       "game:resumed",
       "game:bingo_claimed",
       "game:finished",
+      "game:powerups_dealt",
+      "game:powerup_used",
+      "game:number_peek",
+      "game:turbo_stamp_applied",
+      "game:wild_square_applied",
       "chat:message",
       "error",
     ];
@@ -375,6 +489,6 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
 
   reset: () => {
     get().cleanupListeners();
-    set({ ...initialState, myDabs: new Set<number>() });
+    set({ ...initialState, myDabs: [], myCards: [], myPowerUps: [], peekedNumbers: [] });
   },
 }));

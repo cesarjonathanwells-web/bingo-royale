@@ -95,6 +95,25 @@
     "send": "Send",
     "unread": "{{count}} new"
   },
+  "powerups": {
+    "title": "Power-Ups",
+    "double_daub": "Double Daub",
+    "number_peek": "Number Peek",
+    "wild_square": "Wild Square",
+    "shield": "Shield",
+    "scramble": "Scramble",
+    "callers_choice": "Caller's Choice",
+    "ink_blot": "Ink Blot",
+    "turbo_stamp": "Turbo Stamp",
+    "used": "Used",
+    "activated": "{{name}} used {{powerup}}!",
+    "comingSoon": "Coming soon!"
+  },
+  "cards": {
+    "count": "Number of Cards",
+    "card": "Card {{n}}",
+    "selectCount": "How many cards?"
+  },
   "stats": {
     "title": "Your Stats",
     "gamesPlayed": "Games Played",
