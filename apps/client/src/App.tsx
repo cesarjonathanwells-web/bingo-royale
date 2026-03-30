@@ -1,4 +1,4 @@
-import { useState, useEffect, useMemo, Suspense } from "react";
+import { useState, useEffect, useMemo, useRef, Suspense } from "react";
 import {
   RouterProvider,
   createRouter,
@@ -85,10 +85,16 @@ function RootLayout() {
 function HomeWrapper() {
   const room = useRoomStore((s) => s.room);
   const navigate = useNavigate();
+  const prevRoom = useRef<string | null>(null);
 
   useEffect(() => {
-    if (room) {
+    // Only navigate to room if a NEW room appeared (not leftover state)
+    if (room && room.code !== prevRoom.current) {
+      prevRoom.current = room.code;
       navigate({ to: "/room/$code", params: { code: room.code } });
+    }
+    if (!room) {
+      prevRoom.current = null;
     }
   }, [room, navigate]);
 
@@ -99,16 +105,22 @@ function RoomWrapper() {
   const { code } = useParams({ from: "/room/$code" });
   const room = useRoomStore((s) => s.room);
   const navigate = useNavigate();
+  const hasJoined = useRef(false);
 
   useEffect(() => {
-    // If room was left (was set then became null), go home
-    if (!room) {
+    if (room) {
+      hasJoined.current = true;
+    } else if (hasJoined.current) {
+      // Room was set then cleared = we left. Navigate home immediately.
+      navigate({ to: "/" });
+    } else {
+      // Never had a room - this is a direct URL navigation.
+      // Give time for the join to complete.
       const timeout = setTimeout(() => {
-        const currentRoom = useRoomStore.getState().room;
-        if (!currentRoom) {
+        if (!useRoomStore.getState().room) {
           navigate({ to: "/" });
         }
-      }, 2000); // Allow time for join/reconnect
+      }, 3000);
       return () => clearTimeout(timeout);
     }
   }, [room, navigate]);

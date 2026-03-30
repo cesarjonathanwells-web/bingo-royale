@@ -124,7 +124,7 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
   leaveRoom: () => {
     const socket = getSocket();
     socket.emit("room:leave");
-    set({ ...initialState, myDabs: [], myCards: [] });
+    set({ ...initialState, myDabs: [], myCards: [], myPowerUps: [], peekedNumbers: [], reactions: [] });
   },
 
   startGame: () => {

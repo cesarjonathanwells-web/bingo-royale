@@ -64,9 +64,8 @@ export function Room({ code }: RoomPageProps) {
   const activeDabs = myDabs.length > 0 ? (myDabs[activeCardIndex] ?? myDabs[0] ?? new Set<number>()) : new Set<number>();
 
   const handleLeave = useCallback(() => {
+    leaveRoom();
     navigate({ to: "/" });
-    // Delay leaveRoom so navigation happens first (avoids blank flash)
-    setTimeout(() => leaveRoom(), 100);
   }, [leaveRoom, navigate]);
 
   // Auto-join room if navigated directly (only once)

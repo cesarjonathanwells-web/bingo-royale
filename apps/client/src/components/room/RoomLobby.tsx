@@ -30,8 +30,8 @@ export function RoomLobby({ room }: RoomLobbyProps) {
   const navigate = useNavigate();
 
   const handleLeave = useCallback(() => {
+    leaveRoom();
     navigate({ to: "/" });
-    setTimeout(() => leaveRoom(), 100);
   }, [leaveRoom, navigate]);
 
   const isHost = user?.id === room.hostId;
