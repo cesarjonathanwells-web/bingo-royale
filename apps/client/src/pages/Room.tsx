@@ -1,5 +1,6 @@
 import { useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "@tanstack/react-router";
 import { useRoomStore } from "@/stores/room-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { useSound } from "@/hooks/useSound";
@@ -42,9 +43,15 @@ export function Room({ code }: RoomPageProps) {
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const { play } = useSound();
   const { toast } = useToast();
+  const navigate = useNavigate();
   const joinAttempted = useRef(false);
 
   const isHost = user?.id === room?.hostId;
+
+  const handleLeave = useCallback(() => {
+    leaveRoom();
+    navigate({ to: "/" });
+  }, [leaveRoom, navigate]);
 
   // Auto-join room if navigated directly (only once)
   useEffect(() => {
@@ -187,7 +194,7 @@ export function Room({ code }: RoomPageProps) {
                 {t("game.playAgain")}
               </Button>
             )}
-            <Button variant="secondary" onClick={leaveRoom}>
+            <Button variant="secondary" onClick={handleLeave}>
               {t("game.leaveGame")}
             </Button>
           </div>
