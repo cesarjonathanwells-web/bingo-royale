@@ -121,6 +121,10 @@ export function registerGameHandlers(
       const code = socket.data.roomCode;
       if (!code) return;
 
+      // Check if player has a card (spectators won't)
+      const card = await roomStore.getCard(code, user.id);
+      if (!card) return;
+
       const cellIndex = data?.cellIndex as number;
       if (typeof cellIndex !== 'number' || cellIndex < 0) return;
 

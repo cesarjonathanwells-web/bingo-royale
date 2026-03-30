@@ -94,15 +94,14 @@ function RoomWrapper() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    // If room was left, go home
+    // If room was left (was set then became null), go home
     if (!room) {
-      // Give a small delay so the leave event processes
       const timeout = setTimeout(() => {
         const currentRoom = useRoomStore.getState().room;
         if (!currentRoom) {
           navigate({ to: "/" });
         }
-      }, 500);
+      }, 2000); // Allow time for join/reconnect
       return () => clearTimeout(timeout);
     }
   }, [room, navigate]);

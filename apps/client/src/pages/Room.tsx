@@ -1,4 +1,4 @@
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useRoomStore } from "@/stores/room-store";
 import { useAuthStore } from "@/stores/auth-store";
@@ -14,7 +14,10 @@ import { RoomChat } from "@/components/room/RoomChat";
 import { Button } from "@/components/ui/Button";
 import { getSocket } from "@/socket";
 import { cn } from "@/lib/utils";
-import type { BingoCard75, BingoCard90 as BingoCard90Type } from "@bingo/shared";
+import type {
+  BingoCard75,
+  BingoCard90 as BingoCard90Type,
+} from "@bingo/shared";
 
 interface RoomPageProps {
   code: string;
@@ -34,40 +37,57 @@ export function Room({ code }: RoomPageProps) {
   const sendChat = useRoomStore((s) => s.sendChat);
   const leaveRoom = useRoomStore((s) => s.leaveRoom);
   const joinRoom = useRoomStore((s) => s.joinRoom);
+  const newRound = useRoomStore((s) => s.newRound);
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const { play } = useSound();
   const { toast } = useToast();
+  const joinAttempted = useRef(false);
 
   const isHost = user?.id === room?.hostId;
 
-  // Auto-join room if navigated directly
+  // Auto-join room if navigated directly (only once)
   useEffect(() => {
-    if (isAuthenticated && !room && code) {
+    if (isAuthenticated && !room && code && !joinAttempted.current) {
+      joinAttempted.current = true;
       joinRoom(code);
     }
   }, [isAuthenticated, room, code, joinRoom]);
 
-  // Listen for bingo-invalid event for toast
+  // Reset join attempt flag when leaving
+  useEffect(() => {
+    return () => {
+      joinAttempted.current = false;
+    };
+  }, []);
+
+  // Listen for sound-triggering events
   useEffect(() => {
     const socket = getSocket();
-    const handleInvalid = () => {
-      play("bingoInvalid");
-      toast(t("game.bingoInvalid"), "error");
-    };
-    const handleValid = () => {
-      play("bingoWin");
-    };
-    const handleNumberCalled = () => {
-      play("numberCalled");
+
+    const handleBingoClaimed = (data: {
+      valid: boolean;
+      playerId: string;
+      playerName: string;
+      pattern?: string;
+    }) => {
+      if (data.valid) {
+        play("bingoWin");
+        toast(
+          t("game.winnerAnnouncement", {
+            name: data.playerName,
+            pattern: data.pattern ?? "",
+          }),
+          "success",
+        );
+      } else if (data.playerId === user?.id) {
+        play("bingoInvalid");
+        toast(t("game.bingoInvalid"), "error");
+      }
     };
 
-    const handleBingoClaimed = (data: { valid: boolean }) => {
-      if (data.valid) {
-        handleValid();
-      } else {
-        handleInvalid();
-      }
+    const handleNumberCalled = () => {
+      play("numberCalled");
     };
 
     socket.on("game:bingo_claimed", handleBingoClaimed);
@@ -77,7 +97,7 @@ export function Room({ code }: RoomPageProps) {
       socket.off("game:bingo_claimed", handleBingoClaimed);
       socket.off("game:number_called", handleNumberCalled);
     };
-  }, [play, toast, t]);
+  }, [play, toast, t, user?.id]);
 
   const handleDab = useCallback(
     (cellIndex: number) => {
@@ -136,45 +156,39 @@ export function Room({ code }: RoomPageProps) {
         </div>
 
         <div className="relative z-10 text-center space-y-4">
-          <h2 className="text-4xl font-black text-[var(--color-ball-o)] text-shadow-glow">
+          <h2 className="text-4xl font-black text-[var(--color-ball-o)]">
             {t("game.gameOver")}
           </h2>
 
-          {latestWinner && (
+          {latestWinner ? (
             <div className="space-y-2">
               <p className="text-2xl font-bold text-[var(--color-text-primary)]">
                 {t("game.winnerAnnouncement", {
                   name: latestWinner.playerName,
-                  pattern: t(`patterns.${latestWinner.pattern}`),
+                  pattern: latestWinner.pattern,
                 })}
               </p>
             </div>
+          ) : (
+            <p className="text-lg text-[var(--color-text-secondary)]">
+              {t("game.noWinner")}
+            </p>
           )}
 
-          {gameState.winners.length > 1 && (
-            <div className="space-y-1">
-              {gameState.winners.map((w, i) => (
-                <p
-                  key={i}
-                  className="text-sm text-[var(--color-text-secondary)]"
-                >
-                  {w.playerName} - {t(`patterns.${w.pattern}`)}
-                </p>
-              ))}
-            </div>
-          )}
+          <p className="text-sm text-[var(--color-text-muted)]">
+            {t("game.numbersCalled", {
+              count: gameState.calledNumbers.length,
+            })}
+          </p>
 
           <div className="flex flex-col gap-3 pt-4">
             {isHost && (
-              <Button size="lg" onClick={() => {
-                const socket = getSocket();
-                socket.emit("game:new_round");
-              }}>
+              <Button size="lg" onClick={newRound}>
                 {t("game.playAgain")}
               </Button>
             )}
             <Button variant="secondary" onClick={leaveRoom}>
-              {t("game.backToLobby")}
+              {t("game.leaveGame")}
             </Button>
           </div>
         </div>
@@ -202,7 +216,7 @@ export function Room({ code }: RoomPageProps) {
         <CalledNumbers gameState={gameState} variant={room.variant} />
 
         {/* Active Pattern */}
-        {room.patterns.length > 0 && (
+        {room.variant === "75" && room.patterns.length > 0 && (
           <div className="flex items-center justify-center gap-2">
             <span className="text-xs text-[var(--color-text-muted)]">
               {t("game.activePattern")}:
@@ -240,9 +254,7 @@ export function Room({ code }: RoomPageProps) {
             "hover:from-amber-400 hover:via-orange-400 hover:to-red-400",
             "active:scale-95 transition-all duration-150",
             "shadow-xl shadow-orange-500/30",
-            "animate-bingo-glow",
             "select-none cursor-pointer",
-            "touch-target",
           )}
         >
           {t("game.bingo")}
@@ -266,14 +278,8 @@ export function Room({ code }: RoomPageProps) {
 
       {/* Right sidebar (desktop) */}
       <div className="w-full lg:w-72 shrink-0 flex flex-col gap-3">
-        <PlayerList
-          players={room.players}
-          className="hidden lg:block"
-        />
-        <RoomChat
-          messages={chatMessages}
-          onSend={sendChat}
-        />
+        <PlayerList players={room.players} className="hidden lg:block" />
+        <RoomChat messages={chatMessages} onSend={sendChat} />
       </div>
     </div>
   );

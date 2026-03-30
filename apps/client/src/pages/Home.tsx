@@ -46,7 +46,7 @@ export function Home() {
 
   const handleJoinRoom = useCallback(() => {
     const code = roomCode.trim().replace(/-/g, "").toUpperCase();
-    if (code.length < 4) {
+    if (code.length < 6) {
       toast(t("errors.invalidRoom"), "error");
       return;
     }
@@ -208,7 +208,7 @@ export function Home() {
               size="lg"
               onClick={handleJoinRoom}
               loading={isConnecting}
-              disabled={roomCode.replace(/-/g, "").length < 4}
+              disabled={roomCode.replace(/-/g, "").length < 6}
               className="w-full"
             >
               {t("home.joinRoom", { ns: "game" })}

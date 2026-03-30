@@ -6,6 +6,7 @@ import { connectSocket, destroySocket, getSocket } from "@/socket";
 /**
  * Manages the Socket.IO connection lifecycle.
  * Connects when authenticated, disconnects on logout.
+ * Handles reconnection and room rejoin.
  */
 export function useSocket(): void {
   const token = useAuthStore((s) => s.token);
@@ -25,9 +26,15 @@ export function useSocket(): void {
 
       const socket = getSocket();
 
+      // On reconnect, re-auth and rejoin room if we were in one
       const handleReconnect = () => {
         if (token) {
           socket.auth = { token };
+        }
+        // If we were in a room, attempt to rejoin
+        const room = useRoomStore.getState().room;
+        if (room) {
+          socket.emit("room:join", { code: room.code });
         }
       };
 
