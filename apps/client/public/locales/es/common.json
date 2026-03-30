@@ -1,0 +1,68 @@
+{
+  "app": {
+    "title": "Bingo Royale",
+    "tagline": "La mejor experiencia de bingo en linea"
+  },
+  "nav": {
+    "home": "Inicio",
+    "stats": "Estadisticas",
+    "settings": "Configuracion"
+  },
+  "auth": {
+    "guestName": "Tu nombre",
+    "guestNamePlaceholder": "Escribe tu nombre",
+    "playAsGuest": "Jugar como invitado",
+    "login": "Iniciar sesion",
+    "register": "Registrarse",
+    "logout": "Cerrar sesion",
+    "email": "Correo electronico",
+    "emailPlaceholder": "tu@ejemplo.com",
+    "password": "Contrasena",
+    "passwordPlaceholder": "Escribe tu contrasena",
+    "confirmPassword": "Confirmar contrasena",
+    "name": "Nombre de jugador",
+    "namePlaceholder": "Elige un nombre",
+    "orContinueAs": "o continuar como",
+    "alreadyHaveAccount": "Ya tienes una cuenta?",
+    "dontHaveAccount": "No tienes cuenta?"
+  },
+  "settings": {
+    "title": "Configuracion",
+    "language": "Idioma",
+    "theme": "Tema",
+    "dark": "Oscuro",
+    "light": "Claro",
+    "sound": "Sonido",
+    "soundOn": "Activado",
+    "soundOff": "Desactivado"
+  },
+  "errors": {
+    "generic": "Algo salio mal. Intentalo de nuevo.",
+    "networkError": "Error de red. Verifica tu conexion.",
+    "invalidRoom": "Sala no encontrada.",
+    "roomFull": "Esta sala esta llena.",
+    "nameRequired": "Por favor escribe un nombre.",
+    "nameTooShort": "El nombre debe tener al menos 2 caracteres.",
+    "nameTooLong": "El nombre debe tener 20 caracteres o menos.",
+    "invalidEmail": "Por favor escribe un correo valido.",
+    "passwordTooShort": "La contrasena debe tener al menos 6 caracteres.",
+    "passwordMismatch": "Las contrasenas no coinciden.",
+    "invalidCredentials": "Correo o contrasena incorrectos.",
+    "connectionLost": "Conexion perdida. Reconectando..."
+  },
+  "actions": {
+    "copy": "Copiar",
+    "copied": "Copiado!",
+    "close": "Cerrar",
+    "cancel": "Cancelar",
+    "confirm": "Confirmar",
+    "save": "Guardar",
+    "back": "Volver",
+    "loading": "Cargando...",
+    "retry": "Reintentar"
+  },
+  "language": {
+    "en": "English",
+    "es": "Espanol"
+  }
+}
