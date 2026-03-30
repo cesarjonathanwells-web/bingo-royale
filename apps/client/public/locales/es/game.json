@@ -98,16 +98,16 @@
   "powerups": {
     "title": "Poderes",
     "double_daub": "Doble Marca",
-    "number_peek": "Espiar Numeros",
-    "wild_square": "Comodin",
+    "number_peek": "Espiar Números",
+    "wild_square": "Comodín",
     "shield": "Escudo",
     "scramble": "Revolver",
-    "callers_choice": "Eleccion del Cantor",
+    "callers_choice": "Elección del Cantor",
     "ink_blot": "Mancha de Tinta",
     "turbo_stamp": "Sello Turbo",
     "used": "Usado",
-    "activated": "{{name}} uso {{powerup}}!",
-    "comingSoon": "Proximamente!"
+    "activated": "¡{{name}} usó {{powerup}}!",
+    "comingSoon": "¡Próximamente!"
   },
   "cards": {
     "count": "Número de cartones",

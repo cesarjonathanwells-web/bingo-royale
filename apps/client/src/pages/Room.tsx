@@ -14,6 +14,8 @@ import { PatternDisplay } from "@/components/bingo/PatternDisplay";
 import { PowerUpBar } from "@/components/bingo/PowerUpBar";
 import { PlayerList } from "@/components/room/PlayerList";
 import { RoomChat } from "@/components/room/RoomChat";
+import { EmojiBar } from "@/components/room/EmojiBar";
+import { EmojiToast } from "@/components/room/EmojiToast";
 import { Button } from "@/components/ui/Button";
 import { getSocket } from "@/socket";
 import { cn } from "@/lib/utils";
@@ -48,6 +50,8 @@ export function Room({ code }: RoomPageProps) {
   const joinRoom = useRoomStore((s) => s.joinRoom);
   const newRound = useRoomStore((s) => s.newRound);
   const usePowerUp = useRoomStore((s) => s.usePowerUp);
+  const reactions = useRoomStore((s) => s.reactions);
+  const sendReaction = useRoomStore((s) => s.sendReaction);
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const { play } = useSound();
@@ -367,8 +371,16 @@ export function Room({ code }: RoomPageProps) {
       {/* Right sidebar (desktop) */}
       <div className="w-full lg:w-72 shrink-0 flex flex-col gap-3">
         <PlayerList players={room.players} className="hidden lg:block" />
-        <RoomChat messages={chatMessages} onSend={sendChat} />
+        <div className="flex items-center gap-2">
+          <div className="flex-1">
+            <RoomChat messages={chatMessages} onSend={sendChat} />
+          </div>
+          <EmojiBar onSend={sendReaction} />
+        </div>
       </div>
+
+      {/* Floating emoji reactions */}
+      <EmojiToast reactions={reactions} />
     </div>
   );
 }

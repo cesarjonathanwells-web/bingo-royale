@@ -296,6 +296,10 @@ html {
   animation: shake 0.5s ease-in-out;
 }
 
+.animate-pulse-subtle {
+  animation: ball-pulse 3s ease-in-out infinite;
+}
+
 .animate-emoji-float {
   animation: emoji-float 2s ease-out forwards;
 }

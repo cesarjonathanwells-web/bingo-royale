@@ -496,12 +496,12 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
 
     socket.on(
       "game:turbo_stamp_applied",
-      (data: { dabs: number[] }) => {
-        // Update local dabs for active card to match server
+      (data: { dabs: number[]; cardIndex?: number }) => {
         set((state) => {
           const newDabs = [...state.myDabs];
-          if (newDabs.length > 0) {
-            newDabs[0] = new Set(data.dabs);
+          const idx = data.cardIndex ?? state.activeCardIndex;
+          if (idx >= 0 && idx < newDabs.length) {
+            newDabs[idx] = new Set(data.dabs);
           }
           return { myDabs: newDabs };
         });

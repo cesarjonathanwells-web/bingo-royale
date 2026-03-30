@@ -45,6 +45,7 @@ export function Header() {
               "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]",
             )}
             title={t("settings.language")}
+            aria-label={t("settings.language")}
           >
             {i18n.language === "en" ? "EN" : "ES"}
           </button>
@@ -57,6 +58,7 @@ export function Header() {
               "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]",
             )}
             title={t("settings.theme")}
+            aria-label={t("settings.theme")}
           >
             {theme === "dark" ? (
               <svg
@@ -105,6 +107,7 @@ export function Header() {
               "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]",
             )}
             title={t("settings.sound")}
+            aria-label={t("settings.sound")}
           >
             {muted ? (
               <svg
