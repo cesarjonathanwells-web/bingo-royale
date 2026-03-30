@@ -25,7 +25,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
 
   const isHost = user?.id === room.hostId;
   const isEs = i18n.language === "es";
-  const canStart = room.players.filter((p) => !p.isSpectator).length >= 2;
+  const canStart = room.players.filter((p) => !p.isSpectator).length >= 1;
 
   const [showPatterns, setShowPatterns] = useState(false);
 

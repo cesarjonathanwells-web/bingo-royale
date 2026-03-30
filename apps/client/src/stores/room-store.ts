@@ -94,8 +94,9 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
   },
 
   claimBingo: () => {
+    const { myDabs } = get();
     const socket = getSocket();
-    socket.emit("game:claim-bingo");
+    socket.emit("game:claim_bingo", { markedCells: Array.from(myDabs) });
   },
 
   pauseGame: () => {
@@ -111,59 +112,64 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
   sendChat: (text) => {
     if (!text.trim()) return;
     const socket = getSocket();
-    socket.emit("chat:send", { text: text.trim() });
+    socket.emit("chat:message", { text: text.trim() });
   },
 
   updateSettings: (settings) => {
     const socket = getSocket();
-    socket.emit("room:settings", settings);
+    socket.emit("room:update_settings", settings);
   },
 
   setupListeners: () => {
     const socket = getSocket();
 
-    socket.on("room:created", (room: Room) => {
-      set({ room, isConnecting: false });
-    });
-
-    socket.on("room:joined", (data: { room: Room; card?: BingoCard }) => {
-      set({
-        room: data.room,
-        myCard: data.card ?? null,
+    // Server emits room:state on create, join, and settings update
+    socket.on("room:state", (room: Room) => {
+      set((state) => ({
+        room,
         isConnecting: false,
-      });
+        // If transitioning to lobby from finished (new round), clear game state
+        ...(room.state === "lobby"
+          ? { gameState: null, myCard: null, myDabs: new Set<number>() }
+          : {}),
+        // Preserve existing gameState/card if game is in progress
+        ...(room.state === "in_progress" && state.gameState
+          ? {}
+          : {}),
+      }));
     });
 
-    socket.on("room:updated", (room: Room) => {
-      set({ room });
-    });
-
-    socket.on("room:player-joined", (player: Player) => {
+    socket.on("room:player_joined", (data: { player: Player }) => {
       set((state) => {
         if (!state.room) return state;
         return {
           room: {
             ...state.room,
-            players: [...state.room.players, player],
-          },
-        };
-      });
-    });
-
-    socket.on("room:player-left", (playerId: string) => {
-      set((state) => {
-        if (!state.room) return state;
-        return {
-          room: {
-            ...state.room,
-            players: state.room.players.filter((p) => p.id !== playerId),
+            players: [...state.room.players, data.player],
           },
         };
       });
     });
 
     socket.on(
-      "room:player-status",
+      "room:player_left",
+      (data: { playerId: string; playerName: string; reason: string }) => {
+        set((state) => {
+          if (!state.room) return state;
+          return {
+            room: {
+              ...state.room,
+              players: state.room.players.filter(
+                (p) => p.id !== data.playerId,
+              ),
+            },
+          };
+        });
+      },
+    );
+
+    socket.on(
+      "room:player_updated",
       (data: { playerId: string; connected: boolean }) => {
         set((state) => {
           if (!state.room) return state;
@@ -182,23 +188,74 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     );
 
     socket.on(
+      "room:host_changed",
+      (data: { newHostId: string; newHostName: string }) => {
+        set((state) => {
+          if (!state.room) return state;
+          return {
+            room: {
+              ...state.room,
+              hostId: data.newHostId,
+              players: state.room.players.map((p) => ({
+                ...p,
+                isHost: p.id === data.newHostId,
+              })),
+            },
+          };
+        });
+      },
+    );
+
+    // Server emits game:card_dealt to each player individually with their card
+    socket.on("game:card_dealt", (data: { card: BingoCard }) => {
+      set({ myCard: data.card, myDabs: new Set<number>() });
+    });
+
+    // Server emits game:started to entire room
+    socket.on(
       "game:started",
-      (data: { gameState: GameState; card: BingoCard }) => {
+      (data: {
+        variant: string;
+        speed: number;
+        patterns: string[];
+        playerCount: number;
+        startedAt: number;
+      }) => {
         set((state) => ({
-          gameState: data.gameState,
-          myCard: data.card,
-          myDabs: new Set<number>(),
+          gameState: {
+            calledNumbers: [],
+            currentNumber: null,
+            currentLetter: null,
+            paused: false,
+            startedAt: data.startedAt,
+            winners: [],
+          },
           room: state.room
-            ? { ...state.room, state: "in_progress" }
+            ? { ...state.room, state: "in_progress" as const }
             : null,
         }));
       },
     );
 
+    // Server emits game:number_called with { number, calledNumbers, remaining, letter? }
     socket.on(
-      "game:number-called",
-      (data: { number: number; letter: string | null; gameState: GameState }) => {
-        set({ gameState: data.gameState });
+      "game:number_called",
+      (data: {
+        number: number;
+        calledNumbers: number[];
+        remaining: number;
+        letter?: string;
+      }) => {
+        set((state) => ({
+          gameState: state.gameState
+            ? {
+                ...state.gameState,
+                calledNumbers: data.calledNumbers,
+                currentNumber: data.number,
+                currentLetter: data.letter ?? null,
+              }
+            : null,
+        }));
       },
     );
 
@@ -218,27 +275,59 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       }));
     });
 
-    socket.on("game:bingo-valid", (win: WinEvent) => {
-      set((state) => ({
-        gameState: state.gameState
-          ? {
-              ...state.gameState,
-              winners: [...state.gameState.winners, win],
-            }
-          : null,
-      }));
-    });
+    // Server emits game:bingo_claimed with { valid, playerId, playerName, pattern?, message? }
+    socket.on(
+      "game:bingo_claimed",
+      (data: {
+        valid: boolean;
+        playerId: string;
+        playerName: string;
+        pattern?: string;
+        message?: string;
+      }) => {
+        if (data.valid) {
+          set((state) => ({
+            gameState: state.gameState
+              ? {
+                  ...state.gameState,
+                  winners: [
+                    ...state.gameState.winners,
+                    {
+                      playerId: data.playerId,
+                      playerName: data.playerName,
+                      pattern: data.pattern ?? "",
+                      timestamp: Date.now(),
+                    },
+                  ],
+                }
+              : null,
+          }));
+        }
+        // Invalid claims: components can listen to this event directly for toasts
+      },
+    );
 
-    socket.on("game:bingo-invalid", () => {
-      // Handled by the component via a separate callback or toast
-    });
-
-    socket.on("game:finished", (data: { gameState: GameState }) => {
-      set((state) => ({
-        gameState: data.gameState,
-        room: state.room ? { ...state.room, state: "finished" } : null,
-      }));
-    });
+    socket.on(
+      "game:finished",
+      (data: {
+        reason: string;
+        winners: WinEvent[];
+        calledNumbers?: number[];
+        totalCalled?: number;
+      }) => {
+        set((state) => ({
+          gameState: state.gameState
+            ? {
+                ...state.gameState,
+                winners: data.winners,
+                calledNumbers:
+                  data.calledNumbers ?? state.gameState.calledNumbers,
+              }
+            : null,
+          room: state.room ? { ...state.room, state: "finished" as const } : null,
+        }));
+      },
+    );
 
     socket.on("chat:message", (message: ChatMessage) => {
       set((state) => ({
@@ -246,7 +335,7 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       }));
     });
 
-    socket.on("room:error", (data: { message: string }) => {
+    socket.on("error", (data: { message: string }) => {
       set({ error: data.message, isConnecting: false });
     });
 
@@ -257,21 +346,20 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
 
   cleanupListeners: () => {
     const socket = getSocket();
-    socket.off("room:created");
-    socket.off("room:joined");
-    socket.off("room:updated");
-    socket.off("room:player-joined");
-    socket.off("room:player-left");
-    socket.off("room:player-status");
+    socket.off("room:state");
+    socket.off("room:player_joined");
+    socket.off("room:player_left");
+    socket.off("room:player_updated");
+    socket.off("room:host_changed");
+    socket.off("game:card_dealt");
     socket.off("game:started");
-    socket.off("game:number-called");
+    socket.off("game:number_called");
     socket.off("game:paused");
     socket.off("game:resumed");
-    socket.off("game:bingo-valid");
-    socket.off("game:bingo-invalid");
+    socket.off("game:bingo_claimed");
     socket.off("game:finished");
     socket.off("chat:message");
-    socket.off("room:error");
+    socket.off("error");
   },
 
   reset: () => {

@@ -62,14 +62,20 @@ export function Room({ code }: RoomPageProps) {
       play("numberCalled");
     };
 
-    socket.on("game:bingo-invalid", handleInvalid);
-    socket.on("game:bingo-valid", handleValid);
-    socket.on("game:number-called", handleNumberCalled);
+    const handleBingoClaimed = (data: { valid: boolean }) => {
+      if (data.valid) {
+        handleValid();
+      } else {
+        handleInvalid();
+      }
+    };
+
+    socket.on("game:bingo_claimed", handleBingoClaimed);
+    socket.on("game:number_called", handleNumberCalled);
 
     return () => {
-      socket.off("game:bingo-invalid", handleInvalid);
-      socket.off("game:bingo-valid", handleValid);
-      socket.off("game:number-called", handleNumberCalled);
+      socket.off("game:bingo_claimed", handleBingoClaimed);
+      socket.off("game:number_called", handleNumberCalled);
     };
   }, [play, toast, t]);
 
@@ -160,7 +166,10 @@ export function Room({ code }: RoomPageProps) {
 
           <div className="flex flex-col gap-3 pt-4">
             {isHost && (
-              <Button size="lg" onClick={() => useRoomStore.getState().startGame()}>
+              <Button size="lg" onClick={() => {
+                const socket = getSocket();
+                socket.emit("game:new_round");
+              }}>
                 {t("game.playAgain")}
               </Button>
             )}
