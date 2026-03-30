@@ -1,0 +1,312 @@
+// ============================================================
+// Bingo Royale - Room Socket Handlers
+// ============================================================
+
+import { randomUUID } from 'crypto';
+import type { Server } from 'socket.io';
+import type { Room, Player, BingoVariant } from '@bingo/shared';
+import {
+  DEFAULT_PLAYER_LIMIT,
+  MAX_PLAYERS,
+  SPEED_PRESETS,
+} from '@bingo/shared';
+import type { AuthenticatedSocket } from '../../services/auth.js';
+import * as roomStore from '../../redis/room-store.js';
+import { CallerManager } from '../../services/caller.js';
+
+/**
+ * Generate a 6-character alphanumeric room code.
+ */
+function generateRoomCode(): string {
+  const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789'; // Exclude confusing chars
+  let code = '';
+  const bytes = new Uint8Array(6);
+  globalThis.crypto.getRandomValues(bytes);
+  for (let i = 0; i < 6; i++) {
+    code += chars[bytes[i]! % chars.length];
+  }
+  return code;
+}
+
+export function registerRoomHandlers(
+  socket: AuthenticatedSocket,
+  io: Server,
+): void {
+  const user = socket.data.user;
+
+  // --------------- room:create ---------------
+
+  socket.on('room:create', async (data, callback) => {
+    try {
+      const variant: BingoVariant = data?.variant === '90' ? '90' : '75';
+      const speed =
+        typeof data?.speed === 'number'
+          ? data.speed
+          : SPEED_PRESETS[1]!.ms; // Default to 'normal'
+      const patterns: string[] = Array.isArray(data?.patterns)
+        ? data.patterns
+        : [];
+      const playerLimit =
+        typeof data?.playerLimit === 'number'
+          ? Math.min(Math.max(data.playerLimit, 2), MAX_PLAYERS)
+          : DEFAULT_PLAYER_LIMIT;
+
+      const code = generateRoomCode();
+
+      const hostPlayer: Player = {
+        id: user.id,
+        name: user.name,
+        isHost: true,
+        connected: true,
+        isSpectator: false,
+      };
+
+      const room: Room = {
+        code,
+        hostId: user.id,
+        variant,
+        state: 'lobby',
+        speed,
+        patterns,
+        playerLimit,
+        players: [hostPlayer],
+        createdAt: Date.now(),
+      };
+
+      await roomStore.createRoom(room);
+
+      // Join the socket to the room channel
+      await socket.join(code);
+      socket.data.roomCode = code;
+
+      // Respond with room state
+      const response = {
+        success: true,
+        room,
+      };
+
+      if (typeof callback === 'function') {
+        callback(response);
+      }
+
+      socket.emit('room:state', room);
+    } catch (err) {
+      console.error('[Room] Error creating room:', err);
+      const errorMsg =
+        err instanceof Error ? err.message : 'Failed to create room';
+      if (typeof callback === 'function') {
+        callback({ success: false, error: errorMsg });
+      }
+      socket.emit('error', { message: errorMsg });
+    }
+  });
+
+  // --------------- room:join ---------------
+
+  socket.on('room:join', async (data, callback) => {
+    try {
+      const code = data?.code as string;
+      if (!code) {
+        const msg = 'Room code is required';
+        if (typeof callback === 'function') callback({ success: false, error: msg });
+        return;
+      }
+
+      const room = await roomStore.getRoom(code);
+      if (!room) {
+        const msg = 'Room not found';
+        if (typeof callback === 'function') callback({ success: false, error: msg });
+        return;
+      }
+
+      // Check if player is already in the room (reconnecting)
+      const existingPlayer = room.players.find((p) => p.id === user.id);
+
+      if (existingPlayer) {
+        // Reconnecting - update connection status
+        existingPlayer.connected = true;
+        await roomStore.addPlayer(code, existingPlayer);
+        await socket.join(code);
+        socket.data.roomCode = code;
+
+        const updatedRoom = await roomStore.getRoom(code);
+
+        if (typeof callback === 'function') {
+          callback({ success: true, room: updatedRoom });
+        }
+        socket.emit('room:state', updatedRoom);
+        io.to(code).emit('room:player_updated', {
+          playerId: user.id,
+          connected: true,
+        });
+        return;
+      }
+
+      // Check room state - new players can only join in lobby
+      const isSpectator = room.state !== 'lobby';
+
+      // Check player limit (spectators don't count)
+      if (!isSpectator) {
+        const activePlayers = room.players.filter((p) => !p.isSpectator);
+        if (activePlayers.length >= room.playerLimit) {
+          const msg = 'Room is full';
+          if (typeof callback === 'function') callback({ success: false, error: msg });
+          return;
+        }
+      }
+
+      const newPlayer: Player = {
+        id: user.id,
+        name: user.name,
+        isHost: false,
+        connected: true,
+        isSpectator,
+      };
+
+      await roomStore.addPlayer(code, newPlayer);
+      await socket.join(code);
+      socket.data.roomCode = code;
+
+      const updatedRoom = await roomStore.getRoom(code);
+
+      // Notify others
+      socket.to(code).emit('room:player_joined', {
+        player: newPlayer,
+      });
+
+      // Send state to joiner
+      if (typeof callback === 'function') {
+        callback({ success: true, room: updatedRoom });
+      }
+      socket.emit('room:state', updatedRoom);
+    } catch (err) {
+      console.error('[Room] Error joining room:', err);
+      const errorMsg =
+        err instanceof Error ? err.message : 'Failed to join room';
+      if (typeof callback === 'function') {
+        callback({ success: false, error: errorMsg });
+      }
+      socket.emit('error', { message: errorMsg });
+    }
+  });
+
+  // --------------- room:leave ---------------
+
+  socket.on('room:leave', async (_, callback) => {
+    try {
+      const code = socket.data.roomCode;
+      if (!code) {
+        if (typeof callback === 'function') callback({ success: true });
+        return;
+      }
+
+      const room = await roomStore.getRoom(code);
+      if (!room) {
+        socket.data.roomCode = undefined;
+        if (typeof callback === 'function') callback({ success: true });
+        return;
+      }
+
+      await roomStore.removePlayer(code, user.id);
+      await socket.leave(code);
+      socket.data.roomCode = undefined;
+
+      // Notify room
+      io.to(code).emit('room:player_left', {
+        playerId: user.id,
+        playerName: user.name,
+        reason: 'left',
+      });
+
+      // Check remaining players
+      const remaining = await roomStore.getPlayers(code);
+
+      if (remaining.length === 0) {
+        // Room is empty - delete it
+        CallerManager.stopCalling(code);
+        await roomStore.deleteRoom(code);
+      } else if (room.hostId === user.id) {
+        // Host left - transfer host to next player
+        const newHost = remaining.find((p) => !p.isSpectator) ?? remaining[0]!;
+        newHost.isHost = true;
+        await roomStore.addPlayer(code, newHost);
+        await roomStore.updateRoom(code, { hostId: newHost.id });
+
+        io.to(code).emit('room:host_changed', {
+          newHostId: newHost.id,
+          newHostName: newHost.name,
+        });
+      }
+
+      if (typeof callback === 'function') callback({ success: true });
+    } catch (err) {
+      console.error('[Room] Error leaving room:', err);
+      const errorMsg =
+        err instanceof Error ? err.message : 'Failed to leave room';
+      if (typeof callback === 'function') {
+        callback({ success: false, error: errorMsg });
+      }
+      socket.emit('error', { message: errorMsg });
+    }
+  });
+
+  // --------------- room:update_settings ---------------
+
+  socket.on('room:update_settings', async (data, callback) => {
+    try {
+      const code = socket.data.roomCode;
+      if (!code) {
+        if (typeof callback === 'function')
+          callback({ success: false, error: 'Not in a room' });
+        return;
+      }
+
+      const room = await roomStore.getRoom(code);
+      if (!room) {
+        if (typeof callback === 'function')
+          callback({ success: false, error: 'Room not found' });
+        return;
+      }
+
+      if (room.hostId !== user.id) {
+        if (typeof callback === 'function')
+          callback({ success: false, error: 'Only the host can update settings' });
+        return;
+      }
+
+      if (room.state !== 'lobby') {
+        if (typeof callback === 'function')
+          callback({ success: false, error: 'Cannot update settings while game is in progress' });
+        return;
+      }
+
+      const updates: Partial<Room> = {};
+      if (typeof data?.speed === 'number') updates.speed = data.speed;
+      if (Array.isArray(data?.patterns)) updates.patterns = data.patterns;
+      if (typeof data?.playerLimit === 'number') {
+        updates.playerLimit = Math.min(
+          Math.max(data.playerLimit, 2),
+          MAX_PLAYERS,
+        );
+      }
+      if (data?.variant === '75' || data?.variant === '90') {
+        updates.variant = data.variant;
+      }
+
+      await roomStore.updateRoom(code, updates);
+
+      const updatedRoom = await roomStore.getRoom(code);
+      io.to(code).emit('room:state', updatedRoom);
+
+      if (typeof callback === 'function') callback({ success: true });
+    } catch (err) {
+      console.error('[Room] Error updating settings:', err);
+      const errorMsg =
+        err instanceof Error ? err.message : 'Failed to update settings';
+      if (typeof callback === 'function') {
+        callback({ success: false, error: errorMsg });
+      }
+      socket.emit('error', { message: errorMsg });
+    }
+  });
+}
