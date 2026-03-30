@@ -1,0 +1,2 @@
+// Placeholder - game constants
+export {};
