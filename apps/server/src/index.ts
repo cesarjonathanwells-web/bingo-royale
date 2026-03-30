@@ -14,6 +14,7 @@ import { closeRedis } from './redis/index.js';
 import authRoutes from './routes/auth.js';
 import statsRoutes from './routes/stats.js';
 import healthRoutes from './routes/health.js';
+import profileRoutes from './routes/profile.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -38,6 +39,7 @@ app.use(express.json());
 app.use('/api/auth', authRoutes);
 app.use('/api/stats', statsRoutes);
 app.use('/api/health', healthRoutes);
+app.use('/api/profile', profileRoutes);
 
 // --------------- Static files (production) ---------------
 

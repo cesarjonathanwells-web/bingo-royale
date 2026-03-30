@@ -114,12 +114,34 @@
     "card": "Cartón {{n}}",
     "selectCount": "¿Cuántos cartones?"
   },
+  "reactions": {
+    "title": "Reacciones",
+    "rateLimit": "¡Más despacio!"
+  },
+  "autoDaub": {
+    "on": "Auto-Marcar ON",
+    "off": "Auto-Marcar OFF",
+    "toggle": "Auto-Marcar"
+  },
+  "profile": {
+    "title": "Perfil del jugador",
+    "memberSince": "Miembro desde {{date}}",
+    "guest": "Jugador invitado",
+    "registered": "Jugador registrado"
+  },
   "stats": {
     "title": "Tus estadísticas",
     "gamesPlayed": "Partidas jugadas",
     "gamesWon": "Partidas ganadas",
     "winRate": "Porcentaje de victoria",
     "totalDabs": "Marcas totales",
-    "noStats": "¡Juega algunas partidas para ver tus estadísticas!"
+    "noStats": "¡Juega algunas partidas para ver tus estadísticas!",
+    "recentGames": "Partidas recientes",
+    "noGames": "No hay partidas aún",
+    "win": "Victoria",
+    "loss": "Derrota",
+    "players": "{{count}} jugadores",
+    "variant75": "75 bolas",
+    "variant90": "90 bolas"
   }
 }

@@ -91,6 +91,53 @@ export async function login(
 // Stats API
 // ============================================================
 
+export interface RecentGame {
+  id: string;
+  roomCode: string;
+  variant: "75" | "90";
+  playerCount: number;
+  isWinner: boolean;
+  winPattern: string | null;
+  calledCount: number;
+  finishedAt: string | null;
+}
+
+export interface StatsResponse {
+  stats: {
+    userId: string;
+    gamesPlayed: number;
+    gamesWon: number;
+    totalDabs: number;
+    winRate: number;
+  };
+  recentGames: RecentGame[];
+}
+
+export interface ProfileResponse {
+  user: {
+    id: string;
+    displayName: string;
+    isGuest: boolean;
+    locale: string;
+    createdAt: string;
+  };
+  stats: {
+    gamesPlayed: number;
+    gamesWon: number;
+    totalDabs: number;
+    winRate: number;
+  };
+  recentGames: RecentGame[];
+}
+
 export async function getStats(): Promise<UserStats> {
   return fetchApi<UserStats>("/api/stats");
+}
+
+export async function fetchStats(userId: string): Promise<StatsResponse> {
+  return fetchApi<StatsResponse>(`/api/stats/${userId}`);
+}
+
+export async function fetchProfile(userId: string): Promise<ProfileResponse> {
+  return fetchApi<ProfileResponse>(`/api/profile/${userId}`);
 }

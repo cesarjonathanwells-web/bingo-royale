@@ -13,6 +13,7 @@ import { ToastProvider } from "@/components/ui/Toast";
 import { Home } from "@/pages/Home";
 import { Room } from "@/pages/Room";
 import { Stats } from "@/pages/Stats";
+import { Profile } from "@/pages/Profile";
 import { useSocket } from "@/hooks/useSocket";
 import { useThemeEffect } from "@/hooks/useTheme";
 import { useRoomStore } from "@/stores/room-store";
@@ -43,7 +44,13 @@ const statsRoute = createRoute({
   component: Stats,
 });
 
-const routeTree = rootRoute.addChildren([homeRoute, roomRoute, statsRoute]);
+const profileRoute = createRoute({
+  getParentRoute: () => rootRoute,
+  path: "/profile/$userId",
+  component: ProfileWrapper,
+});
+
+const routeTree = rootRoute.addChildren([homeRoute, roomRoute, statsRoute, profileRoute]);
 
 const router = createRouter({ routeTree });
 
@@ -107,6 +114,11 @@ function RoomWrapper() {
   }, [room, navigate]);
 
   return <Room code={code} />;
+}
+
+function ProfileWrapper() {
+  const { userId } = useParams({ from: "/profile/$userId" });
+  return <Profile userId={userId} />;
 }
 
 // ============================================================

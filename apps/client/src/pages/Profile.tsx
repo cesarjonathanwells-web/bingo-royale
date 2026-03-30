@@ -1,32 +1,39 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { fetchStats } from "@/lib/api";
-import type { StatsResponse } from "@/lib/api";
-import { useAuthStore } from "@/stores/auth-store";
+import { fetchProfile } from "@/lib/api";
+import type { ProfileResponse } from "@/lib/api";
 
-export function Stats() {
+interface ProfileProps {
+  userId: string;
+}
+
+export function Profile({ userId }: ProfileProps) {
   const { t } = useTranslation("game");
-  const user = useAuthStore((s) => s.user);
-  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
-  const [data, setData] = useState<StatsResponse | null>(null);
+  const [data, setData] = useState<ProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
+  const [error, setError] = useState(false);
 
   useEffect(() => {
-    if (!isAuthenticated || !user) {
+    if (!userId) {
       setLoading(false);
+      setError(true);
       return;
     }
-    fetchStats(user.id)
+    fetchProfile(userId)
       .then(setData)
-      .catch(() => setData(null))
+      .catch(() => setError(true))
       .finally(() => setLoading(false));
-  }, [isAuthenticated, user]);
+  }, [userId]);
 
   // Loading skeleton
   if (loading) {
     return (
       <div className="flex-1 px-4 py-8 max-w-lg mx-auto w-full">
-        <div className="h-8 w-40 mx-auto mb-6 rounded bg-[var(--color-bg-secondary)] animate-pulse" />
+        <div className="flex flex-col items-center mb-8">
+          <div className="w-16 h-16 rounded-full bg-[var(--color-bg-secondary)] animate-pulse mb-3" />
+          <div className="h-6 w-32 rounded bg-[var(--color-bg-secondary)] animate-pulse mb-2" />
+          <div className="h-4 w-24 rounded bg-[var(--color-bg-secondary)] animate-pulse" />
+        </div>
         <div className="grid grid-cols-2 gap-4 mb-8">
           {[...Array(4)].map((_, i) => (
             <div
@@ -38,24 +45,13 @@ export function Stats() {
             </div>
           ))}
         </div>
-        <div className="h-6 w-32 mb-4 rounded bg-[var(--color-bg-secondary)] animate-pulse" />
-        {[...Array(3)].map((_, i) => (
-          <div
-            key={i}
-            className="h-12 mb-2 rounded bg-[var(--color-bg-secondary)] animate-pulse"
-          />
-        ))}
       </div>
     );
   }
 
-  // Empty state
-  if (!data || data.stats.gamesPlayed === 0) {
+  if (error || !data) {
     return (
-      <div className="flex-1 flex flex-col items-center justify-center px-4">
-        <div className="text-4xl mb-4" aria-hidden="true">
-          B I N G O
-        </div>
+      <div className="flex-1 flex items-center justify-center px-4">
         <p className="text-sm text-[var(--color-text-muted)] text-center">
           {t("stats.noStats")}
         </p>
@@ -63,7 +59,7 @@ export function Stats() {
     );
   }
 
-  const { stats, recentGames } = data;
+  const { user, stats, recentGames } = data;
 
   const statCards = [
     {
@@ -94,11 +90,34 @@ export function Stats() {
 
   return (
     <div className="flex-1 px-4 py-8 max-w-lg mx-auto w-full">
-      <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-6 text-center">
-        {t("stats.title")}
-      </h2>
+      {/* Profile header */}
+      <div className="flex flex-col items-center mb-8">
+        <div className="w-16 h-16 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-2xl font-bold text-white mb-3">
+          {user.displayName.charAt(0).toUpperCase()}
+        </div>
+        <h2 className="text-2xl font-bold text-[var(--color-text-primary)]">
+          {user.displayName}
+        </h2>
+        <span
+          className={`mt-1 text-xs font-medium px-2 py-0.5 rounded ${
+            user.isGuest
+              ? "bg-yellow-500/20 text-yellow-400"
+              : "bg-green-500/20 text-green-400"
+          }`}
+        >
+          {user.isGuest ? t("profile.guest") : t("profile.registered")}
+        </span>
+        <p className="mt-2 text-xs text-[var(--color-text-muted)]">
+          {t("profile.memberSince", {
+            date: new Date(user.createdAt).toLocaleDateString(),
+          })}
+        </p>
+      </div>
 
-      {/* Stat cards */}
+      {/* Stats cards */}
+      <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-3">
+        {t("stats.title")}
+      </h3>
       <div className="grid grid-cols-2 gap-4 mb-8">
         {statCards.map((card) => (
           <div

@@ -114,12 +114,34 @@
     "card": "Card {{n}}",
     "selectCount": "How many cards?"
   },
+  "reactions": {
+    "title": "Reactions",
+    "rateLimit": "Slow down!"
+  },
+  "autoDaub": {
+    "on": "Auto-Daub ON",
+    "off": "Auto-Daub OFF",
+    "toggle": "Auto-Daub"
+  },
+  "profile": {
+    "title": "Player Profile",
+    "memberSince": "Member since {{date}}",
+    "guest": "Guest Player",
+    "registered": "Registered Player"
+  },
   "stats": {
     "title": "Your Stats",
     "gamesPlayed": "Games Played",
     "gamesWon": "Games Won",
     "winRate": "Win Rate",
     "totalDabs": "Total Dabs",
-    "noStats": "Play some games to see your stats!"
+    "noStats": "Play some games to see your stats!",
+    "recentGames": "Recent Games",
+    "noGames": "No games played yet",
+    "win": "Win",
+    "loss": "Loss",
+    "players": "{{count}} players",
+    "variant75": "75-Ball",
+    "variant90": "90-Ball"
   }
 }

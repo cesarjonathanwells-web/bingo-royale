@@ -3,6 +3,8 @@ import type {
   Room,
   GameState,
   BingoCard,
+  BingoCard75,
+  BingoCard90,
   ChatMessage,
   BingoVariant,
   Player,
@@ -12,6 +14,34 @@ import type {
 } from "@bingo/shared";
 import { FREE_SPACE_INDEX } from "@bingo/shared";
 import { getSocket } from "@/socket";
+
+interface EmojiReaction {
+  emoji: string;
+  playerName: string;
+  id: string;
+}
+
+function findCellIndex75(card: BingoCard75, number: number): number | null {
+  for (let col = 0; col < card.grid.length; col++) {
+    const column = card.grid[col];
+    if (!column) continue;
+    for (let row = 0; row < column.length; row++) {
+      if (column[row] === number) return row * 5 + col;
+    }
+  }
+  return null;
+}
+
+function findCellIndex90(card: BingoCard90, number: number): number | null {
+  for (let col = 0; col < card.grid.length; col++) {
+    const column = card.grid[col];
+    if (!column) continue;
+    for (let row = 0; row < column.length; row++) {
+      if (column[row] === number) return row * 9 + col;
+    }
+  }
+  return null;
+}
 
 interface RoomState {
   // State
@@ -26,6 +56,8 @@ interface RoomState {
   error: string | null;
   myPowerUps: PlayerPowerUp[];
   peekedNumbers: number[];
+  reactions: EmojiReaction[];
+  autoDaub: boolean;
 
   // Actions
   createRoom: (variant: BingoVariant) => void;
@@ -46,6 +78,8 @@ interface RoomState {
     playerLimit?: number;
   }) => void;
   usePowerUp: (powerupId: PowerUpId, targetCellIndex?: number) => void;
+  sendReaction: (emoji: string) => void;
+  toggleAutoDaub: () => void;
 
   // Internal
   setupListeners: () => void;
@@ -65,6 +99,8 @@ const initialState = {
   error: null,
   myPowerUps: [] as PlayerPowerUp[],
   peekedNumbers: [] as number[],
+  reactions: [] as EmojiReaction[],
+  autoDaub: typeof window !== "undefined" && localStorage.getItem("bingo-auto-daub") === "true",
 };
 
 export const useRoomStore = create<RoomState>()((set, get) => ({
@@ -157,6 +193,17 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
   updateSettings: (settings) => {
     const socket = getSocket();
     socket.emit("room:update_settings", settings);
+  },
+
+  sendReaction: (emoji) => {
+    const socket = getSocket();
+    socket.emit("chat:reaction", { emoji });
+  },
+
+  toggleAutoDaub: () => {
+    const next = !get().autoDaub;
+    localStorage.setItem("bingo-auto-daub", String(next));
+    set({ autoDaub: next });
   },
 
   usePowerUp: (powerupId, targetCellIndex) => {
@@ -319,6 +366,35 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
               }
             : null,
         }));
+
+        // Auto-daub logic: scan all cards for the called number
+        const { autoDaub, myCards, myDabs } = get();
+        if (autoDaub && myCards.length > 0) {
+          const calledNumber = data.number;
+          const newDabs = [...myDabs];
+          let changed = false;
+          for (let ci = 0; ci < myCards.length; ci++) {
+            const card = myCards[ci];
+            if (!card) continue;
+            const cardDabs = newDabs[ci] ?? new Set<number>();
+            let cellIndex: number | null = null;
+            if (card.grid.length === 5) {
+              cellIndex = findCellIndex75(card as BingoCard75, calledNumber);
+            } else {
+              cellIndex = findCellIndex90(card as BingoCard90, calledNumber);
+            }
+            if (cellIndex !== null && !cardDabs.has(cellIndex)) {
+              const updated = new Set(cardDabs);
+              updated.add(cellIndex);
+              newDabs[ci] = updated;
+              changed = true;
+              const socket = getSocket();
+              socket.emit("game:dab", { cellIndex, cardIndex: ci });
+            }
+          }
+          if (changed) set({ myDabs: newDabs });
+        }
+
       },
     );
 
@@ -454,6 +530,15 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       }));
     });
 
+    socket.on("chat:reaction", (data: { playerId: string; playerName: string; emoji: string }) => {
+      const id = `${Date.now()}-${Math.random()}`;
+      const reaction: EmojiReaction = { emoji: data.emoji, playerName: data.playerName, id };
+      set((state) => ({ reactions: [...state.reactions, reaction] }));
+      setTimeout(() => {
+        set((state) => ({ reactions: state.reactions.filter((r) => r.id !== id) }));
+      }, 3000);
+    });
+
     socket.on("error", (data: { message: string }) => {
       set({ error: data.message, isConnecting: false });
     });
@@ -480,6 +565,7 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       "game:turbo_stamp_applied",
       "game:wild_square_applied",
       "chat:message",
+      "chat:reaction",
       "error",
     ];
     for (const event of events) {

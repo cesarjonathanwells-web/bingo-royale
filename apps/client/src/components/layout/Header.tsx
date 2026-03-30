@@ -7,9 +7,11 @@ import { generateRoomCode } from "@/lib/utils";
 import { cn } from "@/lib/utils";
 
 export function Header() {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation(["common", "game"]);
   const user = useAuthStore((s) => s.user);
   const room = useRoomStore((s) => s.room);
+  const autoDaub = useRoomStore((s) => s.autoDaub);
+  const toggleAutoDaub = useRoomStore((s) => s.toggleAutoDaub);
   const { theme, toggleTheme } = useTheme();
   const { muted, toggleMute } = useSoundStore();
 
@@ -137,6 +139,22 @@ export function Header() {
               </svg>
             )}
           </button>
+
+          {/* Auto-Daub Toggle - only visible during a game */}
+          {room?.state === "in_progress" && (
+            <button
+              onClick={toggleAutoDaub}
+              className={cn(
+                "p-2 rounded-lg text-xs font-bold transition-colors",
+                autoDaub
+                  ? "text-[var(--color-accent)] bg-[var(--color-accent)]/10"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]",
+              )}
+              title={t("autoDaub.toggle", { ns: "game" })}
+            >
+              AD
+            </button>
+          )}
 
           {/* Player Name */}
           {user && (

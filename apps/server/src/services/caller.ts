@@ -6,6 +6,7 @@ import type { Server } from 'socket.io';
 import type { BingoVariant } from '@bingo/shared';
 import { getLetterForNumber } from '@bingo/shared';
 import * as roomStore from '../redis/room-store.js';
+import { persistGameResult } from './game-persistence.js';
 
 // --------------- Active caller intervals ---------------
 
@@ -52,6 +53,9 @@ export const CallerManager = {
             reason: 'no_numbers_left',
             winners: [],
           });
+          const room = await roomStore.getRoom(roomCode);
+          const callerState = await roomStore.getCallerState(roomCode);
+          void persistGameResult(roomCode, variant, room?.hostId ?? '', [], callerState?.called ?? []);
           return;
         }
 
@@ -131,6 +135,9 @@ export const CallerManager = {
             reason: 'no_numbers_left',
             winners: [],
           });
+          const room = await roomStore.getRoom(roomCode);
+          const callerState = await roomStore.getCallerState(roomCode);
+          void persistGameResult(roomCode, caller.variant, room?.hostId ?? '', [], callerState?.called ?? []);
           return;
         }
 

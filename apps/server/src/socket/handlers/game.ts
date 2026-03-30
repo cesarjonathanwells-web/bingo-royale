@@ -10,6 +10,7 @@ import * as roomStore from '../../redis/room-store.js';
 import { CallerManager } from '../../services/caller.js';
 import { generateCardsForRoom } from '../../services/card-generator.js';
 import { validateBingo75, validateBingo90 } from '../../services/win-validator.js';
+import { persistGameResult } from '../../services/game-persistence.js';
 
 export function registerGameHandlers(
   socket: AuthenticatedSocket,
@@ -278,6 +279,15 @@ export function registerGameHandlers(
           calledNumbers: callerState?.called ?? [],
           totalCalled: callerState?.called.length ?? 0,
         });
+
+        // Persist game result to PostgreSQL
+        void persistGameResult(
+          code,
+          room.variant,
+          room.hostId,
+          [{ playerId: user.id, playerName: user.name, pattern: result.pattern ?? '', timestamp: Date.now() }],
+          callerState?.called ?? [],
+        );
 
         if (typeof callback === 'function')
           callback({ success: true, valid: true, pattern: result.pattern });

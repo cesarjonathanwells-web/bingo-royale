@@ -83,3 +83,13 @@ export const BALL_COLORS: Record<string, string> = {
   G: '#228B22', // green
   O: '#FFD700', // gold
 } as const;
+
+// --------------- Emoji reactions ---------------
+
+/** Allowed emojis for quick reactions during gameplay. */
+export const GAME_EMOJIS = [
+  '\u{1F389}', '\u{1F631}', '\u{1F44F}', '\u{1F605}', '\u{1F525}', '\u{1F4AA}',
+  '\u{1F62D}', '\u{1F91E}', '\u{1F624}', '\u{1F64F}', '\u{1F480}', '\u{1F3AF}',
+  '\u{2B50}', '\u{1F440}', '\u{1F60E}', '\u{1F92F}', '\u{2764}\u{FE0F}', '\u{1F494}',
+  '\u{1F340}', '\u{1F38A}', '\u{1F602}', '\u{1F973}', '\u{1F451}', '\u{1F91D}',
+] as const;

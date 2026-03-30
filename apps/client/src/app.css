@@ -238,6 +238,28 @@ html {
   20%, 40%, 60%, 80% { transform: translateX(4px); }
 }
 
+@keyframes emoji-float {
+  0% {
+    opacity: 0;
+    transform: translateY(10px) scale(0.8);
+  }
+  15% {
+    opacity: 1;
+    transform: translateY(0) scale(1.1);
+  }
+  30% {
+    transform: translateY(-5px) scale(1);
+  }
+  70% {
+    opacity: 1;
+    transform: translateY(-30px) scale(1);
+  }
+  100% {
+    opacity: 0;
+    transform: translateY(-60px) scale(0.8);
+  }
+}
+
 /* ============================================================
    Animation Utility Classes
    ============================================================ */
@@ -272,6 +294,10 @@ html {
 
 .animate-shake {
   animation: shake 0.5s ease-in-out;
+}
+
+.animate-emoji-float {
+  animation: emoji-float 2s ease-out forwards;
 }
 
 /* ============================================================
