@@ -3,6 +3,7 @@
 // ============================================================
 
 import type { PowerUpDef, PowerUpId } from './types.js';
+import { shuffleArray } from './bingo.js';
 
 // --------------- Power-up catalog ---------------
 
@@ -85,16 +86,9 @@ export const POWER_UP_MAP: Record<PowerUpId, PowerUpDef> = Object.fromEntries(
 
 /**
  * Randomly select `count` non-duplicate power-ups.
- * Uses Fisher-Yates partial shuffle for fairness.
+ * Uses Fisher-Yates shuffle for fairness.
  */
 export function dealPowerUps(count: number): PowerUpId[] {
-  const ids = POWER_UPS.map((p) => p.id);
-
-  // Fisher-Yates shuffle (partial - only need `count` items)
-  for (let i = ids.length - 1; i > 0 && ids.length - 1 - i < count; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [ids[i], ids[j]] = [ids[j], ids[i]];
-  }
-
-  return ids.slice(ids.length - count);
+  const clamped = Math.min(count, POWER_UPS.length);
+  return shuffleArray(POWER_UPS.map((p) => p.id)).slice(0, clamped);
 }

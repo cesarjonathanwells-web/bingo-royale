@@ -2,7 +2,7 @@
 // Bingo Royale - Win Validation Service (Anti-Cheat)
 // ============================================================
 
-import type { BingoCard75, BingoCard90, WinStage90 } from '@bingo/shared';
+import type { BingoCard, BingoCard75, BingoCard90, WinStage90 } from '@bingo/shared';
 import {
   checkWin75,
   checkWinStage90,
@@ -15,6 +15,32 @@ export interface ValidationResult {
   valid: boolean;
   pattern?: string;
 }
+
+// --------------- Common helpers ---------------
+
+/**
+ * Retrieve a player's card and the room's called numbers for validation.
+ * Returns null if the card or caller state is not available.
+ */
+async function getValidationContext(
+  roomCode: string,
+  playerId: string,
+  cardIndex: number,
+): Promise<{ card: BingoCard; calledSet: Set<number> } | null> {
+  const cards = await roomStore.getCard(roomCode, playerId);
+  if (!cards || cards.length === 0) return null;
+
+  const safeIndex = Math.max(0, Math.min(cardIndex, cards.length - 1));
+  const card = cards[safeIndex];
+  if (!card) return null;
+
+  const callerState = await roomStore.getCallerState(roomCode);
+  if (!callerState) return null;
+
+  return { card, calledSet: new Set(callerState.called) };
+}
+
+// --------------- 75-ball validation ---------------
 
 /**
  * Validate a 75-ball bingo claim.
@@ -31,24 +57,11 @@ export async function validateBingo75(
   markedCells: number[],
   cardIndex: number = 0,
 ): Promise<ValidationResult> {
-  // Get the player's cards array
-  const cards = await roomStore.getCard(roomCode, playerId);
-  if (!cards || cards.length === 0) {
-    return { valid: false };
-  }
-  const safeIndex = Math.max(0, Math.min(cardIndex, cards.length - 1));
-  const card = cards[safeIndex] as BingoCard75;
-  if (!card) {
-    return { valid: false };
-  }
+  const ctx = await getValidationContext(roomCode, playerId, cardIndex);
+  if (!ctx) return { valid: false };
 
-  // Get called numbers
-  const callerState = await roomStore.getCallerState(roomCode);
-  if (!callerState) {
-    return { valid: false };
-  }
-
-  const calledSet = new Set(callerState.called);
+  const card = ctx.card as BingoCard75;
+  const { calledSet } = ctx;
 
   // Verify each marked cell corresponds to a called number or is the FREE space
   for (const cellIndex of markedCells) {
@@ -72,9 +85,7 @@ export async function validateBingo75(
 
   // Get active patterns for the room
   const room = await roomStore.getRoom(roomCode);
-  if (!room) {
-    return { valid: false };
-  }
+  if (!room) return { valid: false };
 
   const dabbedSet = new Set(markedCells);
 
@@ -101,6 +112,8 @@ export async function validateBingo75(
   return { valid: false };
 }
 
+// --------------- 90-ball validation ---------------
+
 /**
  * Validate a 90-ball bingo claim.
  *
@@ -117,24 +130,11 @@ export async function validateBingo90(
   stage: WinStage90,
   cardIndex: number = 0,
 ): Promise<ValidationResult> {
-  // Get the player's cards array
-  const cards = await roomStore.getCard(roomCode, playerId);
-  if (!cards || cards.length === 0) {
-    return { valid: false };
-  }
-  const safeIndex = Math.max(0, Math.min(cardIndex, cards.length - 1));
-  const card = cards[safeIndex] as BingoCard90;
-  if (!card) {
-    return { valid: false };
-  }
+  const ctx = await getValidationContext(roomCode, playerId, cardIndex);
+  if (!ctx) return { valid: false };
 
-  // Get called numbers
-  const callerState = await roomStore.getCallerState(roomCode);
-  if (!callerState) {
-    return { valid: false };
-  }
-
-  const calledSet = new Set(callerState.called);
+  const card = ctx.card as BingoCard90;
+  const { calledSet } = ctx;
 
   // Verify each marked cell corresponds to a called number
   // 90-ball card: grid[col][row], 9 columns x 3 rows, 0 = blank

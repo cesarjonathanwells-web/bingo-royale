@@ -16,20 +16,6 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
   );
 }
 
-export function DialogTrigger({
-  children,
-  asChild,
-}: {
-  children: ReactNode;
-  asChild?: boolean;
-}) {
-  return (
-    <DialogPrimitive.Trigger asChild={asChild}>
-      {children}
-    </DialogPrimitive.Trigger>
-  );
-}
-
 interface DialogContentProps {
   children: ReactNode;
   className?: string;

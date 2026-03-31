@@ -6,7 +6,7 @@ import { randomUUID } from 'crypto';
 import jwt from 'jsonwebtoken';
 import bcrypt from 'bcryptjs';
 import type { Socket } from 'socket.io';
-import type { User, GuestUser, RegisteredUser } from '@bingo/shared';
+import type { GuestUser, RegisteredUser } from '@bingo/shared';
 import { config } from '../config.js';
 import { getDb, schema } from '../db/index.js';
 import { eq } from 'drizzle-orm';

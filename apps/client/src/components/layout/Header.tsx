@@ -5,8 +5,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useRoomStore } from "@/stores/room-store";
 import { useTheme } from "@/hooks/useTheme";
 import { useSoundStore } from "@/hooks/useSound";
-import { generateRoomCode } from "@/lib/utils";
-import { cn } from "@/lib/utils";
+import { generateRoomCode, cn } from "@/lib/utils";
 
 export function Header() {
   const { t, i18n } = useTranslation(["common", "game"]);

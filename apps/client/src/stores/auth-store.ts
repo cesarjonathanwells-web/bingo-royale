@@ -22,6 +22,27 @@ interface AuthState {
   clearError: () => void;
 }
 
+/**
+ * Wraps an auth API call with loading state, token persistence, and error handling.
+ */
+async function performAuth(
+  set: (partial: Partial<AuthState>) => void,
+  apiFn: () => Promise<{ user: User; token: string }>,
+  fallbackMessage: string,
+): Promise<void> {
+  set({ isLoading: true, error: null });
+  try {
+    const { user, token } = await apiFn();
+    localStorage.setItem("bingo-token", token);
+    set({ user, token, isAuthenticated: true, isLoading: false });
+  } catch (err) {
+    const message =
+      err instanceof api.ApiError ? err.message : fallbackMessage;
+    set({ error: message, isLoading: false });
+    throw err;
+  }
+}
+
 export const useAuthStore = create<AuthState>()(
   persist(
     (set) => ({
@@ -31,52 +52,26 @@ export const useAuthStore = create<AuthState>()(
       isLoading: false,
       error: null,
 
-      loginAsGuest: async (name, locale = "en") => {
-        set({ isLoading: true, error: null });
-        try {
-          const { user, token } = await api.loginAsGuest(name, locale);
-          localStorage.setItem("bingo-token", token);
-          set({ user, token, isAuthenticated: true, isLoading: false });
-        } catch (err) {
-          const message =
-            err instanceof api.ApiError ? err.message : "Login failed";
-          set({ error: message, isLoading: false });
-          throw err;
-        }
-      },
+      loginAsGuest: (name, locale = "en") =>
+        performAuth(
+          set,
+          () => api.loginAsGuest(name, locale),
+          "Login failed",
+        ),
 
-      register: async (name, email, password, locale = "en") => {
-        set({ isLoading: true, error: null });
-        try {
-          const { user, token } = await api.register(
-            name,
-            email,
-            password,
-            locale,
-          );
-          localStorage.setItem("bingo-token", token);
-          set({ user, token, isAuthenticated: true, isLoading: false });
-        } catch (err) {
-          const message =
-            err instanceof api.ApiError ? err.message : "Registration failed";
-          set({ error: message, isLoading: false });
-          throw err;
-        }
-      },
+      register: (name, email, password, locale = "en") =>
+        performAuth(
+          set,
+          () => api.register(name, email, password, locale),
+          "Registration failed",
+        ),
 
-      login: async (email, password) => {
-        set({ isLoading: true, error: null });
-        try {
-          const { user, token } = await api.login(email, password);
-          localStorage.setItem("bingo-token", token);
-          set({ user, token, isAuthenticated: true, isLoading: false });
-        } catch (err) {
-          const message =
-            err instanceof api.ApiError ? err.message : "Login failed";
-          set({ error: message, isLoading: false });
-          throw err;
-        }
-      },
+      login: (email, password) =>
+        performAuth(
+          set,
+          () => api.login(email, password),
+          "Login failed",
+        ),
 
       logout: () => {
         localStorage.removeItem("bingo-token");

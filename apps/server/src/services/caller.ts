@@ -19,6 +19,64 @@ interface CallerInstance {
 
 const activeCallers = new Map<string, CallerInstance>();
 
+// --------------- Shared tick factory ---------------
+
+/**
+ * Create the tick function used by both startCalling and resumeCalling.
+ * Each tick pops the next number from the pool, broadcasts it, and handles
+ * pool exhaustion by finishing the game.
+ */
+function createTickFn(
+  roomCode: string,
+  variant: BingoVariant,
+  io: Server,
+  stopCalling: (code: string) => void,
+): () => Promise<void> {
+  return async () => {
+    try {
+      const number = await roomStore.popNextNumber(roomCode);
+
+      if (number === null) {
+        // Pool is exhausted - game over with no winner
+        stopCalling(roomCode);
+        await roomStore.updateRoom(roomCode, { state: 'finished' });
+        io.to(roomCode).emit('game:finished', {
+          reason: 'no_numbers_left',
+          winners: [],
+        });
+        const room = await roomStore.getRoom(roomCode);
+        const callerState = await roomStore.getCallerState(roomCode);
+        void persistGameResult(roomCode, variant, room?.hostId ?? '', [], callerState?.called ?? []);
+        return;
+      }
+
+      // Get the current caller state to get full called list
+      const callerState = await roomStore.getCallerState(roomCode);
+      const calledNumbers = callerState?.called ?? [number];
+
+      // Build event payload
+      const payload: Record<string, unknown> = {
+        number,
+        calledNumbers,
+        remaining: callerState?.pool.length ?? 0,
+      };
+
+      // Add letter info for 75-ball
+      if (variant === '75') {
+        payload.letter = getLetterForNumber(number);
+      }
+
+      io.to(roomCode).emit('game:number_called', payload);
+    } catch (err) {
+      console.error(
+        `[Caller] Error calling number for room ${roomCode}:`,
+        err,
+      );
+      stopCalling(roomCode);
+    }
+  };
+}
+
 // --------------- CallerManager ---------------
 
 export const CallerManager = {
@@ -41,49 +99,7 @@ export const CallerManager = {
       roomCode,
     };
 
-    const tick = async () => {
-      try {
-        const number = await roomStore.popNextNumber(roomCode);
-
-        if (number === null) {
-          // Pool is exhausted - game over with no winner
-          this.stopCalling(roomCode);
-          await roomStore.updateRoom(roomCode, { state: 'finished' });
-          io.to(roomCode).emit('game:finished', {
-            reason: 'no_numbers_left',
-            winners: [],
-          });
-          const room = await roomStore.getRoom(roomCode);
-          const callerState = await roomStore.getCallerState(roomCode);
-          void persistGameResult(roomCode, variant, room?.hostId ?? '', [], callerState?.called ?? []);
-          return;
-        }
-
-        // Get the current caller state to get full called list
-        const callerState = await roomStore.getCallerState(roomCode);
-        const calledNumbers = callerState?.called ?? [number];
-
-        // Build event payload
-        const payload: Record<string, unknown> = {
-          number,
-          calledNumbers,
-          remaining: callerState?.pool.length ?? 0,
-        };
-
-        // Add letter info for 75-ball
-        if (variant === '75') {
-          payload.letter = getLetterForNumber(number);
-        }
-
-        io.to(roomCode).emit('game:number_called', payload);
-      } catch (err) {
-        console.error(
-          `[Caller] Error calling number for room ${roomCode}:`,
-          err,
-        );
-        this.stopCalling(roomCode);
-      }
-    };
+    const tick = createTickFn(roomCode, variant, io, (code) => this.stopCalling(code));
 
     // Call first number immediately, then start interval
     void tick();
@@ -119,50 +135,12 @@ export const CallerManager = {
     const caller = activeCallers.get(roomCode);
     if (!caller) return;
 
-    // Restart the interval
+    // Clear existing interval if any
     if (caller.interval) {
       clearInterval(caller.interval);
     }
 
-    const tick = async () => {
-      try {
-        const number = await roomStore.popNextNumber(roomCode);
-
-        if (number === null) {
-          this.stopCalling(roomCode);
-          await roomStore.updateRoom(roomCode, { state: 'finished' });
-          io.to(roomCode).emit('game:finished', {
-            reason: 'no_numbers_left',
-            winners: [],
-          });
-          const room = await roomStore.getRoom(roomCode);
-          const callerState = await roomStore.getCallerState(roomCode);
-          void persistGameResult(roomCode, caller.variant, room?.hostId ?? '', [], callerState?.called ?? []);
-          return;
-        }
-
-        const callerState = await roomStore.getCallerState(roomCode);
-        const calledNumbers = callerState?.called ?? [number];
-
-        const payload: Record<string, unknown> = {
-          number,
-          calledNumbers,
-          remaining: callerState?.pool.length ?? 0,
-        };
-
-        if (caller.variant === '75') {
-          payload.letter = getLetterForNumber(number);
-        }
-
-        io.to(roomCode).emit('game:number_called', payload);
-      } catch (err) {
-        console.error(
-          `[Caller] Error calling number for room ${roomCode}:`,
-          err,
-        );
-        this.stopCalling(roomCode);
-      }
-    };
+    const tick = createTickFn(roomCode, caller.variant, io, (code) => this.stopCalling(code));
 
     // Update paused state
     void (async () => {

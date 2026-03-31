@@ -97,22 +97,6 @@ export interface GameState {
   winners: WinEvent[];
 }
 
-// --------------- Player card state ---------------
-
-/** Utility type: tracks a single card and its dabbed cells. Available for consumer use. */
-export interface PlayerCardState {
-  card: BingoCard;
-  dabbed: Set<number>; // set of cell indices that are dabbed
-}
-
-// --------------- Multi-card state ---------------
-
-/** Utility type: tracks multiple cards and their per-card dabs. Available for consumer use. */
-export interface MultiCardState {
-  cards: BingoCard[];
-  dabs: Set<number>[]; // one Set per card
-}
-
 // --------------- Chat ---------------
 
 export interface ChatMessage {

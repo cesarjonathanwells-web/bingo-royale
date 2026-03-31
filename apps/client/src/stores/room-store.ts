@@ -106,6 +106,45 @@ const initialState = {
 // Module-level variable for peek timeout (not reactive state)
 let _peekTimeoutId: ReturnType<typeof setTimeout> | null = null;
 
+/**
+ * Scans all cards for the called number and auto-dabs matching cells.
+ * Emits a dab event to the server for each match.
+ */
+function performAutoDaub(
+  calledNumber: number,
+  get: () => RoomState,
+  set: (partial: Partial<RoomState> | ((state: RoomState) => Partial<RoomState>)) => void,
+): void {
+  const { myCards, myDabs } = get();
+  if (myCards.length === 0) return;
+
+  const newDabs = [...myDabs];
+  let changed = false;
+
+  for (let ci = 0; ci < myCards.length; ci++) {
+    const card = myCards[ci];
+    if (!card) continue;
+
+    const cardDabs = newDabs[ci] ?? new Set<number>();
+    const cellIndex =
+      card.grid.length === 5
+        ? findCellIndex75(card as BingoCard75, calledNumber)
+        : findCellIndex90(card as BingoCard90, calledNumber);
+
+    if (cellIndex !== null && !cardDabs.has(cellIndex)) {
+      const updated = new Set(cardDabs);
+      updated.add(cellIndex);
+      newDabs[ci] = updated;
+      changed = true;
+
+      const socket = getSocket();
+      socket.emit("game:dab", { cellIndex, cardIndex: ci });
+    }
+  }
+
+  if (changed) set({ myDabs: newDabs });
+}
+
 export const useRoomStore = create<RoomState>()((set, get) => ({
   ...initialState,
 
@@ -224,6 +263,8 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
   setupListeners: () => {
     const socket = getSocket();
 
+    // ---- Room lifecycle listeners ----
+
     // Server emits room:state on create, join, settings update, and new round
     socket.on("room:state", (room: Room) => {
       set((state) => ({
@@ -317,6 +358,8 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       },
     );
 
+    // ---- Game lifecycle listeners ----
+
     // Server emits game:card_dealt to each player individually (multi-card)
     socket.on("game:card_dealt", (data: { cards: BingoCard[] }) => {
       const cards = data.cards;
@@ -371,34 +414,10 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
             : null,
         }));
 
-        // Auto-daub logic: scan all cards for the called number
-        const { autoDaub, myCards, myDabs } = get();
-        if (autoDaub && myCards.length > 0) {
-          const calledNumber = data.number;
-          const newDabs = [...myDabs];
-          let changed = false;
-          for (let ci = 0; ci < myCards.length; ci++) {
-            const card = myCards[ci];
-            if (!card) continue;
-            const cardDabs = newDabs[ci] ?? new Set<number>();
-            let cellIndex: number | null = null;
-            if (card.grid.length === 5) {
-              cellIndex = findCellIndex75(card as BingoCard75, calledNumber);
-            } else {
-              cellIndex = findCellIndex90(card as BingoCard90, calledNumber);
-            }
-            if (cellIndex !== null && !cardDabs.has(cellIndex)) {
-              const updated = new Set(cardDabs);
-              updated.add(cellIndex);
-              newDabs[ci] = updated;
-              changed = true;
-              const socket = getSocket();
-              socket.emit("game:dab", { cellIndex, cardIndex: ci });
-            }
-          }
-          if (changed) set({ myDabs: newDabs });
+        // Auto-daub: scan all cards for the called number
+        if (get().autoDaub) {
+          performAutoDaub(data.number, get, set);
         }
-
       },
     );
 
@@ -471,7 +490,8 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       },
     );
 
-    // Power-up listeners
+    // ---- Power-up listeners ----
+
     socket.on(
       "game:powerups_dealt",
       (data: { powerups: PlayerPowerUp[] }) => {
@@ -479,16 +499,8 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       },
     );
 
-    socket.on(
-      "game:powerup_used",
-      (_data: {
-        playerId: string;
-        playerName: string;
-        powerupId: string;
-      }) => {
-        // Handled by Room.tsx for toast display
-      },
-    );
+    // game:powerup_used is handled by Room.tsx for toast display (no store update needed)
+    socket.on("game:powerup_used", () => {});
 
     socket.on("game:number_peek", (data: { numbers: number[] }) => {
       // Clear any existing peek timeout before setting a new one
@@ -533,6 +545,8 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       },
     );
 
+    // ---- Chat and reaction listeners ----
+
     socket.on("chat:message", (message: ChatMessage) => {
       set((state) => {
         const msgs = [...state.chatMessages, message];
@@ -548,6 +562,8 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
         set((state) => ({ reactions: state.reactions.filter((r) => r.id !== id) }));
       }, 3000);
     });
+
+    // ---- Error listener ----
 
     socket.on("error", (data: { message: string }) => {
       set({ error: data.message, isConnecting: false });

@@ -3,6 +3,8 @@ import { useTranslation } from "react-i18next";
 import { fetchStats } from "@/lib/api";
 import type { StatsResponse } from "@/lib/api";
 import { useAuthStore } from "@/stores/auth-store";
+import { StatCards } from "@/components/stats/StatCards";
+import { RecentGamesList } from "@/components/stats/RecentGamesList";
 
 export function Stats() {
   const { t } = useTranslation("game");
@@ -65,109 +67,20 @@ export function Stats() {
 
   const { stats, recentGames } = data;
 
-  const statCards = [
-    {
-      label: t("stats.gamesPlayed"),
-      value: stats.gamesPlayed,
-      color: "var(--color-ball-b)",
-      icon: "#",
-    },
-    {
-      label: t("stats.gamesWon"),
-      value: stats.gamesWon,
-      color: "var(--color-ball-g)",
-      icon: "W",
-    },
-    {
-      label: t("stats.winRate"),
-      value: `${stats.winRate}%`,
-      color: "var(--color-ball-o)",
-      icon: "%",
-    },
-    {
-      label: t("stats.totalDabs"),
-      value: stats.totalDabs,
-      color: "var(--color-ball-i)",
-      icon: "D",
-    },
-  ];
-
   return (
     <div className="flex-1 px-4 py-8 max-w-lg mx-auto w-full animate-page-enter">
       <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-6 text-center">
         {t("stats.title")}
       </h2>
 
-      {/* Stat cards */}
-      <div className="grid grid-cols-2 gap-4 mb-8">
-        {statCards.map((card) => (
-          <div
-            key={card.label}
-            className="rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-4 text-center space-y-1 hover:shadow-lg transition-shadow duration-200"
-          >
-            <p
-              className="text-xs font-bold uppercase tracking-wider"
-              style={{ color: card.color, opacity: 0.7 }}
-            >
-              {card.icon}
-            </p>
-            <p
-              className="text-3xl font-extrabold"
-              style={{ color: card.color }}
-            >
-              {card.value}
-            </p>
-            <p className="text-xs text-[var(--color-text-secondary)] font-medium">
-              {card.label}
-            </p>
-          </div>
-        ))}
-      </div>
+      <StatCards
+        gamesPlayed={stats.gamesPlayed}
+        gamesWon={stats.gamesWon}
+        winRate={stats.winRate}
+        totalDabs={stats.totalDabs}
+      />
 
-      {/* Recent games */}
-      <h3 className="text-lg font-semibold text-[var(--color-text-primary)] mb-3">
-        {t("stats.recentGames")}
-      </h3>
-
-      {recentGames.length === 0 ? (
-        <p className="text-sm text-[var(--color-text-muted)] text-center py-4">
-          {t("stats.noGames")}
-        </p>
-      ) : (
-        <div className="space-y-2">
-          {recentGames.map((game) => (
-            <div
-              key={game.id}
-              className="flex items-center justify-between rounded-lg bg-[var(--color-bg-secondary)] border border-[var(--color-border)] px-4 py-3"
-            >
-              <div className="flex items-center gap-3">
-                <span className="text-xs font-bold px-2 py-0.5 rounded bg-[var(--color-border)] text-[var(--color-text-secondary)]">
-                  {game.variant === "75" ? t("stats.variant75") : t("stats.variant90")}
-                </span>
-                <span className="text-xs text-[var(--color-text-muted)]">
-                  {t("stats.players", { count: game.playerCount })}
-                </span>
-              </div>
-              <div className="flex items-center gap-3">
-                <span
-                  className={`text-xs font-bold px-2 py-0.5 rounded ${
-                    game.isWinner
-                      ? "bg-green-500/20 text-green-400"
-                      : "bg-red-500/20 text-red-400"
-                  }`}
-                >
-                  {game.isWinner ? t("stats.win") : t("stats.loss")}
-                </span>
-                {game.finishedAt && (
-                  <span className="text-xs text-[var(--color-text-muted)]">
-                    {new Date(game.finishedAt).toLocaleDateString()}
-                  </span>
-                )}
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
+      <RecentGamesList games={recentGames} />
     </div>
   );
 }

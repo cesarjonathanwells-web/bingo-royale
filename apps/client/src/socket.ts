@@ -36,15 +36,6 @@ export function connectSocket(token: string): void {
 }
 
 /**
- * Disconnect from the server.
- */
-export function disconnectSocket(): void {
-  if (socket?.connected) {
-    socket.disconnect();
-  }
-}
-
-/**
  * Destroy the socket instance entirely (used on logout).
  */
 export function destroySocket(): void {

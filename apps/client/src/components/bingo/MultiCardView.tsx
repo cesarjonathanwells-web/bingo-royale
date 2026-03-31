@@ -1,8 +1,7 @@
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import type { BingoCard75, BingoCard90 } from "@bingo/shared";
+import type { BingoCard, BingoCard75, BingoCard90 } from "@bingo/shared";
 import { LETTERS, BALL_COLORS, FREE_SPACE_INDEX } from "@bingo/shared";
-import type { BingoCard } from "@bingo/shared";
 import { cn } from "@/lib/utils";
 
 interface MultiCardViewProps {
@@ -30,7 +29,7 @@ export function MultiCardView({
     <div
       className={cn(
         "w-full mx-auto",
-        count === 2 ? "grid grid-cols-2 gap-1.5" : "grid grid-cols-2 gap-1.5",
+        "grid grid-cols-2 gap-1.5",
         count === 3 && "max-w-[calc(100%-0.5rem)]",
       )}
     >

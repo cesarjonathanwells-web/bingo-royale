@@ -388,23 +388,3 @@ export interface ServerToClientEvents {
   [S2C_ERROR]: (payload: ErrorPayload) => void;
 }
 
-// =====================================================================
-// Schema map (useful for server-side validation dispatch)
-// =====================================================================
-
-export const CLIENT_EVENT_SCHEMAS = {
-  [C2S_ROOM_CREATE]: RoomCreateSchema,
-  [C2S_ROOM_JOIN]: RoomJoinSchema,
-  [C2S_ROOM_LEAVE]: RoomLeaveSchema,
-  [C2S_ROOM_SET_CARD_COUNT]: RoomSetCardCountSchema,
-  [C2S_ROOM_UPDATE_SETTINGS]: RoomUpdateSettingsSchema,
-  [C2S_GAME_START]: GameStartSchema,
-  [C2S_GAME_DAB]: GameDabSchema,
-  [C2S_GAME_CLAIM_BINGO]: GameClaimBingoSchema,
-  [C2S_GAME_PAUSE]: GamePauseSchema,
-  [C2S_GAME_RESUME]: GameResumeSchema,
-  [C2S_GAME_NEW_ROUND]: GameNewRoundSchema,
-  [C2S_GAME_USE_POWERUP]: GameUsePowerupSchema,
-  [C2S_CHAT_MESSAGE]: ChatMessageSendSchema,
-  [C2S_CHAT_REACTION]: ChatReactionSendSchema,
-} as const;

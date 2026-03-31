@@ -52,7 +52,7 @@ export function BingoCard({
 
       {/* Column letters */}
       <div className="grid grid-cols-5 gap-1.5 px-2.5">
-        {LETTERS.map((letter, i) => (
+        {LETTERS.map((letter) => (
           <div
             key={letter}
             className="col-header flex items-center justify-center py-2 rounded-lg font-extrabold text-lg text-white"

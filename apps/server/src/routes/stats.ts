@@ -3,8 +3,8 @@
 // ============================================================
 
 import { Router } from 'express';
-import { eq, desc } from 'drizzle-orm';
-import { getDb, schema } from '../db/index.js';
+import { getDb } from '../db/index.js';
+import { fetchUserStats, fetchRecentGames } from '../services/stats-queries.js';
 
 const router = Router();
 
@@ -35,55 +35,12 @@ router.get('/:userId', async (req, res) => {
       return;
     }
 
-    // Fetch user stats
-    const rows = await db
-      .select()
-      .from(schema.userStats)
-      .where(eq(schema.userStats.userId, userId))
-      .limit(1);
-
-    const statsRow = rows[0];
-    const gamesPlayed = statsRow?.gamesPlayed ?? 0;
-    const gamesWon = statsRow?.gamesWon ?? 0;
-    const totalDabs = statsRow?.totalDabs ?? 0;
-    const winRate = gamesPlayed > 0 ? Math.round((gamesWon / gamesPlayed) * 100) : 0;
-
-    // Fetch recent games (last 20)
-    const recentGames = await db
-      .select({
-        id: schema.games.id,
-        roomCode: schema.games.roomCode,
-        variant: schema.games.variant,
-        playerCount: schema.games.playerCount,
-        isWinner: schema.gamePlayers.isWinner,
-        winPattern: schema.games.winPattern,
-        calledNumbers: schema.games.calledNumbers,
-        finishedAt: schema.games.finishedAt,
-      })
-      .from(schema.gamePlayers)
-      .innerJoin(schema.games, eq(schema.gamePlayers.gameId, schema.games.id))
-      .where(eq(schema.gamePlayers.userId, userId))
-      .orderBy(desc(schema.games.finishedAt))
-      .limit(20);
+    const stats = await fetchUserStats(db, userId);
+    const recentGames = await fetchRecentGames(db, userId);
 
     res.json({
-      stats: {
-        userId,
-        gamesPlayed,
-        gamesWon,
-        totalDabs,
-        winRate,
-      },
-      recentGames: recentGames.map((g) => ({
-        id: g.id,
-        roomCode: g.roomCode,
-        variant: g.variant,
-        playerCount: g.playerCount,
-        isWinner: g.isWinner,
-        winPattern: g.winPattern,
-        calledCount: Array.isArray(g.calledNumbers) ? g.calledNumbers.length : 0,
-        finishedAt: g.finishedAt,
-      })),
+      stats: { userId, ...stats },
+      recentGames,
     });
   } catch (err) {
     console.error('[Stats] Error fetching stats:', err);

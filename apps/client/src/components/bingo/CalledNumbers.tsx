@@ -1,7 +1,7 @@
 import { useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import type { GameState, BingoVariant } from "@bingo/shared";
-import { getLetterForNumber, BALL_COLORS, LETTERS } from "@bingo/shared";
+import { BALL_COLORS, LETTERS } from "@bingo/shared";
 import { NumberBall } from "./NumberBall";
 import { cn } from "@/lib/utils";
 
@@ -14,7 +14,6 @@ export function CalledNumbers({ gameState, variant }: CalledNumbersProps) {
   const { t } = useTranslation("game");
   const [showBoard, setShowBoard] = useState(false);
   const is75 = variant === "75";
-  const maxNumber = is75 ? 75 : 90;
 
   const calledSet = useMemo(
     () => new Set(gameState.calledNumbers),

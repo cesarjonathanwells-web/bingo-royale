@@ -1,4 +1,4 @@
-import type { User, UserStats } from "@bingo/shared";
+import type { User } from "@bingo/shared";
 
 const API_BASE = import.meta.env.MODE === "production" ? "" : "http://localhost:3000";
 
@@ -128,10 +128,6 @@ export interface ProfileResponse {
     winRate: number;
   };
   recentGames: RecentGame[];
-}
-
-export async function getStats(): Promise<UserStats> {
-  return fetchApi<UserStats>("/api/stats");
 }
 
 export async function fetchStats(userId: string): Promise<StatsResponse> {

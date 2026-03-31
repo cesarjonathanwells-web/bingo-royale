@@ -3,7 +3,7 @@
 // ============================================================
 
 import type { Server } from 'socket.io';
-import type { BingoVariant, WinStage90, PowerUpId, PlayerPowerUp } from '@bingo/shared';
+import type { Room, RoomState, WinStage90, PowerUpId, PlayerPowerUp } from '@bingo/shared';
 import { generateCallerPool75, generateCallerPool90, dealPowerUps, POWER_UP_MAP } from '@bingo/shared';
 import type { AuthenticatedSocket } from '../../services/auth.js';
 import * as roomStore from '../../redis/room-store.js';
@@ -11,6 +11,74 @@ import { CallerManager } from '../../services/caller.js';
 import { generateCardsForRoom } from '../../services/card-generator.js';
 import { validateBingo75, validateBingo90 } from '../../services/win-validator.js';
 import { persistGameResult } from '../../services/game-persistence.js';
+
+// --------------- Shared handler helpers ---------------
+
+/** Callback type used by socket event handlers. */
+type HandlerCallback = (result: Record<string, unknown>) => void;
+
+/** Send an error via callback (if present). Returns true so callers can `return fail(...)`. */
+function fail(callback: unknown, error: string): true {
+  if (typeof callback === 'function') {
+    (callback as HandlerCallback)({ success: false, error });
+  }
+  return true;
+}
+
+/** Send a success via callback (if present). */
+function succeed(callback: unknown, extra?: Record<string, unknown>): void {
+  if (typeof callback === 'function') {
+    (callback as HandlerCallback)({ success: true, ...extra });
+  }
+}
+
+/**
+ * Common guard: resolve room code from socket and fetch the room.
+ * Returns null (and sends error callback) if the room is missing or doesn't
+ * match the required state.
+ */
+async function requireRoom(
+  socket: AuthenticatedSocket,
+  callback: unknown,
+  requiredState?: RoomState,
+): Promise<{ code: string; room: Room } | null> {
+  const code = socket.data.roomCode;
+  if (!code) {
+    fail(callback, 'Not in a room');
+    return null;
+  }
+
+  const room = await roomStore.getRoom(code);
+  if (!room) {
+    fail(callback, 'Room not found');
+    return null;
+  }
+
+  if (requiredState && room.state !== requiredState) {
+    const messages: Record<RoomState, string> = {
+      lobby: 'Game already in progress',
+      in_progress: 'Game not in progress',
+      finished: 'Game must be finished to start new round',
+    };
+    fail(callback, messages[requiredState] ?? `Room must be in ${requiredState} state`);
+    return null;
+  }
+
+  return { code, room };
+}
+
+/** Wrap a handler body with standard error handling. */
+function handleError(
+  socket: AuthenticatedSocket,
+  label: string,
+  callback: unknown,
+  err: unknown,
+): void {
+  console.error(`[Game] Error ${label}:`, err);
+  const errorMsg = err instanceof Error ? err.message : `Failed to ${label}`;
+  fail(callback, errorMsg);
+  socket.emit('error', { message: errorMsg });
+}
 
 export function registerGameHandlers(
   socket: AuthenticatedSocket,
@@ -22,39 +90,16 @@ export function registerGameHandlers(
 
   socket.on('room:set_card_count', async (data, callback) => {
     try {
-      const code = socket.data.roomCode;
-      if (!code) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Not in a room' });
-        return;
-      }
-
-      const room = await roomStore.getRoom(code);
-      if (!room) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Room not found' });
-        return;
-      }
-
-      // Only allowed in lobby state
-      if (room.state !== 'lobby') {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Can only change card count in lobby' });
-        return;
-      }
+      const ctx = await requireRoom(socket, callback, 'lobby');
+      if (!ctx) return;
+      const { code } = ctx;
 
       const count = typeof data?.count === 'number' ? data.count : 1;
       await roomStore.setCardCount(code, user.id, count);
 
-      if (typeof callback === 'function') callback({ success: true });
+      succeed(callback);
     } catch (err) {
-      console.error('[Game] Error setting card count:', err);
-      const errorMsg =
-        err instanceof Error ? err.message : 'Failed to set card count';
-      if (typeof callback === 'function') {
-        callback({ success: false, error: errorMsg });
-      }
-      socket.emit('error', { message: errorMsg });
+      handleError(socket, 'setting card count', callback, err);
     }
   });
 
@@ -62,40 +107,19 @@ export function registerGameHandlers(
 
   socket.on('game:start', async (_, callback) => {
     try {
-      const code = socket.data.roomCode;
-      if (!code) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Not in a room' });
-        return;
-      }
-
-      const room = await roomStore.getRoom(code);
-      if (!room) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Room not found' });
-        return;
-      }
+      const ctx = await requireRoom(socket, callback, 'lobby');
+      if (!ctx) return;
+      const { code, room } = ctx;
 
       // Only host can start
       if (room.hostId !== user.id) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Only the host can start the game' });
-        return;
-      }
-
-      // Must be in lobby
-      if (room.state !== 'lobby') {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Game already in progress' });
-        return;
+        return void fail(callback, 'Only the host can start the game');
       }
 
       // Need at least 1 non-spectator player
       const activePlayers = room.players.filter((p) => !p.isSpectator);
       if (activePlayers.length < 1) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Need at least 1 player to start' });
-        return;
+        return void fail(callback, 'Need at least 1 player to start');
       }
 
       // Update room state
@@ -168,15 +192,9 @@ export function registerGameHandlers(
       // Extend room TTL
       await roomStore.extendTTL(code);
 
-      if (typeof callback === 'function') callback({ success: true });
+      succeed(callback);
     } catch (err) {
-      console.error('[Game] Error starting game:', err);
-      const errorMsg =
-        err instanceof Error ? err.message : 'Failed to start game';
-      if (typeof callback === 'function') {
-        callback({ success: false, error: errorMsg });
-      }
-      socket.emit('error', { message: errorMsg });
+      handleError(socket, 'starting game', callback, err);
     }
   });
 
@@ -222,28 +240,16 @@ export function registerGameHandlers(
 
   socket.on('game:claim_bingo', async (data, callback) => {
     try {
-      const code = socket.data.roomCode;
-      if (!code) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Not in a room' });
-        return;
-      }
-
-      const room = await roomStore.getRoom(code);
-      if (!room || room.state !== 'in_progress') {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Game not in progress' });
-        return;
-      }
+      const ctx = await requireRoom(socket, callback, 'in_progress');
+      if (!ctx) return;
+      const { code, room } = ctx;
 
       const stage: WinStage90 | undefined = data?.stage;
 
       // Get all cards and server-stored dabs for this player
       const cards = await roomStore.getCard(code, user.id);
       if (!cards || cards.length === 0) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'No cards found' });
-        return;
+        return void fail(callback, 'No cards found');
       }
 
       const allDabs = await roomStore.getDabs(code, user.id);
@@ -251,7 +257,6 @@ export function registerGameHandlers(
       // Try ALL cards with server-stored dabs (not client-sent dabs)
       // This prevents desync between client and server dab state
       let result: { valid: boolean; pattern?: string } = { valid: false };
-      let winningCardIndex = 0;
 
       for (let ci = 0; ci < cards.length; ci++) {
         const serverDabs = allDabs[ci] ?? [];
@@ -262,16 +267,13 @@ export function registerGameHandlers(
           cardResult = await validateBingo75(code, user.id, serverDabs, ci);
         } else {
           if (!stage) {
-            if (typeof callback === 'function')
-              callback({ success: false, error: 'Stage is required for 90-ball bingo' });
-            return;
+            return void fail(callback, 'Stage is required for 90-ball bingo');
           }
           cardResult = await validateBingo90(code, user.id, serverDabs, stage, ci);
         }
 
         if (cardResult.valid) {
           result = cardResult;
-          winningCardIndex = ci;
           break;
         }
       }
@@ -287,7 +289,6 @@ export function registerGameHandlers(
           } else if (stage) {
             result = await validateBingo90(code, user.id, rawMarkedCells, stage, cardIndex);
           }
-          winningCardIndex = cardIndex;
         }
       }
 
@@ -334,8 +335,7 @@ export function registerGameHandlers(
           callerState?.called ?? [],
         );
 
-        if (typeof callback === 'function')
-          callback({ success: true, valid: true, pattern: result.pattern });
+        succeed(callback, { valid: true, pattern: result.pattern });
       } else {
         // Invalid claim - only notify the claimer
         socket.emit('game:bingo_claimed', {
@@ -345,17 +345,10 @@ export function registerGameHandlers(
           message: 'Invalid bingo claim',
         });
 
-        if (typeof callback === 'function')
-          callback({ success: true, valid: false });
+        succeed(callback, { valid: false });
       }
     } catch (err) {
-      console.error('[Game] Error claiming bingo:', err);
-      const errorMsg =
-        err instanceof Error ? err.message : 'Failed to validate bingo claim';
-      if (typeof callback === 'function') {
-        callback({ success: false, error: errorMsg });
-      }
-      socket.emit('error', { message: errorMsg });
+      handleError(socket, 'claiming bingo', callback, err);
     }
   });
 
@@ -363,44 +356,20 @@ export function registerGameHandlers(
 
   socket.on('game:pause', async (_, callback) => {
     try {
-      const code = socket.data.roomCode;
-      if (!code) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Not in a room' });
-        return;
-      }
-
-      const room = await roomStore.getRoom(code);
-      if (!room) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Room not found' });
-        return;
-      }
+      const ctx = await requireRoom(socket, callback, 'in_progress');
+      if (!ctx) return;
+      const { code, room } = ctx;
 
       if (room.hostId !== user.id) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Only the host can pause the game' });
-        return;
-      }
-
-      if (room.state !== 'in_progress') {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Game not in progress' });
-        return;
+        return void fail(callback, 'Only the host can pause the game');
       }
 
       await CallerManager.pauseCalling(code);
       io.to(code).emit('game:paused', { pausedBy: user.name });
 
-      if (typeof callback === 'function') callback({ success: true });
+      succeed(callback);
     } catch (err) {
-      console.error('[Game] Error pausing game:', err);
-      const errorMsg =
-        err instanceof Error ? err.message : 'Failed to pause game';
-      if (typeof callback === 'function') {
-        callback({ success: false, error: errorMsg });
-      }
-      socket.emit('error', { message: errorMsg });
+      handleError(socket, 'pausing game', callback, err);
     }
   });
 
@@ -408,44 +377,20 @@ export function registerGameHandlers(
 
   socket.on('game:resume', async (_, callback) => {
     try {
-      const code = socket.data.roomCode;
-      if (!code) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Not in a room' });
-        return;
-      }
-
-      const room = await roomStore.getRoom(code);
-      if (!room) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Room not found' });
-        return;
-      }
+      const ctx = await requireRoom(socket, callback, 'in_progress');
+      if (!ctx) return;
+      const { code, room } = ctx;
 
       if (room.hostId !== user.id) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Only the host can resume the game' });
-        return;
-      }
-
-      if (room.state !== 'in_progress') {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Game not in progress' });
-        return;
+        return void fail(callback, 'Only the host can resume the game');
       }
 
       CallerManager.resumeCalling(code, io);
       io.to(code).emit('game:resumed', { resumedBy: user.name });
 
-      if (typeof callback === 'function') callback({ success: true });
+      succeed(callback);
     } catch (err) {
-      console.error('[Game] Error resuming game:', err);
-      const errorMsg =
-        err instanceof Error ? err.message : 'Failed to resume game';
-      if (typeof callback === 'function') {
-        callback({ success: false, error: errorMsg });
-      }
-      socket.emit('error', { message: errorMsg });
+      handleError(socket, 'resuming game', callback, err);
     }
   });
 
@@ -453,37 +398,23 @@ export function registerGameHandlers(
 
   socket.on('game:use_powerup', async (data, callback) => {
     try {
-      const code = socket.data.roomCode;
-      if (!code) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Not in a room' });
-        return;
-      }
-
-      const room = await roomStore.getRoom(code);
-      if (!room || room.state !== 'in_progress') {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Game not in progress' });
-        return;
-      }
+      const ctx = await requireRoom(socket, callback, 'in_progress');
+      if (!ctx) return;
+      const { code, room } = ctx;
 
       const powerupId = data?.powerupId as PowerUpId;
       const targetCellIndex = data?.targetCellIndex as number | undefined;
 
       // Validate powerupId is a non-empty string and a known power-up
       if (!powerupId || typeof powerupId !== 'string' || !POWER_UP_MAP[powerupId]) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Invalid power-up' });
-        return;
+        return void fail(callback, 'Invalid power-up');
       }
 
       // 1. Verify player has this power-up and hasn't used it
       const powerups = await roomStore.getPowerUps(code, user.id);
       const powerup = powerups.find((p) => p.id === powerupId && !p.used);
       if (!powerup) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Power-up not available' });
-        return;
+        return void fail(callback, 'Power-up not available');
       }
 
       // 2. Mark it as used in Redis
@@ -623,15 +554,9 @@ export function registerGameHandlers(
       });
 
       // 5. Callback with success
-      if (typeof callback === 'function') callback({ success: true });
+      succeed(callback);
     } catch (err) {
-      console.error('[Game] Error using power-up:', err);
-      const errorMsg =
-        err instanceof Error ? err.message : 'Failed to use power-up';
-      if (typeof callback === 'function') {
-        callback({ success: false, error: errorMsg });
-      }
-      socket.emit('error', { message: errorMsg });
+      handleError(socket, 'using power-up', callback, err);
     }
   });
 
@@ -639,30 +564,12 @@ export function registerGameHandlers(
 
   socket.on('game:new_round', async (_, callback) => {
     try {
-      const code = socket.data.roomCode;
-      if (!code) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Not in a room' });
-        return;
-      }
-
-      const room = await roomStore.getRoom(code);
-      if (!room) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Room not found' });
-        return;
-      }
+      const ctx = await requireRoom(socket, callback, 'finished');
+      if (!ctx) return;
+      const { code, room } = ctx;
 
       if (room.hostId !== user.id) {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Only the host can start a new round' });
-        return;
-      }
-
-      if (room.state !== 'finished') {
-        if (typeof callback === 'function')
-          callback({ success: false, error: 'Game must be finished to start new round' });
-        return;
+        return void fail(callback, 'Only the host can start a new round');
       }
 
       // Reset room state to lobby
@@ -677,15 +584,9 @@ export function registerGameHandlers(
       const updatedRoom = await roomStore.getRoom(code);
       io.to(code).emit('room:state', updatedRoom);
 
-      if (typeof callback === 'function') callback({ success: true });
+      succeed(callback);
     } catch (err) {
-      console.error('[Game] Error starting new round:', err);
-      const errorMsg =
-        err instanceof Error ? err.message : 'Failed to start new round';
-      if (typeof callback === 'function') {
-        callback({ success: false, error: errorMsg });
-      }
-      socket.emit('error', { message: errorMsg });
+      handleError(socket, 'starting new round', callback, err);
     }
   });
 }
