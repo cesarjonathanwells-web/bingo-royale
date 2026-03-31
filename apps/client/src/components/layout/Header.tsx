@@ -1,4 +1,6 @@
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRoomStore } from "@/stores/room-store";
 import { useTheme } from "@/hooks/useTheme";
@@ -15,19 +17,32 @@ export function Header() {
   const { theme, toggleTheme } = useTheme();
   const { muted, toggleMute } = useSoundStore();
 
+  const navigate = useNavigate();
+  const leaveRoom = useRoomStore((s) => s.leaveRoom);
+
   const toggleLanguage = () => {
     const next = i18n.language === "en" ? "es" : "en";
     i18n.changeLanguage(next);
   };
 
+  const goHome = useCallback(() => {
+    if (room) {
+      leaveRoom();
+    }
+    navigate({ to: "/" });
+  }, [room, leaveRoom, navigate]);
+
   return (
     <header className="sticky top-0 z-30 bg-[var(--color-bg-primary)]/85 backdrop-blur-xl border-b border-[var(--color-border)]/60">
       <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 max-w-5xl mx-auto">
-        {/* Logo */}
+        {/* Logo - clickable to go home */}
         <div className="flex items-center gap-3">
-          <h1 className="text-sm sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-[var(--color-ball-b)] via-[var(--color-ball-i)] to-[var(--color-ball-o)] bg-clip-text text-transparent">
+          <button
+            onClick={goHome}
+            className="text-sm sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-[var(--color-ball-b)] via-[var(--color-ball-i)] to-[var(--color-ball-o)] bg-clip-text text-transparent hover:opacity-80 transition-opacity cursor-pointer"
+          >
             {t("app.title")}
-          </h1>
+          </button>
           {room && (
             <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--color-bg-tertiary)] text-xs font-mono font-bold text-[var(--color-text-secondary)]">
               {generateRoomCode(room.code)}
