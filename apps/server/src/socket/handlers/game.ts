@@ -236,28 +236,62 @@ export function registerGameHandlers(
         return;
       }
 
-      const rawMarkedCells = Array.isArray(data?.markedCells) ? data.markedCells : [];
-      // Validate markedCells: must be an array of integers
-      if (!rawMarkedCells.every((v: unknown) => typeof v === 'number' && Number.isInteger(v) && v >= 0)) {
+      const stage: WinStage90 | undefined = data?.stage;
+
+      // Get all cards and server-stored dabs for this player
+      const cards = await roomStore.getCard(code, user.id);
+      if (!cards || cards.length === 0) {
         if (typeof callback === 'function')
-          callback({ success: false, error: 'Invalid markedCells: must be an array of non-negative integers' });
+          callback({ success: false, error: 'No cards found' });
         return;
       }
-      const markedCells: number[] = rawMarkedCells;
-      const stage: WinStage90 | undefined = data?.stage;
-      const cardIndex: number = typeof data?.cardIndex === 'number' ? data.cardIndex : 0;
 
-      let result;
-      if (room.variant === '75') {
-        result = await validateBingo75(code, user.id, markedCells, cardIndex);
-      } else {
-        if (!stage) {
-          if (typeof callback === 'function')
-            callback({ success: false, error: 'Stage is required for 90-ball bingo' });
-          return;
+      const allDabs = await roomStore.getDabs(code, user.id);
+
+      // Try ALL cards with server-stored dabs (not client-sent dabs)
+      // This prevents desync between client and server dab state
+      let result: { valid: boolean; pattern?: string } = { valid: false };
+      let winningCardIndex = 0;
+
+      for (let ci = 0; ci < cards.length; ci++) {
+        const serverDabs = allDabs[ci] ?? [];
+        if (serverDabs.length === 0) continue;
+
+        let cardResult;
+        if (room.variant === '75') {
+          cardResult = await validateBingo75(code, user.id, serverDabs, ci);
+        } else {
+          if (!stage) {
+            if (typeof callback === 'function')
+              callback({ success: false, error: 'Stage is required for 90-ball bingo' });
+            return;
+          }
+          cardResult = await validateBingo90(code, user.id, serverDabs, stage, ci);
         }
-        result = await validateBingo90(code, user.id, markedCells, stage, cardIndex);
+
+        if (cardResult.valid) {
+          result = cardResult;
+          winningCardIndex = ci;
+          break;
+        }
       }
+
+      // If server dabs didn't find a win, also try client-sent dabs as fallback
+      // (covers edge case where server dabs are slightly behind)
+      if (!result.valid) {
+        const rawMarkedCells = Array.isArray(data?.markedCells) ? data.markedCells : [];
+        if (rawMarkedCells.every((v: unknown) => typeof v === 'number' && Number.isInteger(v) && v >= 0)) {
+          const cardIndex: number = typeof data?.cardIndex === 'number' ? data.cardIndex : 0;
+          if (room.variant === '75') {
+            result = await validateBingo75(code, user.id, rawMarkedCells, cardIndex);
+          } else if (stage) {
+            result = await validateBingo90(code, user.id, rawMarkedCells, stage, cardIndex);
+          }
+          winningCardIndex = cardIndex;
+        }
+      }
+
+      console.log(`[Game] Bingo claim by ${user.name}: valid=${result.valid}, pattern=${result.pattern ?? 'none'}, cards=${cards.length}`);
 
       if (result.valid) {
         // Stop the caller

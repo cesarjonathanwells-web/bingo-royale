@@ -50,9 +50,11 @@ export function registerRoomHandlers(
         typeof data?.speed === 'number'
           ? data.speed
           : SPEED_PRESETS[1]!.ms; // Default to 'normal'
-      const patterns: string[] = Array.isArray(data?.patterns)
+      // Default patterns: rows + diagonals + blackout if none specified
+      const defaultPatterns = ['top_row', 'middle_row', 'bottom_row', 'diagonal_down', 'diagonal_up', 'four_corners', 'blackout'];
+      const patterns: string[] = Array.isArray(data?.patterns) && data.patterns.length > 0
         ? data.patterns
-        : [];
+        : defaultPatterns;
       const playerLimit =
         typeof data?.playerLimit === 'number'
           ? Math.min(Math.max(data.playerLimit, 2), MAX_PLAYERS)

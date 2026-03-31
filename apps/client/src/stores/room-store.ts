@@ -171,6 +171,7 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     const { myDabs, activeCardIndex } = get();
     const currentDabs = myDabs[activeCardIndex];
     const socket = getSocket();
+    // Send current card's dabs as hint, but server checks ALL cards
     socket.emit("game:claim_bingo", {
       markedCells: Array.from(currentDabs ?? []),
       cardIndex: activeCardIndex,
