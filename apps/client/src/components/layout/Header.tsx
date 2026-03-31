@@ -27,12 +27,12 @@ export function Header() {
   }, [room]);
 
   return (
-    <header className="sticky top-0 z-30 bg-[var(--color-bg-primary)]/85 backdrop-blur-xl border-b border-[var(--color-border)]/60">
+    <header className="sticky top-0 z-30 bg-[var(--color-bg-primary)]/70 backdrop-blur-xl border-b border-[var(--color-border)]">
       <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 max-w-5xl mx-auto">
         {/* Logo - clickable to go home */}
         <button
           onClick={goHome}
-          className="text-sm sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-[var(--color-ball-b)] via-[var(--color-ball-i)] to-[var(--color-ball-o)] bg-clip-text text-transparent hover:opacity-80 transition-opacity cursor-pointer"
+          className="text-sm sm:text-lg font-extrabold tracking-tight text-gold hover:opacity-80 transition-opacity cursor-pointer"
         >
           {t("app.title")}
         </button>

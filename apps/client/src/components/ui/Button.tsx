@@ -12,7 +12,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-gradient-to-b from-[var(--color-accent-hover)] to-[var(--color-accent)] hover:from-[var(--color-accent)] hover:to-[var(--color-accent-hover)] text-white shadow-lg shadow-indigo-500/25 active:scale-[0.97] border-t border-white/10",
+    "bg-gradient-to-b from-amber-400 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-white shadow-lg shadow-amber-500/25 active:scale-[0.97] border-t border-yellow-300/20",
   secondary:
     "bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-border-light)] text-[var(--color-text-primary)] border border-[var(--color-border)] active:scale-[0.97] shadow-sm",
   danger:
@@ -47,7 +47,7 @@ export const Button = forwardRef<HTMLButtonElement, ButtonProps>(
         className={cn(
           "inline-flex items-center justify-center gap-2 font-semibold transition-all duration-200 cursor-pointer select-none touch-target",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",
-          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--color-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-primary)]",
+          "focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-amber-400 focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--color-bg-primary)]",
           variantClasses[variant],
           sizeClasses[size],
           className,

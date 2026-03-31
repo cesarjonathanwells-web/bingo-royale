@@ -87,7 +87,7 @@ function MiniCard75({ card, dabs, cardIndex, onDab, disabled, label }: MiniCard7
           <div
             key={letter}
             className="flex-1 text-center text-[8px] sm:text-[10px] font-black text-white rounded py-0.5 col-header"
-            style={{ backgroundColor: BALL_COLORS[letter] ?? "#6366f1" }}
+            style={{ backgroundColor: BALL_COLORS[letter] ?? "#f59e0b" }}
           >
             {letter}
           </div>

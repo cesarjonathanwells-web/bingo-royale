@@ -1,5 +1,4 @@
 import { useCallback } from "react";
-import { useTranslation } from "react-i18next";
 import type { BingoCard75 } from "@bingo/shared";
 import { LETTERS, BALL_COLORS, FREE_SPACE_INDEX } from "@bingo/shared";
 import { BingoCell } from "./BingoCell";
@@ -20,7 +19,6 @@ export function BingoCard({
   disabled = false,
   className,
 }: BingoCardProps) {
-  const { t } = useTranslation("game");
 
   const getCellValue = useCallback(
     (row: number, col: number): number | null => {
@@ -39,24 +37,17 @@ export function BingoCard({
         "w-full max-w-[calc(100%-0.5rem)] sm:max-w-[400px] mx-auto",
         "rounded-2xl overflow-hidden",
         "bg-gradient-card border border-[var(--color-border)]",
-        "shadow-xl shadow-black/25",
+        "shadow-xl shadow-black/30",
         className,
       )}
     >
-      {/* Header */}
-      <div className="text-center py-2.5 px-1 bg-gradient-to-b from-[var(--color-bg-tertiary)]/60 to-transparent">
-        <h3 className="text-[10px] font-bold text-[var(--color-text-secondary)] uppercase tracking-[0.2em]">
-          {t("game.yourCard")}
-        </h3>
-      </div>
-
-      {/* Column letters */}
-      <div className="grid grid-cols-5 gap-1.5 px-2.5">
+      {/* Column letters - directly at top, no header text */}
+      <div className="grid grid-cols-5 gap-1.5 px-2.5 pt-2.5">
         {LETTERS.map((letter) => (
           <div
             key={letter}
-            className="col-header flex items-center justify-center py-2 rounded-lg font-extrabold text-lg text-white"
-            style={{ backgroundColor: BALL_COLORS[letter] ?? "#6366f1" }}
+            className="col-header flex items-center justify-center py-2.5 rounded-lg font-black text-xl text-white"
+            style={{ backgroundColor: BALL_COLORS[letter] ?? "#f59e0b" }}
           >
             {letter}
           </div>

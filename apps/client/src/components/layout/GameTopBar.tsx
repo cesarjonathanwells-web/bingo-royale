@@ -32,11 +32,11 @@ export function GameTopBar({
   // Determine ball color
   const ballColor =
     is75 && currentNumber && currentNumber <= 75
-      ? BALL_COLORS[getLetterForNumber(currentNumber)] ?? "#6366f1"
-      : "#6366f1";
+      ? BALL_COLORS[getLetterForNumber(currentNumber)] ?? "#f59e0b"
+      : "#f59e0b";
 
   return (
-    <div className="sticky top-0 z-30 bg-[var(--color-bg-primary)]/85 backdrop-blur-xl border-b border-[var(--color-border)]/60">
+    <div className="sticky top-0 z-30 bg-[var(--color-bg-primary)]/70 backdrop-blur-xl border-b border-[var(--color-border)]">
       <div className="flex items-center justify-between px-2 py-1.5 h-12">
         {/* Left: Current ball + letter-number */}
         <button

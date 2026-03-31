@@ -70,13 +70,13 @@ export function Home() {
         <div className="text-center space-y-3">
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight">
             <span
-              className="bg-gradient-to-r from-[var(--color-ball-b)] via-[var(--color-ball-i)] via-[var(--color-ball-g)] to-[var(--color-ball-o)] bg-clip-text text-transparent drop-shadow-lg"
-              style={{ textShadow: '0 4px 24px rgba(99, 102, 241, 0.3)' }}
+              className="text-gold drop-shadow-lg"
+              style={{ filter: 'drop-shadow(0 4px 24px rgba(255, 215, 0, 0.3))' }}
             >
               BINGO
             </span>
             <br />
-            <span className="text-[var(--color-text-primary)] tracking-widest text-3xl sm:text-4xl lg:text-5xl">ROYALE</span>
+            <span className="text-white tracking-widest text-3xl sm:text-4xl lg:text-5xl" style={{ textShadow: '0 2px 12px rgba(0,0,0,0.3)' }}>ROYALE</span>
           </h1>
           <p className="text-sm text-[var(--color-text-secondary)] font-medium tracking-wide">
             {t("app.tagline")}
@@ -170,7 +170,7 @@ export function Home() {
                   }}
                 >
                   <span style={{ color: c, fontSize: '6px', fontWeight: 700, lineHeight: 1 }}>{l}</span>
-                  <span style={{ color: '#1e293b', fontSize: '11px', fontWeight: 800, lineHeight: 1 }}>{n}</span>
+                  <span style={{ color: '#0f1330', fontSize: '11px', fontWeight: 800, lineHeight: 1 }}>{n}</span>
                 </div>
               </div>
             </div>

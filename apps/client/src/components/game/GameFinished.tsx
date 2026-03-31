@@ -12,13 +12,15 @@ interface GameFinishedProps {
 }
 
 const CONFETTI_COLORS = [
+  "#ffd700",
+  "#f59e0b",
+  "#fbbf24",
+  "#22c55e",
   "#3b82f6",
   "#ef4444",
-  "#22c55e",
-  "#f59e0b",
   "#a78bfa",
   "#ec4899",
-  "#06b6d4",
+  "#fcd34d",
 ];
 
 const CONFETTI_SHAPES = ["rounded-full", "rounded-sm", "rounded-none"];
@@ -35,7 +37,7 @@ export function GameFinished({
   // Stable confetti pieces (avoid re-randomizing on every render)
   const confettiPieces = useMemo(
     () =>
-      Array.from({ length: 40 }, (_, i) => ({
+      Array.from({ length: 60 }, (_, i) => ({
         left: `${Math.random() * 100}%`,
         width: `${6 + Math.random() * 10}px`,
         height: `${6 + Math.random() * 10}px`,
@@ -49,6 +51,9 @@ export function GameFinished({
 
   return (
     <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 gap-6 relative">
+      {/* Dark backdrop with blur */}
+      <div className="absolute inset-0 bg-black/60 backdrop-blur-sm" />
+
       {/* Confetti decoration */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         {confettiPieces.map((piece, i) => (
@@ -61,20 +66,29 @@ export function GameFinished({
               height: piece.height,
               backgroundColor: piece.color,
               animation: `confetti-fall ${piece.duration} linear ${piece.delay} infinite`,
-              opacity: 0.8,
+              opacity: 0.85,
             }}
           />
         ))}
       </div>
 
-      <div className="relative z-10 text-center space-y-5 animate-page-enter">
-        <h2 className="text-5xl sm:text-6xl font-black text-[var(--color-ball-o)] animate-winner-glow">
-          {t("game.gameOver")}
+      <div className="relative z-10 text-center space-y-5">
+        <h2
+          className="text-5xl sm:text-7xl font-black text-gold animate-win-entrance"
+          style={{
+            textShadow: '0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.3)',
+            filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
+          }}
+        >
+          {latestWinner ? "BINGO!" : t("game.gameOver")}
         </h2>
 
         {latestWinner ? (
-          <div className="space-y-3">
-            <p className="text-2xl sm:text-3xl font-extrabold text-[var(--color-text-primary)]">
+          <div className="space-y-3 animate-page-enter">
+            <p className="text-3xl sm:text-4xl font-black text-white" style={{ textShadow: '0 2px 8px rgba(0,0,0,0.5)' }}>
+              {latestWinner.playerName}
+            </p>
+            <p className="text-lg sm:text-xl font-semibold text-[var(--color-text-secondary)]">
               {t("game.winnerAnnouncement", {
                 name: latestWinner.playerName,
                 pattern: latestWinner.pattern,
@@ -82,7 +96,7 @@ export function GameFinished({
             </p>
           </div>
         ) : (
-          <p className="text-lg text-[var(--color-text-secondary)]">
+          <p className="text-lg text-[var(--color-text-secondary)] animate-page-enter">
             {t("game.noWinner")}
           </p>
         )}
@@ -95,7 +109,12 @@ export function GameFinished({
 
         <div className="flex flex-col gap-3 pt-6">
           {isHost && (
-            <Button size="lg" onClick={onNewRound} className="text-lg">
+            <Button
+              size="lg"
+              onClick={onNewRound}
+              className="text-lg !bg-gradient-to-r !from-amber-400 !via-yellow-500 !to-amber-600 !text-white !shadow-lg !border-t !border-yellow-300/30 glow-gold"
+              style={{ textShadow: '0 1px 3px rgba(0,0,0,0.3)' }}
+            >
               {t("game.playAgain")}
             </Button>
           )}

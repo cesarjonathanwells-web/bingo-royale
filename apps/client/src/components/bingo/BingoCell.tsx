@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { BALL_COLORS, LETTERS, FREE_SPACE_INDEX } from "@bingo/shared";
+import { LETTERS, FREE_SPACE_INDEX } from "@bingo/shared";
 import { cn } from "@/lib/utils";
 
 interface BingoCellProps {
@@ -23,7 +23,6 @@ export function BingoCell({
   const { t } = useTranslation("game");
   const isFree = index === FREE_SPACE_INDEX;
   const letter = LETTERS[column];
-  const color = letter ? BALL_COLORS[letter] : undefined;
 
   const handleClick = useCallback(() => {
     if (disabled || isFree) return;
@@ -39,13 +38,13 @@ export function BingoCell({
         "relative flex items-center justify-center touch-target",
         "aspect-square w-full rounded-lg font-bold text-base sm:text-lg",
         "transition-all duration-150 select-none",
-        "border border-[var(--color-border)]/40",
         "cell-depth",
         isFree
-          ? "bg-[var(--color-accent)]/15 text-[var(--color-accent)] cursor-default border-[var(--color-accent)]/30"
-          : "bg-[var(--color-cell-bg)] text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border)]/60 active:scale-90 cursor-pointer",
+          ? "border border-[var(--color-gold)]/30 cursor-default"
+          : "cell-glass border border-[var(--color-border)] text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] active:scale-[0.92] cursor-pointer",
         disabled && !isFree && "opacity-60 cursor-not-allowed",
       )}
+      style={isFree ? { background: 'linear-gradient(135deg, rgba(255,215,0,0.15), rgba(245,158,11,0.1))', boxShadow: '0 0 12px rgba(255,215,0,0.15)' } : undefined}
       aria-label={
         isFree
           ? t("game.free")
@@ -56,26 +55,29 @@ export function BingoCell({
       <span
         className={cn(
           "z-10 relative font-extrabold",
-          dabbed && !isFree && "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]",
-          isFree && "text-xs sm:text-sm font-black tracking-wide",
+          dabbed && !isFree && "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]",
+          isFree && "text-xs sm:text-sm font-black tracking-wide text-gold",
         )}
       >
         {isFree ? t("game.free") : (value ?? "")}
       </span>
 
-      {/* Dab overlay */}
-      {(dabbed || isFree) && (
+      {/* Dab overlay - GREEN for marked cells */}
+      {(dabbed || isFree) && !isFree && (
         <div
-          className={cn(
-            "absolute inset-[3px] rounded-full",
-            !isFree && "animate-dab dab-stamp",
-            isFree && "border border-[var(--color-accent)]/20",
-          )}
+          className="absolute inset-[3px] rounded-full animate-dab dab-mark"
           style={{
-            backgroundColor: isFree
-              ? "var(--color-accent)"
-              : color ?? "var(--color-dab)",
-            opacity: isFree ? 0.25 : 0.75,
+            opacity: 0.80,
+          }}
+        />
+      )}
+      {/* FREE space gold overlay */}
+      {isFree && (
+        <div
+          className="absolute inset-[3px] rounded-full border border-[var(--color-gold)]/20"
+          style={{
+            background: 'radial-gradient(circle, rgba(255,215,0,0.2) 0%, rgba(245,158,11,0.1) 100%)',
+            opacity: 0.5,
           }}
         />
       )}

@@ -34,10 +34,10 @@ export function NumberBall({
 }: NumberBallProps) {
   const { letter, color } = useMemo(() => {
     if (!is75 || number > 75) {
-      return { letter: "", color: "#6366f1" };
+      return { letter: "", color: "#f59e0b" };
     }
     const l = getLetterForNumber(number);
-    return { letter: l, color: BALL_COLORS[l] ?? "#6366f1" };
+    return { letter: l, color: BALL_COLORS[l] ?? "#f59e0b" };
   }, [number, is75]);
 
   return (
@@ -48,19 +48,19 @@ export function NumberBall({
           sizeClasses[size],
         )}
         style={{
-          background: `radial-gradient(circle at 30% 25%, ${lighten(color, 50)}, ${lighten(color, 20)} 30%, ${color} 60%, ${darken(color, 35)} 100%)`,
-          boxShadow: `0 4px 12px ${color}66, 0 2px 4px rgba(0,0,0,0.3), inset 0 -2px 4px ${darken(color, 20)}80, inset 0 2px 4px ${lighten(color, 30)}60`,
+          background: `radial-gradient(circle at 28% 22%, ${lighten(color, 60)}, ${lighten(color, 25)} 25%, ${color} 55%, ${darken(color, 30)} 80%, ${darken(color, 45)} 100%)`,
+          boxShadow: `0 6px 16px ${color}55, 0 2px 6px rgba(0,0,0,0.4), 0 12px 24px rgba(0,0,0,0.15), inset 0 -3px 6px ${darken(color, 25)}80, inset 0 2px 6px ${lighten(color, 35)}50`,
         }}
       >
-        {/* Specular highlight */}
+        {/* Specular highlight - brighter white spot */}
         <div
           className="absolute rounded-full"
           style={{
-            width: size === "lg" ? "24px" : size === "md" ? "16px" : "10px",
-            height: size === "lg" ? "12px" : size === "md" ? "8px" : "5px",
-            top: size === "lg" ? "8px" : size === "md" ? "5px" : "3px",
-            left: size === "lg" ? "14px" : size === "md" ? "10px" : "7px",
-            background: "radial-gradient(ellipse, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0) 70%)",
+            width: size === "lg" ? "28px" : size === "md" ? "18px" : "12px",
+            height: size === "lg" ? "14px" : size === "md" ? "9px" : "6px",
+            top: size === "lg" ? "7px" : size === "md" ? "4px" : "2px",
+            left: size === "lg" ? "12px" : size === "md" ? "9px" : "6px",
+            background: "radial-gradient(ellipse, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 80%)",
           }}
         />
 
@@ -71,8 +71,8 @@ export function NumberBall({
             innerSizeClasses[size],
           )}
           style={{
-            background: "radial-gradient(circle at 50% 40%, #ffffff, #f0f0f0 70%, #e0e0e0 100%)",
-            boxShadow: "inset 0 1px 2px rgba(0,0,0,0.1), 0 1px 0 rgba(255,255,255,0.3)",
+            background: "radial-gradient(circle at 48% 38%, #ffffff, #f4f4f4 60%, #e8e8e8 85%, #ddd 100%)",
+            boxShadow: "inset 0 1px 3px rgba(0,0,0,0.12), 0 1px 0 rgba(255,255,255,0.4)",
           }}
         >
           {is75 && number <= 75 && (
@@ -89,7 +89,7 @@ export function NumberBall({
           <span
             className="font-extrabold leading-none"
             style={{
-              color: "#1e293b",
+              color: "#0f1330",
               fontSize:
                 size === "lg"
                   ? "18px"
@@ -102,14 +102,14 @@ export function NumberBall({
           </span>
         </div>
       </div>
-      {/* Drop shadow below ball */}
+      {/* Drop shadow ellipse below ball */}
       <div
         className="mx-auto rounded-full"
         style={{
-          width: size === "lg" ? "60%" : "55%",
-          height: size === "lg" ? "6px" : size === "md" ? "4px" : "3px",
-          marginTop: size === "lg" ? "4px" : "2px",
-          background: "radial-gradient(ellipse, rgba(0,0,0,0.2) 0%, transparent 70%)",
+          width: size === "lg" ? "65%" : "58%",
+          height: size === "lg" ? "8px" : size === "md" ? "5px" : "3px",
+          marginTop: size === "lg" ? "3px" : "2px",
+          background: "radial-gradient(ellipse, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.08) 50%, transparent 75%)",
         }}
       />
     </div>

@@ -42,14 +42,14 @@ export function PowerUpBar({ powerups, onUse }: PowerUpBarProps) {
                 pu.used
                   ? "opacity-40 border-[var(--color-border)] bg-[var(--color-bg-tertiary)] cursor-not-allowed grayscale"
                   : [
-                      "border-[var(--color-accent)]/50 bg-gradient-to-b from-[var(--color-bg-secondary)] to-[var(--color-bg-tertiary)]/50",
-                      "hover:bg-[var(--color-accent)]/20 hover:border-[var(--color-accent)]",
+                      "border-[var(--color-gold)]/30 bg-gradient-to-b from-[var(--color-bg-secondary)] to-[var(--color-bg-tertiary)]/50",
+                      "hover:bg-[var(--color-gold)]/10 hover:border-[var(--color-gold)]/60",
                       "active:scale-95",
-                      "shadow-[0_0_12px_var(--color-accent)/30]",
+                      "shadow-[0_0_12px_rgba(255,215,0,0.15)]",
                     ],
               )}
             >
-              <span className={cn("text-xl leading-none", !pu.used && "drop-shadow-[0_0_6px_var(--color-accent)]")}>{def.icon}</span>
+              <span className={cn("text-xl leading-none", !pu.used && "drop-shadow-[0_0_6px_rgba(255,215,0,0.5)]")}>{def.icon}</span>
               <span
                 className={cn(
                   "text-[10px] font-semibold leading-tight whitespace-nowrap",

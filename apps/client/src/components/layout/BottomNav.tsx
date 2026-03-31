@@ -78,8 +78,8 @@ export function BottomNav() {
 
   return (
     <nav
-      className="fixed bottom-0 left-0 right-0 z-30 border-t border-[var(--color-border)]/60 bg-[var(--color-bg-primary)]/85 backdrop-blur-xl"
-      style={{ height: "56px", paddingBottom: "env(safe-area-inset-bottom)" }}
+      className="fixed bottom-0 left-0 right-0 z-30 bg-[var(--color-bg-primary)]/70 backdrop-blur-xl"
+      style={{ height: "56px", paddingBottom: "env(safe-area-inset-bottom)", borderTop: '1px solid rgba(255, 215, 0, 0.12)' }}
     >
       <div className="flex items-center justify-around h-full max-w-5xl mx-auto">
         {tabs.map((tab) => {
@@ -91,7 +91,7 @@ export function BottomNav() {
               className={cn(
                 "flex flex-col items-center justify-center gap-0.5 flex-1 h-full transition-colors cursor-pointer",
                 isActive
-                  ? "text-[var(--color-accent)]"
+                  ? "text-[var(--color-gold)]"
                   : "text-[var(--color-text-muted)] hover:text-[var(--color-text-secondary)]",
               )}
               aria-label={t(`nav.${tab.key}`)}

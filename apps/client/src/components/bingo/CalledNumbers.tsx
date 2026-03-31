@@ -102,7 +102,7 @@ function Board75({ calledSet }: { calledSet: Set<number> }) {
           <div
             key={letter}
             className="text-center py-1 rounded font-bold text-sm text-white col-header"
-            style={{ backgroundColor: BALL_COLORS[letter] ?? "#6366f1" }}
+            style={{ backgroundColor: BALL_COLORS[letter] ?? "#f59e0b" }}
           >
             {letter}
           </div>
@@ -113,7 +113,7 @@ function Board75({ calledSet }: { calledSet: Set<number> }) {
             const n = col * 15 + row + 1;
             const called = calledSet.has(n);
             const letter = LETTERS[col];
-            const color = letter ? BALL_COLORS[letter] : "#6366f1";
+            const color = letter ? BALL_COLORS[letter] : "#f59e0b";
             return (
               <div
                 key={n}

@@ -70,10 +70,10 @@ export function BingoCard90({
                   "relative flex items-center justify-center touch-target",
                   "aspect-square w-full rounded-md font-bold text-[10px] sm:text-sm",
                   "transition-all duration-150 select-none",
-                  "border border-[var(--color-border)]/40 cell-depth",
+                  "cell-depth",
                   isBlank
                     ? "bg-[var(--color-bg-primary)]/30 cursor-default border-transparent"
-                    : "bg-[var(--color-cell-bg)] text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] active:scale-90 cursor-pointer",
+                    : "cell-glass border border-[var(--color-border)] text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] active:scale-[0.92] cursor-pointer",
                   disabled && !isBlank && "opacity-60 cursor-not-allowed",
                 )}
                 aria-label={isBlank ? "blank" : `${value} ${isDabbed ? "dabbed" : ""}`}
