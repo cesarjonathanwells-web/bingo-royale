@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "@tanstack/react-router";
 import { fetchProfile } from "@/lib/api";
 import type { ProfileResponse } from "@/lib/api";
 import { StatCards } from "@/components/stats/StatCards";
@@ -11,6 +12,7 @@ interface ProfileProps {
 
 export function Profile({ userId }: ProfileProps) {
   const { t } = useTranslation("game");
+  const navigate = useNavigate();
   const [data, setData] = useState<ProfileResponse | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(false);
@@ -64,7 +66,28 @@ export function Profile({ userId }: ProfileProps) {
   const { user, stats, recentGames } = data;
 
   return (
-    <div className="flex-1 px-4 py-8 max-w-lg mx-auto w-full animate-page-enter">
+    <div className="flex-1 px-4 py-8 pb-20 max-w-lg mx-auto w-full animate-page-enter">
+      {/* Back button */}
+      <button
+        onClick={() => navigate({ to: "/" })}
+        className="mb-4 inline-flex items-center gap-1 text-sm text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] transition-colors cursor-pointer"
+      >
+        <svg
+          xmlns="http://www.w3.org/2000/svg"
+          width="16"
+          height="16"
+          viewBox="0 0 24 24"
+          fill="none"
+          stroke="currentColor"
+          strokeWidth="2"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        >
+          <polyline points="15 18 9 12 15 6" />
+        </svg>
+        {t("actions.back", { ns: "common", defaultValue: "Back" })}
+      </button>
+
       {/* Profile header */}
       <div className="flex flex-col items-center mb-8">
         <div

@@ -28,13 +28,19 @@
   },
   "settings": {
     "title": "Settings",
+    "player": "Player",
     "language": "Language",
     "theme": "Theme",
     "dark": "Dark",
     "light": "Light",
     "sound": "Sound",
     "soundOn": "On",
-    "soundOff": "Off"
+    "soundOff": "Off",
+    "autoDaub": "Auto-Daub",
+    "autoDaubDesc": "Automatically mark called numbers on your cards",
+    "about": "About",
+    "version": "Version 1.0",
+    "logout": "Logout"
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",

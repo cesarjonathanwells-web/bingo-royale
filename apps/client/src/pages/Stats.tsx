@@ -68,7 +68,7 @@ export function Stats() {
   const { stats, recentGames } = data;
 
   return (
-    <div className="flex-1 px-4 py-8 max-w-lg mx-auto w-full animate-page-enter">
+    <div className="flex-1 px-4 py-8 pb-20 max-w-lg mx-auto w-full animate-page-enter">
       <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-6 text-center">
         {t("stats.title")}
       </h2>

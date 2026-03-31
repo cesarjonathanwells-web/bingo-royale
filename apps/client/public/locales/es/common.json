@@ -6,7 +6,7 @@
   "nav": {
     "home": "Inicio",
     "stats": "Estadísticas",
-    "settings": "Configuración"
+    "settings": "Ajustes"
   },
   "auth": {
     "guestName": "Tu nombre",
@@ -27,14 +27,20 @@
     "dontHaveAccount": "¿No tienes cuenta?"
   },
   "settings": {
-    "title": "Configuración",
+    "title": "Ajustes",
+    "player": "Jugador",
     "language": "Idioma",
     "theme": "Tema",
     "dark": "Oscuro",
     "light": "Claro",
     "sound": "Sonido",
     "soundOn": "Activado",
-    "soundOff": "Desactivado"
+    "soundOff": "Desactivado",
+    "autoDaub": "Auto-Marcar",
+    "autoDaubDesc": "Marca automáticamente los números cantados en tus cartones",
+    "about": "Acerca de",
+    "version": "Versión 1.0",
+    "logout": "Cerrar sesión"
   },
   "errors": {
     "generic": "Algo salió mal. Inténtalo de nuevo.",

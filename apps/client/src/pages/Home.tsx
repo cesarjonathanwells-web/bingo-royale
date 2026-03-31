@@ -56,7 +56,7 @@ export function Home() {
   }, [joinRoom, roomCode, t, toast]);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 bg-gradient-game relative">
+    <div className="flex-1 flex flex-col items-center justify-center px-4 py-8 pb-20 bg-gradient-game relative">
       {/* Decorative background orbs */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-20 -left-20 w-80 h-80 rounded-full bg-[var(--color-ball-b)]/8 blur-3xl animate-pulse" style={{ animationDuration: '6s' }} />

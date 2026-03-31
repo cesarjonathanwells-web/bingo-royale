@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   Room,
@@ -10,18 +10,21 @@ import type {
   PowerUpId,
   ChatMessage,
 } from "@bingo/shared";
+import { GAME_EMOJIS } from "@bingo/shared";
 import { BingoCard } from "@/components/bingo/BingoCard";
 import { BingoCard90 } from "@/components/bingo/BingoCard90";
 import { CardTabs } from "@/components/bingo/CardTabs";
-import { CalledNumbers } from "@/components/bingo/CalledNumbers";
 import { PatternDisplay } from "@/components/bingo/PatternDisplay";
-import { PowerUpBar } from "@/components/bingo/PowerUpBar";
 import { MultiCardView } from "@/components/bingo/MultiCardView";
-import { PlayerList } from "@/components/room/PlayerList";
-import { RoomChat } from "@/components/room/RoomChat";
-import { EmojiBar } from "@/components/room/EmojiBar";
+import { CardCarousel } from "@/components/bingo/CardCarousel";
 import { EmojiToast } from "@/components/room/EmojiToast";
 import { Button } from "@/components/ui/Button";
+import { GameTopBar } from "@/components/layout/GameTopBar";
+import { ActionBar } from "@/components/layout/ActionBar";
+import { GameBottomBar } from "@/components/layout/GameBottomBar";
+import { ChatDrawer } from "@/components/layout/ChatDrawer";
+import { PlayerDrawer } from "@/components/layout/PlayerDrawer";
+import { CalledNumbersDropdown } from "@/components/layout/CalledNumbersDropdown";
 import { cn } from "@/lib/utils";
 
 interface EmojiReaction {
@@ -74,7 +77,28 @@ export function GameView({
   onSendReaction,
 }: GameViewProps) {
   const { t } = useTranslation("game");
+  const [chatOpen, setChatOpen] = useState(false);
+  const [playersOpen, setPlayersOpen] = useState(false);
+  const [numbersOpen, setNumbersOpen] = useState(false);
+  const [emojiOpen, setEmojiOpen] = useState(false);
   const [viewAll, setViewAll] = useState(myCards.length > 1);
+  const [unreadChat, setUnreadChat] = useState(0);
+  const prevChatLength = useRef(chatMessages.length);
+
+  // Track unread chat messages
+  useEffect(() => {
+    if (chatMessages.length > prevChatLength.current && !chatOpen) {
+      setUnreadChat((u) => u + (chatMessages.length - prevChatLength.current));
+    }
+    prevChatLength.current = chatMessages.length;
+  }, [chatMessages.length, chatOpen]);
+
+  // Clear unread when chat opens
+  useEffect(() => {
+    if (chatOpen) {
+      setUnreadChat(0);
+    }
+  }, [chatOpen]);
 
   const myCard =
     myCards.length > 0 ? (myCards[activeCardIndex] ?? myCards[0] ?? null) : null;
@@ -90,26 +114,57 @@ export function GameView({
     [onUsePowerUp],
   );
 
+  const handleEmojiSend = useCallback(
+    (emoji: string) => {
+      onSendReaction(emoji);
+      setEmojiOpen(false);
+    },
+    [onSendReaction],
+  );
+
   return (
-    <div className="flex-1 flex flex-col lg:flex-row gap-2 sm:gap-3 px-1 sm:px-3 py-2 sm:py-3 max-w-6xl mx-auto w-full animate-page-enter">
-      {/* Left: Called Numbers + Card */}
-      <div className="flex-1 flex flex-col gap-3 min-w-0">
-        {/* Paused banner */}
+    <div className="fixed inset-0 flex flex-col bg-[var(--color-bg-primary)]">
+      {/* Top bar with current ball + room code */}
+      <GameTopBar
+        gameState={gameState}
+        variant={room.variant}
+        roomCode={room.code}
+        onBallPress={() => setNumbersOpen(!numbersOpen)}
+        onMenuPress={() => setPlayersOpen(true)}
+      />
+
+      {/* Called numbers dropdown */}
+      <CalledNumbersDropdown
+        open={numbersOpen}
+        onClose={() => setNumbersOpen(false)}
+        gameState={gameState}
+        variant={room.variant}
+      />
+
+      {/* Card area - fills remaining space */}
+      <div className="flex-1 flex flex-col items-center justify-center overflow-hidden px-2 py-1 relative">
+        {/* Paused overlay */}
         {gameState.paused && (
-          <div className="px-4 py-2 rounded-xl bg-amber-500/20 border border-amber-500/30 text-center">
-            <span className="text-sm font-semibold text-amber-400">
-              {t("game.paused")}
-            </span>
+          <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--color-bg-primary)]/80 backdrop-blur-sm">
+            <div className="px-6 py-4 rounded-2xl bg-amber-500/20 border border-amber-500/30 text-center">
+              <span className="text-lg font-semibold text-amber-400">
+                {t("game.paused")}
+              </span>
+              {isHost && (
+                <div className="mt-3">
+                  <Button variant="secondary" size="sm" onClick={onResumeGame}>
+                    {t("game.resume")}
+                  </Button>
+                </div>
+              )}
+            </div>
           </div>
         )}
 
-        {/* Called Numbers */}
-        <CalledNumbers gameState={gameState} variant={room.variant} />
-
         {/* Active Pattern */}
         {room.variant === "75" && room.patterns.length > 0 && (
-          <div className="flex items-center justify-center gap-2">
-            <span className="text-xs text-[var(--color-text-muted)]">
+          <div className="flex items-center justify-center gap-2 py-0.5 shrink-0">
+            <span className="text-[10px] text-[var(--color-text-muted)]">
               {t("game.activePattern")}:
             </span>
             <PatternDisplay patternIds={room.patterns} compact />
@@ -118,11 +173,11 @@ export function GameView({
 
         {/* View toggle for multi-card */}
         {myCards.length > 1 && (
-          <div className="flex items-center justify-center gap-2">
+          <div className="flex items-center justify-center gap-2 py-0.5 shrink-0">
             <button
               onClick={() => setViewAll(false)}
               className={cn(
-                "px-3 py-1 rounded-lg text-xs font-semibold transition-colors",
+                "px-3 py-0.5 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer",
                 !viewAll
                   ? "bg-[var(--color-accent)] text-white"
                   : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
@@ -133,7 +188,7 @@ export function GameView({
             <button
               onClick={() => setViewAll(true)}
               className={cn(
-                "px-3 py-1 rounded-lg text-xs font-semibold transition-colors",
+                "px-3 py-0.5 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer",
                 viewAll
                   ? "bg-[var(--color-accent)] text-white"
                   : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
@@ -144,53 +199,53 @@ export function GameView({
           </div>
         )}
 
-        {/* Multi-card grid view */}
-        {viewAll && myCards.length > 1 ? (
-          <MultiCardView
-            cards={myCards}
-            dabs={myDabs}
-            variant={room.variant}
-            onDab={onDabMulti}
-          />
-        ) : (
-          <>
-            {/* Single card view with tabs */}
-            {myCards.length > 1 && (
-              <CardTabs
-                count={myCards.length}
-                activeIndex={activeCardIndex}
-                onSelect={onSetActiveCard}
+        {/* Card display */}
+        <div className="flex-1 flex items-center justify-center w-full min-h-0">
+          {viewAll && myCards.length > 1 ? (
+            <div className="w-full overflow-y-auto max-h-full px-1">
+              <MultiCardView
+                cards={myCards}
                 dabs={myDabs}
+                variant={room.variant}
+                onDab={onDabMulti}
               />
-            )}
-            {myCard && (
-              <>
-                {room.variant === "75" ? (
-                  <BingoCard
-                    card={myCard as BingoCard75}
-                    dabs={activeDabs}
-                    onDab={onDab}
-                  />
-                ) : (
-                  <BingoCard90
-                    card={myCard as BingoCard90Type}
-                    dabs={activeDabs}
-                    onDab={onDab}
-                  />
-                )}
-              </>
-            )}
-          </>
-        )}
-
-        {/* Power-Ups Bar */}
-        {myPowerUps.length > 0 && (
-          <PowerUpBar powerups={myPowerUps} onUse={handleUsePowerUp} />
-        )}
+            </div>
+          ) : myCards.length > 1 ? (
+            /* Swipeable carousel for multi-card single view */
+            <CardCarousel
+              cards={myCards}
+              dabs={myDabs}
+              variant={room.variant}
+              onDab={onDabMulti}
+              activeIndex={activeCardIndex}
+              onIndexChange={onSetActiveCard}
+            />
+          ) : (
+            <div className="w-full max-w-[400px]">
+              {myCard && (
+                <>
+                  {room.variant === "75" ? (
+                    <BingoCard
+                      card={myCard as BingoCard75}
+                      dabs={activeDabs}
+                      onDab={onDab}
+                    />
+                  ) : (
+                    <BingoCard90
+                      card={myCard as BingoCard90Type}
+                      dabs={activeDabs}
+                      onDab={onDab}
+                    />
+                  )}
+                </>
+              )}
+            </div>
+          )}
+        </div>
 
         {/* Number Peek Overlay */}
         {peekedNumbers.length > 0 && (
-          <div className="w-full max-w-[calc(100%-0.5rem)] sm:max-w-[400px] mx-auto px-3 py-2 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-accent)]/40">
+          <div className="absolute top-2 left-2 right-2 z-10 px-3 py-2 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-accent)]/40 shadow-lg">
             <p className="text-xs font-semibold text-[var(--color-accent)] text-center mb-1">
               {t("powerups.number_peek")}
             </p>
@@ -207,52 +262,85 @@ export function GameView({
           </div>
         )}
 
-        {/* BINGO Button */}
-        <button
-          onClick={onClaimBingo}
-          className={cn(
-            "w-full max-w-[calc(100%-0.5rem)] sm:max-w-[400px] mx-auto py-4 sm:py-5 rounded-2xl",
-            "text-2xl sm:text-3xl font-black tracking-wider text-white uppercase",
-            "bg-gradient-to-r from-amber-500 via-orange-500 to-red-500",
-            "hover:from-amber-400 hover:via-orange-400 hover:to-red-400",
-            "active:scale-[0.97] transition-all duration-150",
-            "animate-bingo-glow",
-            "select-none cursor-pointer",
-            "border-t border-amber-300/30",
-          )}
-          style={{
-            textShadow: "0 2px 4px rgba(0,0,0,0.3)",
-          }}
-        >
-          {t("game.bingo")}
-        </button>
-
-        {/* Host controls */}
-        {isHost && (
-          <div className="flex justify-center gap-3">
-            {gameState.paused ? (
-              <Button variant="secondary" size="sm" onClick={onResumeGame}>
-                {t("game.resume")}
-              </Button>
-            ) : (
-              <Button variant="secondary" size="sm" onClick={onPauseGame}>
-                {t("game.pause")}
-              </Button>
-            )}
+        {/* Host pause control (floating, subtle) */}
+        {isHost && !gameState.paused && (
+          <div className="absolute top-1 right-2 z-10">
+            <Button variant="ghost" size="sm" onClick={onPauseGame} className="text-[10px] px-2 py-0.5 opacity-60 hover:opacity-100">
+              {t("game.pause")}
+            </Button>
           </div>
         )}
       </div>
 
-      {/* Right sidebar (desktop) */}
-      <div className="w-full lg:w-72 shrink-0 flex flex-col gap-3">
-        <PlayerList players={room.players} className="hidden lg:block" />
-        <div className="flex items-center gap-2">
-          <div className="flex-1">
-            <RoomChat messages={chatMessages} onSend={onSendChat} />
+      {/* Action bar */}
+      <ActionBar
+        powerups={myPowerUps}
+        onUsePowerUp={handleUsePowerUp}
+        onToggleChat={() => setChatOpen(!chatOpen)}
+        onToggleEmoji={() => setEmojiOpen(!emojiOpen)}
+        onTogglePlayers={() => setPlayersOpen(true)}
+        unreadChat={unreadChat}
+        chatOpen={chatOpen}
+      />
+
+      {/* Spacer for fixed BINGO button */}
+      <div className="shrink-0" style={{ height: "52px" }} />
+
+      {/* Fixed BINGO button */}
+      <GameBottomBar onClaim={onClaimBingo} />
+
+      {/* Emoji picker overlay */}
+      {emojiOpen && (
+        <>
+          <div
+            className="fixed inset-0 z-30"
+            onClick={() => setEmojiOpen(false)}
+            aria-hidden="true"
+          />
+          <div
+            className={cn(
+              "fixed bottom-[100px] left-1/2 -translate-x-1/2",
+              "flex flex-wrap justify-center gap-1 p-2",
+              "bg-[var(--color-bg-secondary)] border border-[var(--color-border)]",
+              "rounded-xl shadow-xl",
+              "max-w-[calc(100vw-2rem)] w-max",
+              "animate-slide-in-up",
+            )}
+            style={{ zIndex: 35 }}
+          >
+            {GAME_EMOJIS.map((emoji) => (
+              <button
+                key={emoji}
+                onClick={() => handleEmojiSend(emoji)}
+                className={cn(
+                  "w-10 h-10 flex items-center justify-center",
+                  "rounded-lg hover:bg-[var(--color-bg-tertiary)]",
+                  "transition-colors text-xl select-none cursor-pointer",
+                  "active:scale-90",
+                )}
+              >
+                {emoji}
+              </button>
+            ))}
           </div>
-          <EmojiBar onSend={onSendReaction} />
-        </div>
-      </div>
+        </>
+      )}
+
+      {/* Chat drawer */}
+      <ChatDrawer
+        open={chatOpen}
+        onClose={() => setChatOpen(false)}
+        messages={chatMessages}
+        onSend={onSendChat}
+      />
+
+      {/* Player drawer */}
+      <PlayerDrawer
+        open={playersOpen}
+        onClose={() => setPlayersOpen(false)}
+        players={room.players}
+        roomCode={room.code}
+      />
 
       {/* Floating emoji reactions */}
       <EmojiToast reactions={reactions} />

@@ -56,7 +56,15 @@
     "noWinner": "Sin ganador esta ronda",
     "pattern": "Patrón",
     "activePattern": "Patrón activo",
-    "noNumberYet": "Esperando el primer número..."
+    "noNumberYet": "Esperando el primer número...",
+    "share": "Compartir",
+    "players": "Jugadores",
+    "chat": "Chat",
+    "calledOf": "{{called}}/{{total}}",
+    "tapHistory": "Toca para ver historial",
+    "showAll": "Ver todos los números",
+    "copyCode": "¡Código copiado!",
+    "menu": "Menú"
   },
   "patterns": {
     "top_row": "Fila superior",

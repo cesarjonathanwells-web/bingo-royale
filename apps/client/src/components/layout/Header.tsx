@@ -1,28 +1,15 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
-import { useAuthStore } from "@/stores/auth-store";
 import { useRoomStore } from "@/stores/room-store";
-import { useTheme } from "@/hooks/useTheme";
-import { useSoundStore } from "@/hooks/useSound";
 import { generateRoomCode, cn } from "@/lib/utils";
 
 export function Header() {
-  const { t, i18n } = useTranslation(["common", "game"]);
-  const user = useAuthStore((s) => s.user);
+  const { t } = useTranslation(["common", "game"]);
   const room = useRoomStore((s) => s.room);
-  const autoDaub = useRoomStore((s) => s.autoDaub);
-  const toggleAutoDaub = useRoomStore((s) => s.toggleAutoDaub);
-  const { theme, toggleTheme } = useTheme();
-  const { muted, toggleMute } = useSoundStore();
-
   const navigate = useNavigate();
   const leaveRoom = useRoomStore((s) => s.leaveRoom);
-
-  const toggleLanguage = () => {
-    const next = i18n.language === "en" ? "es" : "en";
-    i18n.changeLanguage(next);
-  };
+  const [copied, setCopied] = useState(false);
 
   const goHome = useCallback(() => {
     if (room) {
@@ -31,160 +18,80 @@ export function Header() {
     navigate({ to: "/" });
   }, [room, leaveRoom, navigate]);
 
+  const copyRoomCode = useCallback(() => {
+    if (!room) return;
+    navigator.clipboard.writeText(room.code.toUpperCase()).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 1500);
+    });
+  }, [room]);
+
   return (
     <header className="sticky top-0 z-30 bg-[var(--color-bg-primary)]/85 backdrop-blur-xl border-b border-[var(--color-border)]/60">
       <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 max-w-5xl mx-auto">
         {/* Logo - clickable to go home */}
-        <div className="flex items-center gap-3">
-          <button
-            onClick={goHome}
-            className="text-sm sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-[var(--color-ball-b)] via-[var(--color-ball-i)] to-[var(--color-ball-o)] bg-clip-text text-transparent hover:opacity-80 transition-opacity cursor-pointer"
-          >
-            {t("app.title")}
-          </button>
-          {room && (
-            <span className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[var(--color-bg-tertiary)] text-xs font-mono font-bold text-[var(--color-text-secondary)]">
-              {generateRoomCode(room.code)}
-            </span>
-          )}
-        </div>
+        <button
+          onClick={goHome}
+          className="text-sm sm:text-lg font-extrabold tracking-tight bg-gradient-to-r from-[var(--color-ball-b)] via-[var(--color-ball-i)] to-[var(--color-ball-o)] bg-clip-text text-transparent hover:opacity-80 transition-opacity cursor-pointer"
+        >
+          {t("app.title")}
+        </button>
 
-        {/* Controls */}
-        <div className="flex items-center gap-1">
-          {/* Language Toggle */}
-          <button
-            onClick={toggleLanguage}
-            className={cn(
-              "p-2 rounded-lg text-xs font-bold transition-colors",
-              "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]",
-            )}
-            title={t("settings.language")}
-            aria-label={t("settings.language")}
-          >
-            {i18n.language === "en" ? "EN" : "ES"}
-          </button>
-
-          {/* Theme Toggle */}
-          <button
-            onClick={toggleTheme}
-            className={cn(
-              "p-2 rounded-lg transition-colors",
-              "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]",
-            )}
-            title={t("settings.theme")}
-            aria-label={t("settings.theme")}
-          >
-            {theme === "dark" ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <circle cx="12" cy="12" r="5" />
-                <line x1="12" y1="1" x2="12" y2="3" />
-                <line x1="12" y1="21" x2="12" y2="23" />
-                <line x1="4.22" y1="4.22" x2="5.64" y2="5.64" />
-                <line x1="18.36" y1="18.36" x2="19.78" y2="19.78" />
-                <line x1="1" y1="12" x2="3" y2="12" />
-                <line x1="21" y1="12" x2="23" y2="12" />
-                <line x1="4.22" y1="19.78" x2="5.64" y2="18.36" />
-                <line x1="18.36" y1="5.64" x2="19.78" y2="4.22" />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z" />
-              </svg>
-            )}
-          </button>
-
-          {/* Sound Toggle */}
-          <button
-            onClick={toggleMute}
-            className={cn(
-              "p-2 rounded-lg transition-colors",
-              "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]",
-            )}
-            title={t("settings.sound")}
-            aria-label={t("settings.sound")}
-          >
-            {muted ? (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                <line x1="23" y1="9" x2="17" y2="15" />
-                <line x1="17" y1="9" x2="23" y2="15" />
-              </svg>
-            ) : (
-              <svg
-                xmlns="http://www.w3.org/2000/svg"
-                width="18"
-                height="18"
-                viewBox="0 0 24 24"
-                fill="none"
-                stroke="currentColor"
-                strokeWidth="2"
-                strokeLinecap="round"
-                strokeLinejoin="round"
-              >
-                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5" />
-                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07" />
-              </svg>
-            )}
-          </button>
-
-          {/* Auto-Daub Toggle - only visible during a game */}
-          {room?.state === "in_progress" && (
+        {/* Room controls - visible when in a room */}
+        {room && (
+          <div className="flex items-center gap-2">
+            {/* Room code with copy */}
             <button
-              onClick={toggleAutoDaub}
+              onClick={copyRoomCode}
               className={cn(
-                "p-2 rounded-lg text-xs font-bold transition-colors",
-                autoDaub
-                  ? "text-[var(--color-accent)] bg-[var(--color-accent)]/10"
-                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)]",
+                "inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-[var(--color-bg-tertiary)] text-xs font-mono font-bold transition-colors cursor-pointer",
+                copied
+                  ? "text-[var(--color-accent)]"
+                  : "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
               )}
-              title={t("autoDaub.toggle", { ns: "game" })}
+              title={copied ? t("actions.copied") : t("actions.copy")}
             >
-              AD
+              {generateRoomCode(room.code)}
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="14"
+                height="14"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
             </button>
-          )}
 
-          {/* Player Name with avatar */}
-          {user && (
-            <div className="ml-2 flex items-center gap-1.5 px-2 py-1 rounded-lg bg-[var(--color-bg-tertiary)]/80 border border-[var(--color-border)]/40">
-              <div className="w-5 h-5 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-[10px] font-bold text-white shrink-0">
-                {user.name.charAt(0).toUpperCase()}
-              </div>
-              <span className="text-xs font-medium text-[var(--color-text-secondary)] max-w-[80px] truncate">
-                {user.name}
-              </span>
-            </div>
-          )}
-        </div>
+            {/* Leave room button */}
+            <button
+              onClick={goHome}
+              className="p-1.5 rounded-lg text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)] hover:bg-[var(--color-bg-tertiary)] transition-colors cursor-pointer"
+              title={t("actions.close")}
+              aria-label={t("actions.close")}
+            >
+              <svg
+                xmlns="http://www.w3.org/2000/svg"
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <line x1="18" y1="6" x2="6" y2="18" />
+                <line x1="6" y1="6" x2="18" y2="18" />
+              </svg>
+            </button>
+          </div>
+        )}
       </div>
     </header>
   );

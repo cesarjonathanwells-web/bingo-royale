@@ -56,7 +56,15 @@
     "noWinner": "No winner this round",
     "pattern": "Pattern",
     "activePattern": "Active Pattern",
-    "noNumberYet": "Waiting for first number..."
+    "noNumberYet": "Waiting for first number...",
+    "share": "Share",
+    "players": "Players",
+    "chat": "Chat",
+    "calledOf": "{{called}}/{{total}}",
+    "tapHistory": "Tap for history",
+    "showAll": "Show all numbers",
+    "copyCode": "Code copied!",
+    "menu": "Menu"
   },
   "patterns": {
     "top_row": "Top Row",
