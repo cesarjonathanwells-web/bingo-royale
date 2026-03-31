@@ -1,4 +1,4 @@
-import { useCallback, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
 import type { Room } from "@bingo/shared";
@@ -67,19 +67,39 @@ export function RoomLobby({ room }: RoomLobbyProps) {
     [updateSettings],
   );
 
+  // Track patterns locally to avoid race conditions on fast clicks
+  const [localPatterns, setLocalPatterns] = useState<Set<string>>(
+    () => new Set(room.patterns),
+  );
+
+  // Sync local patterns when server state arrives (if different)
+  useEffect(() => {
+    const serverSet = new Set(room.patterns);
+    setLocalPatterns((prev) => {
+      // Only update if server has different patterns (avoids overwriting optimistic state)
+      if (prev.size !== serverSet.size || ![...prev].every((p) => serverSet.has(p))) {
+        return serverSet;
+      }
+      return prev;
+    });
+  }, [room.patterns]);
+
   const togglePattern = useCallback(
     (patternId: string) => {
-      const current = new Set(room.patterns);
-      if (current.has(patternId)) {
-        current.delete(patternId);
-      } else {
-        current.add(patternId);
-      }
-      if (current.size > 0) {
-        updateSettings({ patterns: Array.from(current) });
-      }
+      setLocalPatterns((prev) => {
+        const next = new Set(prev);
+        if (next.has(patternId)) {
+          next.delete(patternId);
+        } else {
+          next.add(patternId);
+        }
+        if (next.size > 0) {
+          updateSettings({ patterns: Array.from(next) });
+        }
+        return next.size > 0 ? next : prev; // Don't allow empty
+      });
     },
-    [room.patterns, updateSettings],
+    [updateSettings],
   );
 
   const currentSpeed = SPEED_PRESETS.find((p) => p.ms === room.speed);
@@ -194,7 +214,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
                 {showPatterns && (
                   <div className="mt-3 flex flex-wrap gap-2 animate-slide-down">
                     {WIN_PATTERNS.map((p) => {
-                      const active = room.patterns.includes(p.id);
+                      const active = localPatterns.has(p.id);
                       return (
                         <button
                           key={p.id}
@@ -213,9 +233,9 @@ export function RoomLobby({ room }: RoomLobbyProps) {
                   </div>
                 )}
 
-                {room.patterns.length > 0 && !showPatterns && (
+                {localPatterns.size > 0 && !showPatterns && (
                   <div className="mt-2">
-                    <PatternDisplay patternIds={room.patterns} compact />
+                    <PatternDisplay patternIds={Array.from(localPatterns)} compact />
                   </div>
                 )}
               </div>
@@ -239,8 +259,8 @@ export function RoomLobby({ room }: RoomLobbyProps) {
               </div>
             </div>
 
-            {room.variant === "75" && room.patterns.length > 0 && (
-              <PatternDisplay patternIds={room.patterns} />
+            {room.variant === "75" && localPatterns.size > 0 && (
+              <PatternDisplay patternIds={Array.from(localPatterns)} />
             )}
           </div>
         )}
