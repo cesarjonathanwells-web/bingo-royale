@@ -26,9 +26,15 @@ export function PowerUpBar({ powerups, onUse }: PowerUpBarProps) {
           return (
             <button
               key={pu.id}
+              type="button"
               disabled={pu.used}
-              onClick={() => onUse(pu.id)}
+              onClick={(e) => {
+                e.preventDefault();
+                e.stopPropagation();
+                if (!pu.used) onUse(pu.id);
+              }}
               title={def.description}
+              style={{ touchAction: 'manipulation' }}
               className={cn(
                 "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl",
                 "min-w-[60px] sm:min-w-[72px] min-h-[48px] transition-all duration-200",
@@ -38,8 +44,8 @@ export function PowerUpBar({ powerups, onUse }: PowerUpBarProps) {
                   : [
                       "border-[var(--color-accent)]/50 bg-gradient-to-b from-[var(--color-bg-secondary)] to-[var(--color-bg-tertiary)]/50",
                       "hover:bg-[var(--color-accent)]/20 hover:border-[var(--color-accent)]",
-                      "hover:scale-105 active:scale-95",
-                      "animate-pulse-subtle",
+                      "active:scale-95",
+                      "shadow-[0_0_12px_var(--color-accent)/30]",
                     ],
               )}
             >
