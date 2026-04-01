@@ -28,8 +28,8 @@ export function CardTabs({ count, activeIndex, onSelect, dabs }: CardTabsProps) 
               "flex-1 py-2 px-1 sm:px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150",
               "border select-none cursor-pointer",
               isActive
-                ? "bg-gradient-to-b from-[var(--color-accent-hover)] to-[var(--color-accent)] text-white border-[var(--color-accent)] shadow-md shadow-[var(--color-accent)]/30"
-                : "bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:bg-[var(--color-bg-tertiary)] hover:border-[var(--color-border-light)]",
+                ? "bg-gradient-to-b from-[var(--color-accent-hover)] to-[var(--color-accent)] text-white border-[var(--color-accent)] shadow-md shadow-[var(--color-accent)]/30 active:scale-95"
+                : "bg-[var(--color-bg-secondary)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:bg-[var(--color-bg-tertiary)] hover:border-[var(--color-border-light)] active:scale-95",
             )}
             aria-label={t("cards.card", { n: i + 1 })}
             aria-current={isActive ? "true" : undefined}

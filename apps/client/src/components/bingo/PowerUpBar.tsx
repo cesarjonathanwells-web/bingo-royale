@@ -47,6 +47,7 @@ export function PowerUpBar({ powerups, onUse }: PowerUpBarProps) {
                       "hover:bg-[var(--color-gold)]/10 hover:border-[var(--color-gold)]/60",
                       "active:scale-95",
                       "shadow-[0_0_12px_rgba(255,215,0,0.15)]",
+                      "focus-visible:ring-2 focus-visible:ring-[var(--color-gold)]/40 focus-visible:outline-none",
                     ],
               )}
             >

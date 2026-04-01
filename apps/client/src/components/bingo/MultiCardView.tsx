@@ -29,7 +29,7 @@ export function MultiCardView({
     <div
       className={cn(
         "w-full mx-auto",
-        "grid grid-cols-2 gap-1.5",
+        "grid grid-cols-1 sm:grid-cols-2 gap-1.5",
         count === 3 && "max-w-[calc(100%-0.5rem)]",
       )}
     >

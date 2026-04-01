@@ -91,7 +91,7 @@ export function Profile({ userId }: ProfileProps) {
       {/* Profile header */}
       <div className="flex flex-col items-center mb-8">
         <div
-          className="w-18 h-18 rounded-full bg-gradient-to-br from-[var(--color-accent-hover)] to-[var(--color-accent)] flex items-center justify-center text-3xl font-bold text-white mb-3 shadow-lg shadow-[var(--color-accent)]/30"
+          className="rounded-full bg-gradient-to-br from-[var(--color-accent-hover)] to-[var(--color-accent)] flex items-center justify-center text-3xl font-bold text-white mb-3 shadow-lg shadow-[var(--color-accent)]/30"
           style={{ width: "72px", height: "72px" }}
         >
           {user.displayName.charAt(0).toUpperCase()}

@@ -76,6 +76,7 @@ export function GameFinished({
         <h2
           className="text-5xl sm:text-7xl font-black text-gold animate-win-entrance"
           style={{
+            color: 'var(--color-gold)',
             textShadow: '0 0 30px rgba(255, 215, 0, 0.5), 0 0 60px rgba(255, 215, 0, 0.3)',
             filter: 'drop-shadow(0 4px 8px rgba(0,0,0,0.4))',
           }}

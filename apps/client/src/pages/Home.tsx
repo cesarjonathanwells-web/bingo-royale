@@ -71,7 +71,7 @@ export function Home() {
           <h1 className="text-5xl sm:text-6xl lg:text-7xl font-black tracking-tight">
             <span
               className="text-gold drop-shadow-lg"
-              style={{ filter: 'drop-shadow(0 4px 24px rgba(255, 215, 0, 0.3))' }}
+              style={{ color: 'var(--color-gold)', filter: 'drop-shadow(0 4px 24px rgba(255, 215, 0, 0.3))' }}
             >
               BINGO
             </span>
