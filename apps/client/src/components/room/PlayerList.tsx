@@ -30,7 +30,7 @@ export function PlayerList({ players, className }: PlayerListProps) {
   return (
     <div
       className={cn(
-        "rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] overflow-hidden",
+        "rounded-xl glass overflow-hidden",
         className,
       )}
     >

@@ -27,7 +27,7 @@ export function Header() {
   }, [room]);
 
   return (
-    <header className="sticky top-0 z-30 bg-[var(--color-bg-primary)]/70 backdrop-blur-xl border-b border-[var(--color-border)]">
+    <header className="sticky top-0 z-30 glass">
       <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 max-w-5xl mx-auto">
         {/* Logo - clickable to go home */}
         <button

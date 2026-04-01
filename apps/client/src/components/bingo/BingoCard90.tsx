@@ -37,7 +37,7 @@ export function BingoCard90({
       className={cn(
         "w-full mx-auto",
         "rounded-xl sm:rounded-2xl overflow-hidden",
-        "bg-gradient-card border border-[var(--color-border)]",
+        "glass-card",
         "shadow-xl shadow-black/25",
         className,
       )}
@@ -66,7 +66,7 @@ export function BingoCard90({
                   "cell-depth",
                   isBlank
                     ? "bg-[var(--color-bg-primary)]/30 cursor-default border-transparent"
-                    : "cell-glass border border-[var(--color-border)] text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] active:scale-[0.92] cursor-pointer",
+                    : "glass-cell text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] active:scale-[0.92] cursor-pointer",
                   disabled && !isBlank && "opacity-60 cursor-not-allowed",
                 )}
                 aria-label={isBlank ? "blank" : `${value} ${isDabbed ? "dabbed" : ""}`}

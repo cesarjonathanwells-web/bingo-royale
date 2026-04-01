@@ -115,7 +115,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
           </p>
           <button
             onClick={copyInviteLink}
-            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl bg-gradient-to-b from-[var(--color-bg-secondary)] to-[var(--color-bg-tertiary)]/50 border border-[var(--color-border)] hover:border-[var(--color-accent)]/50 hover:shadow-lg hover:shadow-[var(--color-accent)]/10 transition-all duration-200 group"
+            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl glass hover:border-[var(--color-accent)]/50 hover:shadow-lg hover:shadow-[var(--color-accent)]/10 transition-all duration-200 group"
           >
             <span className="text-3xl sm:text-4xl font-mono font-extrabold tracking-[0.3em] sm:tracking-[0.4em] text-[var(--color-text-primary)]">
               {generateRoomCode(room.code)}
@@ -143,7 +143,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
 
         {/* Host Settings */}
         {isHost && (
-          <div className="space-y-4 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-4">
+          <div className="space-y-4 rounded-xl glass p-4">
             <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
               {t("lobby.settings")}
             </h3>
@@ -246,7 +246,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
         {/* Non-host view */}
         {!isHost && (
           <div className="space-y-4">
-            <div className="rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-4 text-center">
+            <div className="rounded-xl glass p-4 text-center">
               <p className="text-sm text-[var(--color-text-secondary)]">
                 {t("lobby.waitingForHost")}
               </p>
@@ -266,7 +266,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
         )}
 
         {/* Card Count Selector (all players) */}
-        <div className="rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-4 space-y-3">
+        <div className="rounded-xl glass p-4 space-y-3">
           <label className="block text-sm font-semibold text-[var(--color-text-primary)]">
             {t("cards.count")}
           </label>

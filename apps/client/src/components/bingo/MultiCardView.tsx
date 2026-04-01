@@ -80,7 +80,7 @@ function MiniCard75({ card, dabs, cardIndex, onDab, disabled, label }: MiniCard7
   );
 
   return (
-    <div className="rounded-xl overflow-hidden bg-gradient-card border border-[var(--color-border)] shadow-md">
+    <div className="rounded-xl overflow-hidden glass-card shadow-md">
       {/* Condensed label + BINGO header */}
       <div className="flex items-center gap-0.5 px-1 pt-1">
         {LETTERS.map((letter) => (
@@ -168,7 +168,7 @@ function MiniCard90({ card, dabs, cardIndex, onDab, disabled, label }: MiniCard9
   );
 
   return (
-    <div className="rounded-xl overflow-hidden bg-gradient-card border border-[var(--color-border)] shadow-md">
+    <div className="rounded-xl overflow-hidden glass-card shadow-md">
       {/* Grid: 9 cols x 3 rows */}
       <div className="grid grid-cols-9 gap-[2px] p-1">
         {Array.from({ length: 3 }, (_, row) =>

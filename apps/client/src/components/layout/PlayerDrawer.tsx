@@ -45,8 +45,7 @@ export function PlayerDrawer({ open, onClose, players, roomCode }: PlayerDrawerP
         className={cn(
           "fixed top-0 right-0 bottom-0 w-[300px] max-w-[85vw]",
           "flex flex-col",
-          "bg-[var(--color-bg-secondary)] border-l border-[var(--color-border)]",
-          "shadow-2xl",
+          "glass-strong",
           "animate-slide-in-right",
         )}
         style={{ zIndex: 36 }}

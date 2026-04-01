@@ -36,7 +36,7 @@ export function GameTopBar({
       : "#f59e0b";
 
   return (
-    <div className="sticky top-0 z-30 bg-[var(--color-bg-primary)]/70 backdrop-blur-xl border-b border-[var(--color-border)]">
+    <div className="sticky top-0 z-30 glass">
       <div className="flex items-center justify-between px-2 py-1.5 h-12">
         {/* Left: Current ball + letter-number */}
         <button

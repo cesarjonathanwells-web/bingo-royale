@@ -58,7 +58,7 @@ export function StatCards({
       {cards.map((card) => (
         <div
           key={card.label}
-          className="rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-4 text-center space-y-1 hover:shadow-lg transition-shadow duration-200"
+          className="rounded-xl glass p-4 text-center space-y-1 hover:shadow-lg transition-shadow duration-200"
         >
           <p
             className="text-xs font-bold uppercase tracking-wider"

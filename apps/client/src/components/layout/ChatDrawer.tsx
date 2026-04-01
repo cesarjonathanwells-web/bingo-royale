@@ -55,8 +55,8 @@ export function ChatDrawer({ open, onClose, messages, onSend }: ChatDrawerProps)
         className={cn(
           "fixed bottom-0 left-0 right-0 z-35",
           "flex flex-col",
-          "bg-[var(--color-bg-secondary)] border-t border-[var(--color-border)]",
-          "rounded-t-2xl shadow-2xl",
+          "glass-strong",
+          "rounded-t-2xl",
           "animate-slide-in-up",
         )}
         style={{ height: "60%", zIndex: 35 }}

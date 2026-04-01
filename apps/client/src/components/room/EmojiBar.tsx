@@ -26,8 +26,8 @@ export function EmojiBar({ onSend }: EmojiBarProps) {
         onClick={() => setOpen((o) => !o)}
         className={cn(
           "w-10 h-10 flex items-center justify-center rounded-full",
-          "bg-[var(--color-bg-secondary)] border border-[var(--color-border)]",
-          "hover:bg-[var(--color-bg-tertiary)] transition-colors",
+          "glass-btn",
+          "transition-colors",
           "text-lg select-none cursor-pointer",
           open && "ring-2 ring-[var(--color-accent)]",
         )}
@@ -43,8 +43,8 @@ export function EmojiBar({ onSend }: EmojiBarProps) {
           className={cn(
             "absolute bottom-12 left-1/2 -translate-x-1/2",
             "flex flex-wrap justify-center gap-1 p-2",
-            "bg-[var(--color-bg-secondary)] border border-[var(--color-border)]",
-            "rounded-xl shadow-xl",
+            "glass",
+            "rounded-xl",
             "max-w-[calc(100vw-2rem)] sm:max-w-[280px] w-max",
             "animate-slide-up z-50",
           )}

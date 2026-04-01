@@ -28,7 +28,7 @@ export function Settings() {
       <div className="space-y-4">
         {/* Player Section */}
         {user && (
-          <section className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4">
+          <section className="rounded-xl glass p-4">
             <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
               {t("settings.player")}
             </h2>
@@ -55,7 +55,7 @@ export function Settings() {
         )}
 
         {/* Language Section */}
-        <section className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4">
+        <section className="rounded-xl glass p-4">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
             {t("settings.language")}
           </h2>
@@ -86,7 +86,7 @@ export function Settings() {
         </section>
 
         {/* Theme Section */}
-        <section className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4">
+        <section className="rounded-xl glass p-4">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
             {t("settings.theme")}
           </h2>
@@ -121,7 +121,7 @@ export function Settings() {
         </section>
 
         {/* Sound Section */}
-        <section className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4">
+        <section className="rounded-xl glass p-4">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
             {t("settings.sound")}
           </h2>
@@ -156,7 +156,7 @@ export function Settings() {
         </section>
 
         {/* Auto-Daub Section */}
-        <section className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4">
+        <section className="rounded-xl glass p-4">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
             {t("settings.autoDaub")}
           </h2>
@@ -194,7 +194,7 @@ export function Settings() {
         </section>
 
         {/* About Section */}
-        <section className="rounded-xl border border-[var(--color-border)] bg-[var(--color-bg-secondary)] p-4">
+        <section className="rounded-xl glass p-4">
           <p className="text-sm text-[var(--color-text-muted)] text-center">
             {t("settings.about")} &mdash; Bingo Royale {t("settings.version")}
           </p>

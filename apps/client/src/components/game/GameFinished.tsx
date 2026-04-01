@@ -72,7 +72,7 @@ export function GameFinished({
         ))}
       </div>
 
-      <div className="relative z-10 text-center space-y-5">
+      <div className="relative z-10 text-center space-y-5 glass-strong rounded-2xl p-6 mx-4">
         <h2
           className="text-5xl sm:text-7xl font-black text-gold animate-win-entrance"
           style={{

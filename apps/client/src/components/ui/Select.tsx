@@ -41,7 +41,7 @@ export function Select({
         <SelectPrimitive.Trigger
           className={cn(
             "inline-flex items-center justify-between w-full rounded-xl border",
-            "bg-[var(--color-bg-secondary)] border-[var(--color-border)]",
+            "glass-cell",
             "px-4 py-2.5 text-sm text-[var(--color-text-primary)]",
             "focus:border-[var(--color-accent)] focus:ring-2 focus:ring-[var(--color-accent)]/20 focus:shadow-lg focus:shadow-[var(--color-accent)]/5",
             "outline-none transition-all duration-200",
@@ -57,7 +57,7 @@ export function Select({
           <SelectPrimitive.Content
             className={cn(
               "z-50 overflow-hidden rounded-xl border",
-              "bg-[var(--color-bg-card)] border-[var(--color-border)]",
+              "glass",
               "shadow-xl animate-slide-down",
             )}
             position="popper"

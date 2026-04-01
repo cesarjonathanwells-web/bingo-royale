@@ -36,7 +36,7 @@ export function BingoCard({
       className={cn(
         "w-full mx-auto",
         "rounded-xl sm:rounded-2xl overflow-hidden",
-        "bg-gradient-card border border-[var(--color-border)]",
+        "glass-card",
         "shadow-xl shadow-black/30",
         className,
       )}

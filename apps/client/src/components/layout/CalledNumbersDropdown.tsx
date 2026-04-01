@@ -47,8 +47,8 @@ export function CalledNumbersDropdown({
       <div
         className={cn(
           "absolute left-0 right-0 z-35 mx-2",
-          "bg-[var(--color-bg-secondary)] border border-[var(--color-border)]",
-          "rounded-xl shadow-2xl",
+          "glass",
+          "rounded-xl",
           "animate-slide-down",
           "max-h-[60vh] overflow-y-auto",
         )}

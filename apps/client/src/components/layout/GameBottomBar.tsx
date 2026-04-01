@@ -11,10 +11,9 @@ export function GameBottomBar({ onClaim, disabled = false }: GameBottomBarProps)
 
   return (
     <div
-      className="shrink-0 px-2 pt-1 pb-2 bg-[var(--color-bg-primary)]/90 backdrop-blur-lg"
+      className="shrink-0 px-2 pt-1 pb-2 glass-strong"
       style={{
         paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
-        borderTop: "1px solid rgba(255, 215, 0, 0.2)",
       }}
     >
       <button

@@ -106,7 +106,7 @@ export function ToastProvider({ children }: { children: ReactNode }) {
           <ToastPrimitive.Root
             key={t.id}
             className={cn(
-              "rounded-xl border px-4 py-3 shadow-lg backdrop-blur-sm",
+              "rounded-xl border px-4 py-3 shadow-lg glass",
               "flex items-center gap-3",
               "data-[state=open]:animate-slide-down",
               "data-[swipe=end]:animate-fade-in",

@@ -105,7 +105,7 @@ export function Home() {
         ) : (
           <div className="space-y-4">
             {/* Current player */}
-            <div className="flex items-center justify-between px-4 py-3 rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)]">
+            <div className="flex items-center justify-between px-4 py-3 rounded-xl glass">
               <div>
                 <p className="text-xs text-[var(--color-text-muted)]">
                   {t("auth.orContinueAs")}

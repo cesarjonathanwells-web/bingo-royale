@@ -41,7 +41,7 @@ export function BingoCell({
         "cell-depth",
         isFree
           ? "border border-[var(--color-gold)]/30 cursor-default"
-          : "cell-glass border border-[var(--color-border)] text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] active:scale-[0.92] cursor-pointer",
+          : "glass-cell text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] active:scale-[0.92] cursor-pointer",
         disabled && !isFree && "opacity-60 cursor-not-allowed",
       )}
       style={isFree ? { background: 'linear-gradient(135deg, rgba(255,215,0,0.15), rgba(245,158,11,0.1))', boxShadow: '0 0 12px rgba(255,215,0,0.15)' } : undefined}

@@ -26,7 +26,7 @@ export function ActionBar({
 
   return (
     <div
-      className="flex items-center justify-between px-2 bg-[var(--color-bg-secondary)]/60 backdrop-blur border-t border-[var(--color-border)]/40"
+      className="flex items-center justify-between px-2 glass-light"
       style={{ height: "44px" }}
     >
       {/* Left side: Power-up icons (compact) */}
@@ -53,8 +53,9 @@ export function ActionBar({
                 pu.used
                   ? "opacity-30 grayscale cursor-not-allowed"
                   : [
+                      "glass-btn",
                       "hover:bg-[var(--color-accent)]/20 active:scale-90 cursor-pointer",
-                      "border border-[var(--color-accent)]/30 bg-[var(--color-bg-tertiary)]/50",
+                      "border-[var(--color-accent)]/30",
                     ],
               )}
             >

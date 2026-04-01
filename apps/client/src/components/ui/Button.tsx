@@ -14,11 +14,11 @@ const variantClasses: Record<ButtonVariant, string> = {
   primary:
     "bg-gradient-to-b from-amber-400 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-white shadow-lg shadow-amber-500/25 active:scale-[0.97] border-t border-yellow-300/20",
   secondary:
-    "bg-[var(--color-bg-tertiary)] hover:bg-[var(--color-border-light)] text-[var(--color-text-primary)] border border-[var(--color-border)] active:scale-[0.97] shadow-sm",
+    "glass-btn text-[var(--color-text-primary)] active:scale-[0.97]",
   danger:
     "bg-gradient-to-b from-red-500 to-[var(--color-error)] hover:from-red-400 hover:to-red-600 text-white shadow-lg shadow-red-500/25 active:scale-[0.97] border-t border-red-300/20",
   ghost:
-    "bg-transparent hover:bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] active:scale-[0.97]",
+    "glass-btn bg-transparent text-[var(--color-text-secondary)] active:scale-[0.97]",
 };
 
 const sizeClasses: Record<ButtonSize, string> = {
