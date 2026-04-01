@@ -1,6 +1,6 @@
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
-import { LETTERS, FREE_SPACE_INDEX } from "@bingo/shared";
+import { LETTERS, BALL_COLORS, FREE_SPACE_INDEX } from "@bingo/shared";
 import { cn } from "@/lib/utils";
 
 interface BingoCellProps {
@@ -23,6 +23,7 @@ export function BingoCell({
   const { t } = useTranslation("game");
   const isFree = index === FREE_SPACE_INDEX;
   const letter = LETTERS[column];
+  const columnColor = letter ? BALL_COLORS[letter] : "#f59e0b";
 
   const handleClick = useCallback(() => {
     if (disabled || isFree) return;
@@ -62,12 +63,14 @@ export function BingoCell({
         {isFree ? t("game.free") : (value ?? "")}
       </span>
 
-      {/* Dab overlay - GREEN for marked cells */}
-      {(dabbed || isFree) && !isFree && (
+      {/* Dab overlay - column color */}
+      {dabbed && !isFree && (
         <div
-          className="absolute inset-[3px] rounded-full animate-dab dab-mark"
+          className="absolute inset-[2px] rounded-full animate-dab"
           style={{
-            opacity: 0.80,
+            backgroundColor: columnColor,
+            opacity: 0.75,
+            boxShadow: `0 0 8px ${columnColor}66`,
           }}
         />
       )}
