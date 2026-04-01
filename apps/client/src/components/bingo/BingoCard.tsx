@@ -34,19 +34,19 @@ export function BingoCard({
   return (
     <div
       className={cn(
-        "w-full max-w-[calc(100%-0.5rem)] sm:max-w-[400px] mx-auto",
-        "rounded-2xl overflow-hidden",
+        "w-full mx-auto",
+        "rounded-xl sm:rounded-2xl overflow-hidden",
         "bg-gradient-card border border-[var(--color-border)]",
         "shadow-xl shadow-black/30",
         className,
       )}
     >
-      {/* Column letters - directly at top, no header text */}
-      <div className="grid grid-cols-5 gap-1.5 px-2.5 pt-2.5">
+      {/* Column letters */}
+      <div className="grid grid-cols-5 gap-1 px-1.5 pt-1.5">
         {LETTERS.map((letter) => (
           <div
             key={letter}
-            className="col-header flex items-center justify-center py-2.5 rounded-lg font-black text-xl text-white"
+            className="col-header flex items-center justify-center py-1 sm:py-1.5 rounded font-black text-sm sm:text-base text-white"
             style={{ backgroundColor: BALL_COLORS[letter] ?? "#f59e0b" }}
           >
             {letter}
@@ -55,7 +55,7 @@ export function BingoCard({
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-5 gap-1.5 p-2.5">
+      <div className="grid grid-cols-5 gap-1 p-1.5">
         {Array.from({ length: 5 }, (_, row) =>
           Array.from({ length: 5 }, (_, col) => {
             const index = getCellIndex(row, col);

@@ -35,8 +35,8 @@ export function BingoCell({
       onClick={handleClick}
       disabled={disabled || isFree}
       className={cn(
-        "relative flex items-center justify-center touch-target",
-        "aspect-square w-full rounded-lg font-bold text-base sm:text-lg",
+        "relative flex items-center justify-center",
+        "aspect-square w-full rounded font-bold text-xs sm:text-base",
         "transition-all duration-150 select-none",
         "cell-depth",
         isFree

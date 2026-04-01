@@ -215,19 +215,43 @@ export function GameView({
           </div>
         )}
 
-        {/* Card display */}
-        <div className="flex-1 flex items-center justify-center w-full min-h-0">
+        {/* Card display - constrained to fit available height */}
+        <div className="flex-1 flex items-center justify-center w-full min-h-0 overflow-hidden">
           {viewAll && myCards.length > 1 ? (
-            <div className="w-full overflow-y-auto max-h-full px-1">
-              <MultiCardView
-                cards={myCards}
-                dabs={myDabs}
-                variant={room.variant}
-                onDab={onDabMulti}
-              />
+            /* All cards grid - fit within available space, no scroll */
+            <div className={cn(
+              "w-full h-full flex items-center justify-center p-1",
+              myCards.length <= 2 ? "max-w-[700px]" : "max-w-[800px]",
+            )}>
+              <div className={cn(
+                "w-full grid gap-2",
+                myCards.length <= 2 ? "grid-cols-2" : "grid-cols-2 grid-rows-2",
+              )} style={{ maxHeight: "100%" }}>
+                {myCards.map((card, ci) => (
+                  <div key={ci} className={cn(
+                    "min-h-0 flex items-center justify-center",
+                    myCards.length === 3 && ci === 2 && "col-span-2 max-w-[50%] mx-auto",
+                  )}>
+                    {room.variant === "75" ? (
+                      <BingoCard
+                        card={card as BingoCard75}
+                        dabs={myDabs[ci] ?? new Set()}
+                        onDab={(cellIndex) => onDabMulti(ci, cellIndex)}
+                        className="max-h-full"
+                      />
+                    ) : (
+                      <BingoCard90
+                        card={card as BingoCard90Type}
+                        dabs={myDabs[ci] ?? new Set()}
+                        onDab={(cellIndex) => onDabMulti(ci, cellIndex)}
+                        className="max-h-full"
+                      />
+                    )}
+                  </div>
+                ))}
+              </div>
             </div>
           ) : myCards.length > 1 ? (
-            /* Swipeable carousel for multi-card single view */
             <CardCarousel
               cards={myCards}
               dabs={myDabs}
@@ -237,7 +261,7 @@ export function GameView({
               onIndexChange={onSetActiveCard}
             />
           ) : (
-            <div className="w-full max-w-[400px] lg:max-w-[500px]">
+            <div className="w-full max-w-[min(400px,80vh)] lg:max-w-[min(500px,70vh)] max-h-full">
               {myCard && (
                 <>
                   {room.variant === "75" ? (
@@ -245,12 +269,14 @@ export function GameView({
                       card={myCard as BingoCard75}
                       dabs={activeDabs}
                       onDab={onDab}
+                      className="max-h-full"
                     />
                   ) : (
                     <BingoCard90
                       card={myCard as BingoCard90Type}
                       dabs={activeDabs}
                       onDab={onDab}
+                      className="max-h-full"
                     />
                   )}
                 </>
