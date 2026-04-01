@@ -9,6 +9,7 @@ import type {
   PlayerPowerUp,
   PowerUpId,
   ChatMessage,
+  Player,
 } from "@bingo/shared";
 import { GAME_EMOJIS } from "@bingo/shared";
 import { BingoCard } from "@/components/bingo/BingoCard";
@@ -26,6 +27,19 @@ import { ChatDrawer } from "@/components/layout/ChatDrawer";
 import { PlayerDrawer } from "@/components/layout/PlayerDrawer";
 import { CalledNumbersDropdown } from "@/components/layout/CalledNumbersDropdown";
 import { cn } from "@/lib/utils";
+
+const AVATAR_COLORS = [
+  "#3b82f6", "#ef4444", "#22c55e", "#f59e0b", "#a855f7",
+  "#ec4899", "#06b6d4", "#f97316", "#8b5cf6", "#14b8a6",
+];
+
+function getPlayerColor(name: string): string {
+  let hash = 0;
+  for (let i = 0; i < name.length; i++) {
+    hash = name.charCodeAt(i) + ((hash << 5) - hash);
+  }
+  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]!;
+}
 
 interface EmojiReaction {
   emoji: string;
@@ -141,8 +155,10 @@ export function GameView({
         variant={room.variant}
       />
 
-      {/* Card area - fills remaining space */}
-      <div className="flex-1 flex flex-col items-center justify-center overflow-hidden px-2 py-1 relative">
+      {/* Main area: on desktop, card left + sidebar right. On mobile, card only */}
+      <div className="flex-1 flex overflow-hidden">
+        {/* Card column */}
+        <div className="flex-1 flex flex-col items-center justify-center overflow-hidden px-2 py-1 relative">
         {/* Paused overlay */}
         {gameState.paused && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--color-bg-primary)]/80 backdrop-blur-sm">
@@ -221,7 +237,7 @@ export function GameView({
               onIndexChange={onSetActiveCard}
             />
           ) : (
-            <div className="w-full max-w-[400px]">
+            <div className="w-full max-w-[400px] lg:max-w-[500px]">
               {myCard && (
                 <>
                   {room.variant === "75" ? (
@@ -270,7 +286,89 @@ export function GameView({
             </Button>
           </div>
         )}
-      </div>
+        </div>{/* end card column */}
+
+        {/* Desktop sidebar - visible on lg+ */}
+        <div className="hidden lg:flex flex-col w-80 border-l border-[var(--color-border)] bg-[var(--color-bg-secondary)]/50">
+          {/* Player list */}
+          <div className="border-b border-[var(--color-border)] overflow-y-auto max-h-[40%]">
+            <div className="px-4 py-3 border-b border-[var(--color-border)]">
+              <h3 className="text-sm font-bold text-[var(--color-text-primary)]">
+                {t("game.players")} ({room.players.length})
+              </h3>
+            </div>
+            <ul className="divide-y divide-[var(--color-border)]/30">
+              {room.players.map((player) => (
+                <li key={player.id} className="flex items-center gap-2 px-4 py-2">
+                  <div
+                    className={cn(
+                      "w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold text-white",
+                      !player.connected && "opacity-40",
+                    )}
+                    style={{ backgroundColor: getPlayerColor(player.name) }}
+                  >
+                    {player.name.charAt(0).toUpperCase()}
+                  </div>
+                  <span className={cn(
+                    "text-sm font-medium truncate",
+                    player.connected ? "text-[var(--color-text-primary)]" : "text-[var(--color-text-muted)]",
+                  )}>
+                    {player.name}
+                  </span>
+                  {player.isHost && (
+                    <span className="text-[10px] text-amber-400 font-bold shrink-0">★</span>
+                  )}
+                </li>
+              ))}
+            </ul>
+          </div>
+
+          {/* Chat - fills remaining space */}
+          <div className="flex-1 flex flex-col overflow-hidden">
+            <div className="px-4 py-3 border-b border-[var(--color-border)]">
+              <h3 className="text-sm font-bold text-[var(--color-text-primary)]">
+                {t("game.chat")}
+              </h3>
+            </div>
+            <div className="flex-1 overflow-y-auto px-4 py-2 space-y-2" role="log" aria-live="polite">
+              {chatMessages.length === 0 ? (
+                <p className="text-xs text-[var(--color-text-muted)] text-center py-4">...</p>
+              ) : (
+                chatMessages.map((msg) => (
+                  <div key={msg.id} className="flex gap-2 text-sm">
+                    <span className="font-semibold text-[var(--color-accent)] shrink-0">{msg.playerName}:</span>
+                    <span className="text-[var(--color-text-secondary)] break-words min-w-0">{msg.text}</span>
+                  </div>
+                ))
+              )}
+            </div>
+            <form
+              onSubmit={(e) => {
+                e.preventDefault();
+                const input = e.currentTarget.querySelector("input");
+                if (input && input.value.trim()) {
+                  onSendChat(input.value.trim());
+                  input.value = "";
+                }
+              }}
+              className="flex gap-2 px-4 py-3 border-t border-[var(--color-border)]"
+            >
+              <input
+                type="text"
+                maxLength={200}
+                placeholder={t("chat.placeholder")}
+                className="flex-1 px-3 py-2 rounded-lg bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-accent)]"
+              />
+              <button
+                type="submit"
+                className="px-3 py-2 rounded-lg bg-[var(--color-accent)] text-white text-sm font-semibold hover:opacity-90 cursor-pointer"
+              >
+                {t("chat.send")}
+              </button>
+            </form>
+          </div>
+        </div>
+      </div>{/* end main area flex row */}
 
       {/* Action bar */}
       <ActionBar
