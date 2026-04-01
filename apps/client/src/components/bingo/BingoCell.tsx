@@ -37,7 +37,7 @@ export function BingoCell({
       disabled={disabled || isFree}
       className={cn(
         "relative flex items-center justify-center",
-        "aspect-square w-full rounded font-bold text-xs sm:text-base",
+        "aspect-square w-full rounded font-bold text-xs sm:text-base lg:text-lg",
         "transition-all duration-150 select-none",
         "cell-depth",
         isFree

@@ -218,19 +218,18 @@ export function GameView({
         {/* Card display - constrained to fit available height */}
         <div className="flex-1 flex items-center justify-center w-full min-h-0 overflow-hidden">
           {viewAll && myCards.length > 1 ? (
-            /* All cards grid - fit within available space, no scroll */
-            <div className={cn(
-              "w-full h-full flex items-center justify-center p-1",
-              myCards.length <= 2 ? "max-w-[700px]" : "max-w-[800px]",
-            )}>
+            /* All cards grid - fit within available space */
+            <div className="w-full h-full flex items-center justify-center p-2 lg:p-4">
               <div className={cn(
-                "w-full grid gap-2",
-                myCards.length <= 2 ? "grid-cols-2" : "grid-cols-2 grid-rows-2",
+                "grid gap-2 lg:gap-3 w-full h-full",
+                myCards.length <= 2
+                  ? "grid-cols-1 sm:grid-cols-2 max-w-[600px]"
+                  : "grid-cols-1 sm:grid-cols-2 max-w-[600px]",
               )} style={{ maxHeight: "100%" }}>
                 {myCards.map((card, ci) => (
                   <div key={ci} className={cn(
-                    "min-h-0 flex items-center justify-center",
-                    myCards.length === 3 && ci === 2 && "col-span-2 max-w-[50%] mx-auto",
+                    "min-h-0 min-w-0 flex items-center justify-center",
+                    myCards.length === 3 && ci === 2 && "sm:col-span-2 sm:max-w-[50%] sm:mx-auto",
                   )}>
                     {room.variant === "75" ? (
                       <BingoCard
@@ -261,7 +260,7 @@ export function GameView({
               onIndexChange={onSetActiveCard}
             />
           ) : (
-            <div className="w-full max-w-[min(400px,80vh)] lg:max-w-[min(500px,70vh)] max-h-full">
+            <div className="w-full max-w-[380px] lg:max-w-[420px] max-h-full mx-auto">
               {myCard && (
                 <>
                   {room.variant === "75" ? (
