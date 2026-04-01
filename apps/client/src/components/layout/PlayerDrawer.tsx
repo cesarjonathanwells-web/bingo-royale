@@ -118,7 +118,7 @@ function DrawerPlayerRow({ player }: { player: Player }) {
   const color = getAvatarColor(player.name);
 
   return (
-    <li className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-border)]/20">
+    <li className="flex items-center gap-3 px-4 py-3 border-b border-[var(--color-border)]/20 overflow-hidden">
       {/* Avatar - unique color per player */}
       <div className="relative shrink-0">
         <div
@@ -143,11 +143,12 @@ function DrawerPlayerRow({ player }: { player: Player }) {
       <div className="flex-1 min-w-0">
         <p
           className={cn(
-            "text-base font-semibold leading-tight",
+            "text-base font-semibold leading-tight truncate",
             player.connected
               ? "text-[var(--color-text-primary)]"
               : "text-[var(--color-text-muted)]",
           )}
+          title={player.name}
         >
           {player.name}
         </p>

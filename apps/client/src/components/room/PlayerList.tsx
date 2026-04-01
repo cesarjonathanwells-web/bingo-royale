@@ -100,11 +100,12 @@ function PlayerRow({ player }: { player: Player }) {
       <div className="flex-1 min-w-0">
         <p
           className={cn(
-            "text-[15px] font-semibold leading-tight",
+            "text-[15px] font-semibold leading-tight truncate",
             player.connected
               ? "text-[var(--color-text-primary)]"
               : "text-[var(--color-text-muted)]",
           )}
+          title={player.name}
         >
           {player.name}
         </p>

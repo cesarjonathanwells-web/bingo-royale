@@ -321,7 +321,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
       </div>
 
       {/* Right / Player list */}
-      <div className="w-full lg:w-72 shrink-0">
+      <div className="w-full lg:w-72 shrink-0 max-h-[40vh] lg:max-h-none overflow-hidden">
         <PlayerList players={room.players} />
       </div>
     </div>
