@@ -11,8 +11,11 @@ export function GameBottomBar({ onClaim, disabled = false }: GameBottomBarProps)
 
   return (
     <div
-      className="fixed bottom-0 left-0 right-0 z-40 px-2 pt-1 pb-1 bg-[var(--color-bg-primary)]/90 backdrop-blur-lg safe-bottom"
-      style={{ minHeight: "52px", borderTop: '1px solid rgba(255, 215, 0, 0.2)' }}
+      className="shrink-0 px-2 pt-1 pb-2 bg-[var(--color-bg-primary)]/90 backdrop-blur-lg"
+      style={{
+        paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
+        borderTop: "1px solid rgba(255, 215, 0, 0.2)",
+      }}
     >
       <button
         onClick={onClaim}
@@ -23,7 +26,7 @@ export function GameBottomBar({ onClaim, disabled = false }: GameBottomBarProps)
           "bg-gradient-to-r from-amber-400 via-yellow-500 to-amber-600",
           "hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500",
           "active:scale-[0.97] transition-all duration-150",
-          "animate-bingo-glow animate-gold-pulse",
+          "animate-bingo-glow",
           "select-none cursor-pointer",
           "border-t border-yellow-300/30",
           "disabled:opacity-50 disabled:cursor-not-allowed disabled:active:scale-100",

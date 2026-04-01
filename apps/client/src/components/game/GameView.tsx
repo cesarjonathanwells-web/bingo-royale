@@ -381,10 +381,7 @@ export function GameView({
         chatOpen={chatOpen}
       />
 
-      {/* Spacer for fixed BINGO button */}
-      <div className="shrink-0" style={{ height: "52px" }} />
-
-      {/* Fixed BINGO button */}
+      {/* BINGO button (in-flow, not fixed) */}
       <GameBottomBar onClaim={onClaimBingo} />
 
       {/* Emoji picker overlay */}
