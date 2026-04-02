@@ -135,6 +135,7 @@ export function GameView({
     return () => ro.disconnect();
   }, [myCards.length]);
 
+  const [viewAll, setViewAll] = useState(myCards.length > 1);
   const [chatOpen, setChatOpen] = useState(false);
   const [playersOpen, setPlayersOpen] = useState(false);
   const [numbersOpen, setNumbersOpen] = useState(false);
@@ -231,11 +232,37 @@ export function GameView({
           </div>
         )}
 
-        {/* All cards always visible — no toggle needed */}
+        {/* View toggle */}
+        {myCards.length > 1 && (
+          <div className="flex items-center justify-center gap-1 py-0.5 shrink-0">
+            <button
+              onClick={() => setViewAll(false)}
+              className={cn(
+                "px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer",
+                !viewAll
+                  ? "bg-[var(--color-accent)] text-white"
+                  : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
+              )}
+            >
+              {t("cards.singleView")}
+            </button>
+            <button
+              onClick={() => setViewAll(true)}
+              className={cn(
+                "px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer",
+                viewAll
+                  ? "bg-[var(--color-accent)] text-white"
+                  : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
+              )}
+            >
+              {t("cards.allView")}
+            </button>
+          </div>
+        )}
 
-        {/* Card display — dynamically sized to fit ALL cards on ANY screen */}
+        {/* Card display */}
         <div ref={gridContainerRef} className="flex-1 flex items-center justify-center w-full min-h-0 overflow-hidden p-1">
-          {myCards.length > 1 ? (
+          {viewAll && myCards.length > 1 ? (
             <div
               className={cn(
                 "grid gap-2 w-full h-full",
@@ -267,6 +294,15 @@ export function GameView({
                 </div>
               ))}
             </div>
+          ) : myCards.length > 1 ? (
+            <CardCarousel
+              cards={myCards}
+              dabs={myDabs}
+              variant={room.variant}
+              onDab={onDabMulti}
+              activeIndex={activeCardIndex}
+              onIndexChange={onSetActiveCard}
+            />
           ) : (
             <div style={{ maxWidth: `${Math.min(gridMaxWidth, 420)}px` }} className="w-full max-h-full mx-auto">
               {myCard && (
