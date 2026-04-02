@@ -227,9 +227,12 @@ export function GameView({
                 "grid gap-2 lg:gap-3 w-full h-full",
                 myCards.length <= 2
                   ? "grid-cols-1 sm:grid-cols-2 max-w-[600px]"
-                  : "grid-cols-1 sm:grid-cols-2 max-w-[600px]",
+                  : "grid-cols-1 sm:grid-cols-2",
                 myCards.length > 2 && "sm:grid-rows-2",
-              )} style={{ maxHeight: "100%" }}>
+              )} style={{
+                maxHeight: "100%",
+                maxWidth: myCards.length > 2 ? "min(600px, calc((100dvh - 14rem) * 0.85))" : "600px",
+              }}>
                 {myCards.map((card, ci) => (
                   <div key={ci} className={cn(
                     "min-h-0 min-w-0 flex items-center justify-center overflow-hidden",
