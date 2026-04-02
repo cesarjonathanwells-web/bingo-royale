@@ -27,7 +27,7 @@ export function ActionBar({
   return (
     <div
       className="flex items-center justify-between px-2 glass-light"
-      style={{ height: "44px", borderTop: "1px solid var(--color-border)" }}
+      style={{ height: "48px", borderTop: "1px solid var(--color-border)" }}
     >
       {/* Left side: Power-up icons (compact) */}
       <div className="flex items-center gap-1 overflow-x-auto">
@@ -48,7 +48,7 @@ export function ActionBar({
               title={t(`powerups.${pu.id}`)}
               style={{ touchAction: "manipulation" }}
               className={cn(
-                "w-9 h-9 flex items-center justify-center rounded-lg text-lg select-none shrink-0",
+                "w-10 h-10 flex items-center justify-center rounded-lg text-lg select-none shrink-0",
                 "transition-all duration-150",
                 pu.used
                   ? "opacity-30 grayscale cursor-not-allowed"

@@ -97,7 +97,7 @@ export function BottomNav() {
               aria-label={t(`nav.${tab.key}`)}
             >
               {tab.icon}
-              <span className="text-[10px] font-medium leading-tight">
+              <span className="text-[11px] font-medium leading-snug">
                 {t(`nav.${tab.key}`)}
               </span>
             </button>

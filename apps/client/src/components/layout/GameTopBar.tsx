@@ -85,7 +85,7 @@ export function GameTopBar({
           <button
             onClick={handleCopyCode}
             className={cn(
-              "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold",
+              "px-3 py-1.5 rounded-lg text-[11px] font-mono font-bold",
               "bg-[var(--color-bg-tertiary)] text-[var(--color-accent)]",
               "hover:bg-[var(--color-bg-tertiary)]/80 transition-colors cursor-pointer select-none",
             )}
