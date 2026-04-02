@@ -109,10 +109,10 @@ export function Home() {
               BINGO
             </span>
             <span
-              className="block text-4xl sm:text-5xl lg:text-6xl tracking-[0.25em] text-white/90 mt-1"
+              className="block text-4xl sm:text-5xl lg:text-6xl tracking-[0.25em] mt-1"
               style={{
-                textShadow:
-                  "0 0 20px rgba(255,255,255,0.15), 0 0 40px rgba(168,85,247,0.15)",
+                color: "transparent",
+                WebkitTextStroke: "1.5px rgba(212, 162, 76, 0.7)",
               }}
             >
               ROYALE
