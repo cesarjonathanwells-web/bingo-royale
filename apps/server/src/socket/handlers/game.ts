@@ -295,6 +295,19 @@ export function registerGameHandlers(
       console.log(`[Game] Bingo claim by ${user.name}: valid=${result.valid}, pattern=${result.pattern ?? 'none'}, cards=${cards.length}`);
 
       if (result.valid) {
+        // Re-check room state to prevent concurrent claims both winning
+        const currentRoom = await roomStore.getRoom(code);
+        if (!currentRoom || currentRoom.state !== 'in_progress') {
+          // Another player already won
+          socket.emit('game:bingo_claimed', {
+            valid: false,
+            playerId: user.id,
+            playerName: user.name,
+            message: 'Another player already claimed bingo',
+          });
+          return void succeed(callback, { valid: false });
+        }
+
         // Stop the caller
         CallerManager.stopCalling(code);
 
@@ -575,10 +588,17 @@ export function registerGameHandlers(
       // Reset room state to lobby
       await roomStore.updateRoom(code, { state: 'lobby' });
 
-      // Clear dabs for all players
+      // Stop any lingering caller
+      CallerManager.stopCalling(code);
+
+      // Clear caller state so next game gets a fresh pool
+      await roomStore.setCallerState(code, [], [], false);
+
+      // Clear dabs and power-ups for all players
       const players = await roomStore.getPlayers(code);
       for (const player of players) {
         await roomStore.setDabs(code, player.id, []);
+        await roomStore.setPowerUps(code, player.id, []);
       }
 
       const updatedRoom = await roomStore.getRoom(code);

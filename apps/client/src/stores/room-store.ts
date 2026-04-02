@@ -500,7 +500,6 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     );
 
     // game:powerup_used is handled by Room.tsx for toast display (no store update needed)
-    socket.on("game:powerup_used", () => {});
 
     socket.on("game:number_peek", (data: { numbers: number[] }) => {
       // Clear any existing peek timeout before setting a new one
@@ -586,7 +585,6 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       "game:bingo_claimed",
       "game:finished",
       "game:powerups_dealt",
-      "game:powerup_used",
       "game:number_peek",
       "game:turbo_stamp_applied",
       "game:wild_square_applied",

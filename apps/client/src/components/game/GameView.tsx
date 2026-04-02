@@ -67,6 +67,7 @@ interface GameViewProps {
   onUsePowerUp: (id: PowerUpId) => void;
   onSendChat: (text: string) => void;
   onSendReaction: (emoji: string) => void;
+  onLeave: () => void;
 }
 
 export function GameView({
@@ -89,6 +90,7 @@ export function GameView({
   onUsePowerUp,
   onSendChat,
   onSendReaction,
+  onLeave,
 }: GameViewProps) {
   const { t } = useTranslation("game");
   const [chatOpen, setChatOpen] = useState(false);
@@ -145,6 +147,7 @@ export function GameView({
         roomCode={room.code}
         onBallPress={() => setNumbersOpen(!numbersOpen)}
         onMenuPress={() => setPlayersOpen(true)}
+        onLeave={onLeave}
       />
 
       {/* Called numbers dropdown */}

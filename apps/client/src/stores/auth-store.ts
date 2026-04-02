@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import type { User } from "@bingo/shared";
 import * as api from "@/lib/api";
+import { useRoomStore } from "@/stores/room-store";
 
 interface AuthState {
   user: User | null;
@@ -74,6 +75,11 @@ export const useAuthStore = create<AuthState>()(
         ),
 
       logout: () => {
+        // Leave room before destroying socket/auth
+        const roomState = useRoomStore.getState();
+        if (roomState.room) {
+          roomState.leaveRoom();
+        }
         localStorage.removeItem("bingo-token");
         set({
           user: null,

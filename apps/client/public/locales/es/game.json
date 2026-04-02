@@ -52,6 +52,7 @@
     "winnerAnnouncement": "¡{{name}} ganó con {{pattern}}!",
     "playAgain": "Jugar de nuevo",
     "backToLobby": "Volver a la sala",
+    "leave": "Salir del juego",
     "leaveGame": "Salir del juego",
     "noWinner": "Sin ganador esta ronda",
     "pattern": "Patrón",

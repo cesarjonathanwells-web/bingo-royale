@@ -60,12 +60,25 @@ export function Room({ code }: RoomPageProps) {
     }
   }, [isAuthenticated, room, code, joinRoom]);
 
-  // Reset join attempt flag when leaving
+  // Clean up room on unmount (back button, navigation away) and beforeunload (tab close)
   useEffect(() => {
-    return () => {
-      joinAttempted.current = false;
+    const handleBeforeUnload = () => {
+      const socket = getSocket();
+      socket.emit("room:leave");
     };
-  }, []);
+
+    window.addEventListener("beforeunload", handleBeforeUnload);
+
+    return () => {
+      window.removeEventListener("beforeunload", handleBeforeUnload);
+      joinAttempted.current = false;
+      // If we still have a room when unmounting, leave it
+      const currentRoom = useRoomStore.getState().room;
+      if (currentRoom) {
+        leaveRoom();
+      }
+    };
+  }, [leaveRoom]);
 
   // Listen for sound-triggering events
   useEffect(() => {
@@ -227,6 +240,7 @@ export function Room({ code }: RoomPageProps) {
       onUsePowerUp={handleUsePowerUp}
       onSendChat={sendChat}
       onSendReaction={sendReaction}
+      onLeave={handleLeave}
     />
   );
 }
