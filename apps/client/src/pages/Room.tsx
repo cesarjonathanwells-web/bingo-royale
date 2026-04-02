@@ -157,11 +157,21 @@ export function Room({ code }: RoomPageProps) {
   // For multi-card view: dab on a specific card by index
   const handleDabMulti = useCallback(
     (cardIndex: number, cellIndex: number) => {
-      play("cellDabbed");
       const state = useRoomStore.getState();
       const cardDabs = state.myDabs[cardIndex];
       if (!cardDabs || cardDabs.has(cellIndex)) return;
 
+      // Only allow dabbing numbers that have been called
+      const card = state.myCards[cardIndex];
+      if (card && state.gameState && state.room) {
+        const cols = state.room.variant === "75" ? 5 : 9;
+        const col = cellIndex % cols;
+        const row = Math.floor(cellIndex / cols);
+        const value = card.grid[col]?.[row] ?? null;
+        if (value !== null && !state.gameState.calledNumbers.includes(value)) return;
+      }
+
+      play("cellDabbed");
       const newCardDabs = new Set(cardDabs);
       newCardDabs.add(cellIndex);
       const newDabs = [...state.myDabs];

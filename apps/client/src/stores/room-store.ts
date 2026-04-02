@@ -21,6 +21,13 @@ interface EmojiReaction {
   id: string;
 }
 
+function getCellValue(card: BingoCard, cellIndex: number, variant: "75" | "90"): number | null {
+  const cols = variant === "75" ? 5 : 9;
+  const col = cellIndex % cols;
+  const row = Math.floor(cellIndex / cols);
+  return card.grid[col]?.[row] ?? null;
+}
+
 function findCellIndex75(card: BingoCard75, number: number): number | null {
   for (let col = 0; col < card.grid.length; col++) {
     const column = card.grid[col];
@@ -192,9 +199,16 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
 
   // Dabs are one-way: once dabbed, a cell stays dabbed (matches server behavior)
   dabCell: (cellIndex) => {
-    const { myDabs, activeCardIndex } = get();
+    const { myDabs, activeCardIndex, myCards, gameState, room } = get();
     const currentDabs = myDabs[activeCardIndex];
     if (!currentDabs || currentDabs.has(cellIndex)) return; // Already dabbed, no-op
+
+    // Only allow dabbing numbers that have been called
+    const card = myCards[activeCardIndex];
+    if (card && gameState && room) {
+      const value = getCellValue(card, cellIndex, room.variant);
+      if (value !== null && !gameState.calledNumbers.includes(value)) return;
+    }
 
     const newCardDabs = new Set(currentDabs);
     newCardDabs.add(cellIndex);
