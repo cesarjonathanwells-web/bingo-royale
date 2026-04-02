@@ -168,8 +168,12 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
   },
 
   leaveRoom: () => {
-    const socket = getSocket();
-    socket.emit("room:leave");
+    try {
+      const socket = getSocket();
+      socket.emit("room:leave");
+    } catch {
+      // Socket may not be connected — still reset local state
+    }
     set({ ...initialState, myDabs: [], myCards: [], myPowerUps: [], peekedNumbers: [], reactions: [] });
   },
 
