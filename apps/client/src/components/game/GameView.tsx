@@ -231,7 +231,7 @@ export function GameView({
                 myCards.length > 2 && "sm:grid-rows-2",
               )} style={{
                 maxHeight: "100%",
-                maxWidth: myCards.length > 2 ? "min(600px, calc((100dvh - 14rem) * 0.85))" : "600px",
+                maxWidth: myCards.length > 2 ? "min(600px, calc(100dvh - 25rem))" : "600px",
               }}>
                 {myCards.map((card, ci) => (
                   <div key={ci} className={cn(
