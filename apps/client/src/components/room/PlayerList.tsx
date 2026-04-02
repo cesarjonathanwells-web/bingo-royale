@@ -46,7 +46,7 @@ export function PlayerList({ players, className }: PlayerListProps) {
       </div>
 
       {/* Active players */}
-      <ul className="max-h-[400px] overflow-y-auto">
+      <ul className="max-h-[200px] sm:max-h-[250px] md:max-h-[350px] lg:max-h-[400px] overflow-y-auto">
         {activePlayers.map((player) => (
           <PlayerRow key={player.id} player={player} />
         ))}

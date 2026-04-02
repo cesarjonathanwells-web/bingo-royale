@@ -115,7 +115,7 @@ export function CardCarousel({
       >
         {cards.map((card, i) => (
           <div key={i} className="snap-center flex-shrink-0 w-full px-2 flex items-center justify-center">
-            <div className="w-full max-w-[380px] lg:max-w-[420px] max-h-full">
+            <div className="w-full max-w-[calc(100vw-1rem)] sm:max-w-[380px] lg:max-w-[420px] max-h-full">
               {variant === "75" ? (
                 <BingoCard
                   card={card as BingoCard75}
