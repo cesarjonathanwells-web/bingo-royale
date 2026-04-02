@@ -1,4 +1,6 @@
+import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
+import { useNavigate } from "@tanstack/react-router";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRoomStore } from "@/stores/room-store";
 import { useTheme } from "@/hooks/useTheme";
@@ -7,12 +9,18 @@ import { cn } from "@/lib/utils";
 
 export function Settings() {
   const { t, i18n } = useTranslation();
+  const navigate = useNavigate();
   const user = useAuthStore((s) => s.user);
   const logout = useAuthStore((s) => s.logout);
   const autoDaub = useRoomStore((s) => s.autoDaub);
   const toggleAutoDaub = useRoomStore((s) => s.toggleAutoDaub);
   const { theme, toggleTheme } = useTheme();
   const { muted, toggleMute } = useSoundStore();
+
+  const handleLogout = useCallback(() => {
+    logout();
+    navigate({ to: "/" });
+  }, [logout, navigate]);
 
   const currentLang = i18n.language === "es" ? "es" : "en";
   const setLanguage = (lang: string) => {
@@ -46,7 +54,7 @@ export function Settings() {
               </div>
             </div>
             <button
-              onClick={logout}
+              onClick={handleLogout}
               className="w-full py-2 rounded-lg text-sm font-medium text-red-400 border border-red-400/30 hover:bg-red-400/10 transition-colors cursor-pointer"
             >
               {t("settings.logout")}
