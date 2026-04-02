@@ -321,11 +321,11 @@ export function GameView({
         </div>{/* end card column */}
 
         {/* Desktop sidebar - visible on lg+ */}
-        <div className="hidden lg:flex flex-col w-80 border-l border-[var(--color-neon-purple)]/15 bg-[var(--color-bg-secondary)]/50">
+        <div className="hidden lg:flex flex-col w-80 border-l border-[var(--color-border)] bg-[var(--color-bg-secondary)]/50">
           {/* Player list */}
           <div className="border-b border-[var(--color-border)] overflow-y-auto max-h-[40%]">
             <div className="px-4 py-3 border-b border-[var(--color-border)]">
-              <h3 className="text-sm font-gaming tracking-wider text-[var(--color-neon-purple)]">
+              <h3 className="text-sm font-gaming tracking-wider text-gold">
                 {t("game.players")} ({room.players.length})
               </h3>
             </div>
@@ -358,7 +358,7 @@ export function GameView({
           {/* Chat - fills remaining space */}
           <div className="flex-1 flex flex-col overflow-hidden">
             <div className="px-4 py-3 border-b border-[var(--color-border)]">
-              <h3 className="text-sm font-gaming tracking-wider text-[var(--color-neon-purple)]">
+              <h3 className="text-sm font-gaming tracking-wider text-gold">
                 {t("game.chat")}
               </h3>
             </div>
@@ -366,9 +366,9 @@ export function GameView({
               {chatMessages.length === 0 ? (
                 <p className="text-xs text-[var(--color-text-muted)] text-center py-4">...</p>
               ) : (
-                chatMessages.map((msg) => (
+                chatMessages.slice(-30).map((msg) => (
                   <div key={msg.id} className="flex gap-2 text-sm">
-                    <span className="font-semibold text-[var(--color-neon-purple)] shrink-0">{msg.playerName}:</span>
+                    <span className="font-semibold text-[var(--color-accent)] shrink-0">{msg.playerName}:</span>
                     <span className="text-[var(--color-text-secondary)] break-words min-w-0">{msg.text}</span>
                   </div>
                 ))

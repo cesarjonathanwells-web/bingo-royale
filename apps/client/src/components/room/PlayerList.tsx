@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import type { Player } from "@bingo/shared";
 import { cn } from "@/lib/utils";
@@ -68,7 +69,7 @@ export function PlayerList({ players, className }: PlayerListProps) {
   );
 }
 
-function PlayerRow({ player }: { player: Player }) {
+const PlayerRow = memo(function PlayerRow({ player }: { player: Player }) {
   const { t } = useTranslation("game");
   const color = getAvatarColor(player.name);
 
@@ -134,4 +135,4 @@ function PlayerRow({ player }: { player: Player }) {
       </div>
     </li>
   );
-}
+});

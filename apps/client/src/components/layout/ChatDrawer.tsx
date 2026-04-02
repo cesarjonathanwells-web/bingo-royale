@@ -68,7 +68,7 @@ export function ChatDrawer({ open, onClose, messages, onSend }: ChatDrawerProps)
 
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-1.5 border-b border-[var(--color-border)] shrink-0">
-          <h3 className="text-sm font-gaming tracking-wider text-[var(--color-neon-purple)]">
+          <h3 className="text-sm font-gaming tracking-wider text-gold">
             {t("chat.title")}
           </h3>
           <button
@@ -105,10 +105,10 @@ export function ChatDrawer({ open, onClose, messages, onSend }: ChatDrawerProps)
               ...
             </p>
           ) : (
-            messages.map((msg) => (
+            messages.slice(-50).map((msg) => (
               <div key={msg.id} className="animate-fade-in">
                 <div className="flex items-baseline gap-2">
-                  <span className="text-xs font-semibold text-[var(--color-neon-purple)]">
+                  <span className="text-xs font-semibold text-[var(--color-accent)]">
                     {msg.playerName}
                   </span>
                   <span className="text-[10px] text-[var(--color-text-muted)]">
@@ -133,7 +133,7 @@ export function ChatDrawer({ open, onClose, messages, onSend }: ChatDrawerProps)
             value={input}
             onChange={(e) => setInput(e.target.value)}
             placeholder={t("chat.placeholder")}
-            className="flex-1 bg-[var(--color-bg-primary)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] outline-none border border-[var(--color-border)] focus:border-[var(--color-neon-purple)] focus:shadow-[0_0_8px_rgba(168,85,247,0.15)]"
+            className="flex-1 bg-[var(--color-bg-primary)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] outline-none border border-[var(--color-border)] focus:border-[var(--color-accent)]"
             maxLength={200}
             autoFocus
           />

@@ -95,32 +95,13 @@ export function Home() {
         />
       </div>
 
-      {/* ── Floating particles / sparkles ── */}
-      <div className="absolute inset-0 overflow-hidden pointer-events-none">
-        {particles.map((p) => (
-          <div
-            key={p.id}
-            className="absolute bottom-0 rounded-full"
-            style={{
-              left: p.left,
-              width: `${p.size}px`,
-              height: `${p.size}px`,
-              background: `radial-gradient(circle, rgba(255,215,0,${p.opacity}), rgba(168,85,247,${p.opacity * 0.6}))`,
-              animation: `particle-float ${p.duration} ease-in-out infinite`,
-              animationDelay: p.delay,
-              boxShadow: `0 0 ${p.size * 2}px rgba(255,215,0,${p.opacity * 0.5})`,
-            }}
-          />
-        ))}
-      </div>
-
       {/* ── Main content ── */}
       <div className="relative z-10 w-full max-w-md space-y-10 animate-page-enter">
         {/* ── Title ── */}
         <div className="text-center space-y-4">
           <h1 className="font-gaming tracking-tight leading-none">
             <span
-              className="text-shimmer block text-7xl sm:text-8xl lg:text-9xl drop-shadow-lg"
+              className="text-gold block text-7xl sm:text-8xl lg:text-9xl drop-shadow-lg"
               style={{
                 filter: "drop-shadow(0 4px 30px rgba(255, 215, 0, 0.4))",
               }}
@@ -144,7 +125,7 @@ export function Home() {
         </div>
 
         {/* ── Decorative bingo balls ── */}
-        <div className="flex justify-center gap-4 animate-neon-pulse rounded-full py-2">
+        <div className="flex justify-center gap-4 rounded-full py-2">
           {[
             { n: 7, c: "#3b82f6", l: "B" },
             { n: 22, c: "#ef4444", l: "I" },
@@ -243,7 +224,7 @@ export function Home() {
                 type="button"
                 disabled={isConnecting}
                 onClick={() => setShowCreate(true)}
-                className="glass-card-neon rounded-2xl px-4 py-5 flex flex-col items-center gap-3 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50 group cursor-pointer animate-neon-border"
+                className="glass-card rounded-2xl px-4 py-5 flex flex-col items-center gap-3 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50 group cursor-pointer"
                 style={{
                   boxShadow:
                     "0 0 15px rgba(168,85,247,0.1), 0 4px 20px rgba(0,0,0,0.2)",
@@ -276,7 +257,7 @@ export function Home() {
                 type="button"
                 disabled={isConnecting}
                 onClick={() => setShowJoin(true)}
-                className="glass-card-neon rounded-2xl px-4 py-5 flex flex-col items-center gap-3 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50 group cursor-pointer animate-neon-border"
+                className="glass-card rounded-2xl px-4 py-5 flex flex-col items-center gap-3 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50 group cursor-pointer"
                 style={{
                   boxShadow:
                     "0 0 15px rgba(168,85,247,0.1), 0 4px 20px rgba(0,0,0,0.2)",

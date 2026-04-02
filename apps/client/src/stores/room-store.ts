@@ -574,7 +574,10 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     socket.on("chat:reaction", (data: { playerId: string; playerName: string; emoji: string }) => {
       const id = `${Date.now()}-${Math.random()}`;
       const reaction: EmojiReaction = { emoji: data.emoji, playerName: data.playerName, id };
-      set((state) => ({ reactions: [...state.reactions, reaction] }));
+      set((state) => {
+        const newReactions = [...state.reactions, reaction];
+        return { reactions: newReactions.length > 20 ? newReactions.slice(-20) : newReactions };
+      });
       setTimeout(() => {
         set((state) => ({ reactions: state.reactions.filter((r) => r.id !== id) }));
       }, 3000);

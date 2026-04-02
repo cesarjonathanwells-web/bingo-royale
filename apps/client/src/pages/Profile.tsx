@@ -33,19 +33,19 @@ export function Profile({ userId }: ProfileProps) {
   if (loading) {
     return (
       <div className="flex-1 px-4 py-8 max-w-lg mx-auto w-full animate-page-enter">
-        <div className="glass-card-neon rounded-xl p-6 flex flex-col items-center mb-8">
-          <div className="w-16 h-16 rounded-full bg-purple-900/40 animate-pulse mb-3 ring-2 ring-purple-500/30 ring-offset-2 ring-offset-[var(--color-bg-primary)]" />
-          <div className="h-6 w-32 rounded bg-purple-800/30 animate-pulse mb-2" />
-          <div className="h-4 w-24 rounded bg-purple-800/30 animate-pulse" />
+        <div className="glass-card rounded-xl p-6 flex flex-col items-center mb-8">
+          <div className="w-16 h-16 rounded-full bg-[var(--color-bg-tertiary)] animate-pulse mb-3 ring-2 ring-[var(--color-bg-tertiary)] ring-offset-2 ring-offset-[var(--color-bg-primary)]" />
+          <div className="h-6 w-32 rounded bg-[var(--color-bg-tertiary)] animate-pulse mb-2" />
+          <div className="h-4 w-24 rounded bg-[var(--color-bg-tertiary)] animate-pulse" />
         </div>
         <div className="grid grid-cols-2 gap-4 mb-8">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="rounded-xl glass p-4 space-y-2 border border-purple-500/20"
+              className="rounded-xl glass p-4 space-y-2 border border-[var(--color-bg-tertiary)]"
             >
-              <div className="h-8 w-16 mx-auto rounded bg-purple-800/30 animate-pulse" />
-              <div className="h-3 w-20 mx-auto rounded bg-purple-800/30 animate-pulse" />
+              <div className="h-8 w-16 mx-auto rounded bg-[var(--color-bg-tertiary)] animate-pulse" />
+              <div className="h-3 w-20 mx-auto rounded bg-[var(--color-bg-tertiary)] animate-pulse" />
             </div>
           ))}
         </div>
@@ -89,9 +89,9 @@ export function Profile({ userId }: ProfileProps) {
       </button>
 
       {/* Profile header */}
-      <div className="glass-card-neon rounded-xl p-6 flex flex-col items-center mb-8">
+      <div className="glass-card rounded-xl p-6 flex flex-col items-center mb-8">
         <div
-          className="rounded-full bg-gradient-to-br from-[var(--color-accent-hover)] to-[var(--color-accent)] flex items-center justify-center text-3xl font-bold text-white mb-3 shadow-lg shadow-[var(--color-accent)]/30 ring-2 ring-[var(--color-neon-purple)] ring-offset-2 ring-offset-[var(--color-bg-primary)]"
+          className="rounded-full bg-gradient-to-br from-[var(--color-accent-hover)] to-[var(--color-accent)] flex items-center justify-center text-3xl font-bold text-white mb-3 shadow-lg shadow-[var(--color-accent)]/30 ring-2 ring-[var(--color-accent)] ring-offset-2 ring-offset-[var(--color-bg-primary)]"
           style={{ width: "72px", height: "72px" }}
         >
           {user.displayName.charAt(0).toUpperCase()}
@@ -102,8 +102,8 @@ export function Profile({ userId }: ProfileProps) {
         <span
           className={`mt-1 text-xs font-medium px-2 py-0.5 rounded ${
             user.isGuest
-              ? "neon-border-purple bg-purple-500/10 text-neon-purple"
-              : "neon-border-gold bg-yellow-500/10 text-neon-gold"
+              ? "bg-purple-500/10 text-neon-purple"
+              : "bg-yellow-500/10 text-neon-gold"
           }`}
         >
           {user.isGuest ? t("profile.guest") : t("profile.registered")}

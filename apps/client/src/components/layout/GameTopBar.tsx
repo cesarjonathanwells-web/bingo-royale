@@ -38,7 +38,7 @@ export function GameTopBar({
       : "#f59e0b";
 
   return (
-    <div className="sticky top-0 z-30 glass" style={{ borderBottom: '1px solid rgba(168, 85, 247, 0.15)' }}>
+    <div className="sticky top-0 z-30 glass" style={{ borderBottom: '1px solid var(--color-border)' }}>
       <div className="flex items-center justify-between px-2 py-1.5 h-12">
         {/* Left: Current ball + letter-number */}
         <button
@@ -50,10 +50,10 @@ export function GameTopBar({
             <>
               {/* Small ball */}
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-extrabold shrink-0 animate-ball-pulse"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-extrabold shrink-0"
                 style={{
                   background: `radial-gradient(circle at 35% 30%, ${ballColor}cc, ${ballColor})`,
-                  boxShadow: `0 2px 8px ${ballColor}66, 0 0 20px ${ballColor}33`,
+                  boxShadow: `0 2px 6px ${ballColor}44`,
                 }}
               >
                 {currentNumber}
@@ -86,9 +86,8 @@ export function GameTopBar({
             onClick={handleCopyCode}
             className={cn(
               "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold",
-              "bg-[var(--color-bg-tertiary)] text-[var(--color-neon-purple)]",
+              "bg-[var(--color-bg-tertiary)] text-[var(--color-accent)]",
               "hover:bg-[var(--color-bg-tertiary)]/80 transition-colors cursor-pointer select-none",
-              "neon-border-purple",
             )}
             title={t("game.share")}
           >

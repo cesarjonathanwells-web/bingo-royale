@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { useTranslation } from "react-i18next";
 import type { Player } from "@bingo/shared";
 import { generateRoomCode, cn } from "@/lib/utils";
@@ -47,14 +48,13 @@ export function PlayerDrawer({ open, onClose, players, roomCode }: PlayerDrawerP
           "flex flex-col",
           "glass-strong",
           "animate-slide-in-right",
-          "border-l border-[var(--color-neon-purple)]/20",
         )}
         style={{ zIndex: 36 }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--color-border)]">
           <div>
-            <h3 className="text-base font-gaming tracking-wider text-[var(--color-neon-purple)]">
+            <h3 className="text-base font-gaming tracking-wider text-gold">
               {t("lobby.players")}
             </h3>
             <div className="flex items-center gap-2 mt-1">
@@ -113,7 +113,7 @@ export function PlayerDrawer({ open, onClose, players, roomCode }: PlayerDrawerP
   );
 }
 
-function DrawerPlayerRow({ player }: { player: Player }) {
+const DrawerPlayerRow = memo(function DrawerPlayerRow({ player }: { player: Player }) {
   const { t } = useTranslation("game");
   const color = getAvatarColor(player.name);
 
@@ -180,4 +180,4 @@ function DrawerPlayerRow({ player }: { player: Player }) {
       </div>
     </li>
   );
-}
+});

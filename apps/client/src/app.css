@@ -1,116 +1,87 @@
 @import "tailwindcss";
 
 /* ============================================================
-   Bingo Royale - "Neon Casino Royale" Design System
-   Complete visual overhaul: dark immersive gaming atmosphere
-   with neon accents, particle effects, premium gold/purple
+   Bingo Royale — Clean Luxury Theme
+   Translucent glass + gold edges. Lightweight for mobile.
+   No heavy animations, no backdrop-filter during gameplay.
    ============================================================ */
 
 :root {
-  /* Background — deep black → rich purple */
-  --color-bg-primary: #050511;
-  --color-bg-secondary: #0d0b2e;
-  --color-bg-tertiary: #1a0e3e;
-  --color-bg-card: #110e2e;
+  --color-bg-primary: #070a1a;
+  --color-bg-secondary: #0e1228;
+  --color-bg-tertiary: #161b35;
+  --color-bg-card: #111530;
 
-  /* Text — bright & readable */
-  --color-text-primary: #f8f9ff;
-  --color-text-secondary: #a3a8d8;
-  --color-text-muted: #5c5f8a;
+  --color-text-primary: #f4f5ff;
+  --color-text-secondary: #9ba2cc;
+  --color-text-muted: #5a6080;
 
-  /* Accent — electric gold */
-  --color-accent: #FFD700;
-  --color-accent-hover: #ffe44d;
+  --color-accent: #d4a24c;
+  --color-accent-hover: #e4b65c;
 
-  /* Bingo Ball Colors — neon saturated */
-  --color-ball-b: #3b8bff;
-  --color-ball-i: #ff4466;
-  --color-ball-n: #a855f7;
-  --color-ball-g: #10b981;
-  --color-ball-o: #ff9f1c;
+  --color-ball-b: #3b82f6;
+  --color-ball-i: #ef4444;
+  --color-ball-n: #a78bfa;
+  --color-ball-g: #22c55e;
+  --color-ball-o: #f59e0b;
 
-  /* Status */
-  --color-success: #10b981;
-  --color-error: #f43f5e;
-  --color-warning: #fbbf24;
-  --color-info: #38bdf8;
+  --color-success: #22c55e;
+  --color-error: #ef4444;
+  --color-warning: #f59e0b;
+  --color-info: #3b82f6;
 
-  /* Dab */
   --color-dab: #22c55e;
   --color-dab-opacity: 0.85;
 
-  /* Bingo button */
-  --color-bingo-btn: #FFD700;
-  --color-bingo-btn-hover: #ffe44d;
-  --color-bingo-btn-glow: rgba(255, 215, 0, 0.5);
+  --color-gold: #d4a24c;
+  --color-gold-glow: rgba(212, 162, 76, 0.25);
 
-  /* Gold & Neon */
-  --color-gold: #FFD700;
-  --color-gold-glow: rgba(255, 215, 0, 0.45);
-  --color-neon-purple: #a855f7;
-  --color-neon-blue: #38bdf8;
+  --color-border: rgba(212, 162, 76, 0.10);
+  --color-border-light: rgba(212, 162, 76, 0.18);
 
-  /* Borders */
-  --color-border: rgba(168, 85, 247, 0.12);
-  --color-border-light: rgba(168, 85, 247, 0.22);
-
-  /* Card surfaces */
-  --color-card-gradient-from: #160f3a;
-  --color-card-gradient-to: #0a0720;
-  --color-cell-bg: rgba(168, 85, 247, 0.06);
-  --color-cell-hover: rgba(168, 85, 247, 0.14);
+  --color-cell-bg: rgba(255, 255, 255, 0.04);
+  --color-cell-hover: rgba(255, 255, 255, 0.08);
 }
 
 .light {
-  --color-bg-primary: #f0f0ff;
+  --color-bg-primary: #f5f5f0;
   --color-bg-secondary: #ffffff;
-  --color-bg-tertiary: #e8e6f8;
+  --color-bg-tertiary: #eeece5;
   --color-bg-card: #ffffff;
-  --color-text-primary: #1a1040;
-  --color-text-secondary: #5c5f8a;
-  --color-text-muted: #9495b5;
-  --color-accent: #d97706;
-  --color-accent-hover: #b45309;
+  --color-text-primary: #1a1a2e;
+  --color-text-secondary: #5a5a70;
+  --color-text-muted: #9a9aaa;
+  --color-accent: #b8860b;
+  --color-accent-hover: #a07008;
   --color-ball-b: #2563eb;
   --color-ball-i: #dc2626;
   --color-ball-n: #7c3aed;
   --color-ball-g: #16a34a;
   --color-ball-o: #d97706;
   --color-dab: #16a34a;
-  --color-bingo-btn-glow: rgba(217, 119, 6, 0.4);
   --color-gold: #b8860b;
-  --color-gold-glow: rgba(184, 134, 11, 0.3);
-  --color-neon-purple: #7c3aed;
-  --color-neon-blue: #2563eb;
+  --color-gold-glow: rgba(184, 134, 11, 0.2);
   --color-border: rgba(0, 0, 0, 0.08);
   --color-border-light: rgba(0, 0, 0, 0.14);
-  --color-card-gradient-from: #ffffff;
-  --color-card-gradient-to: #f4f2ff;
   --color-cell-bg: rgba(0, 0, 0, 0.03);
   --color-cell-hover: rgba(0, 0, 0, 0.06);
 }
 
 /* ============================================================
-   Base Reset & Body
+   Base
    ============================================================ */
 
 * { box-sizing: border-box; }
-
-html {
-  -webkit-tap-highlight-color: transparent;
-  overscroll-behavior: none;
-}
+html { -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
 
 body {
-  margin: 0;
-  padding: 0;
+  margin: 0; padding: 0;
   padding-top: env(safe-area-inset-top);
   padding-bottom: env(safe-area-inset-bottom);
   padding-left: env(safe-area-inset-left);
   padding-right: env(safe-area-inset-right);
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   background: var(--color-bg-primary);
-  background-attachment: fixed;
   color: var(--color-text-primary);
   min-height: 100dvh;
   overflow-x: hidden;
@@ -120,7 +91,6 @@ body {
   user-select: none;
   -webkit-touch-callout: none;
   overscroll-behavior: none;
-  transition: background 0.3s ease, color 0.3s ease;
 }
 
 #root {
@@ -130,10 +100,7 @@ body {
   position: relative;
 }
 
-/* ============================================================
-   Ambient Background — Purple/Gold nebula orbs + particles
-   ============================================================ */
-
+/* Subtle ambient glow — no animation, GPU-cheap */
 #root::before,
 #root::after {
   content: '';
@@ -142,46 +109,26 @@ body {
   pointer-events: none;
   z-index: -1;
 }
-
 #root::before {
-  width: 50vw;
-  height: 50vw;
-  max-width: 600px;
-  max-height: 600px;
-  background: radial-gradient(circle, rgba(168, 85, 247, 0.18), rgba(56, 189, 248, 0.05) 50%, transparent 70%);
-  top: -15%;
-  left: -15%;
-  filter: blur(100px);
-  animation: nebula-drift 20s ease-in-out infinite alternate;
+  width: 40vw; height: 40vw; max-width: 500px; max-height: 500px;
+  background: radial-gradient(circle, rgba(212, 162, 76, 0.06), transparent 70%);
+  top: -10%; left: -10%;
+  filter: blur(80px);
 }
-
 #root::after {
-  width: 45vw;
-  height: 45vw;
-  max-width: 500px;
-  max-height: 500px;
-  background: radial-gradient(circle, rgba(255, 215, 0, 0.12), rgba(255, 159, 28, 0.06) 50%, transparent 70%);
-  bottom: -10%;
-  right: -10%;
-  filter: blur(100px);
-  animation: nebula-drift 25s ease-in-out infinite alternate-reverse;
+  width: 35vw; height: 35vw; max-width: 400px; max-height: 400px;
+  background: radial-gradient(circle, rgba(212, 162, 76, 0.04), transparent 70%);
+  bottom: -5%; right: -5%;
+  filter: blur(80px);
 }
-
-.light #root::before {
-  background: radial-gradient(circle, rgba(124, 58, 237, 0.06), transparent 70%);
-}
-
-.light #root::after {
-  background: radial-gradient(circle, rgba(217, 119, 6, 0.05), transparent 70%);
-}
+.light #root::before { background: radial-gradient(circle, rgba(184, 134, 11, 0.04), transparent 70%); }
+.light #root::after { background: radial-gradient(circle, rgba(184, 134, 11, 0.03), transparent 70%); }
 
 /* ============================================================
-   Gaming Typography
+   Typography
    ============================================================ */
 
-.font-gaming {
-  font-family: "Russo One", "Inter", system-ui, sans-serif;
-}
+.font-gaming { font-family: "Russo One", "Inter", system-ui, sans-serif; }
 
 /* ============================================================
    Scrollbar
@@ -189,160 +136,48 @@ body {
 
 ::-webkit-scrollbar { width: 5px; height: 5px; }
 ::-webkit-scrollbar-track { background: transparent; }
-::-webkit-scrollbar-thumb {
-  background: rgba(168, 85, 247, 0.3);
-  border-radius: 3px;
-}
-::-webkit-scrollbar-thumb:hover {
-  background: rgba(168, 85, 247, 0.5);
-}
+::-webkit-scrollbar-thumb { background: rgba(212, 162, 76, 0.2); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: rgba(212, 162, 76, 0.35); }
 
 /* ============================================================
-   KEYFRAME ANIMATIONS
+   Keyframe Animations — only essential, lightweight ones
    ============================================================ */
 
-/* --- Ambient --- */
-@keyframes nebula-drift {
-  from { transform: translate(0, 0) scale(1); }
-  to { transform: translate(30px, 20px) scale(1.1); }
-}
-
-@keyframes particle-float {
-  0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  50% { transform: translateY(-100vh) translateX(20px); }
-  100% { transform: translateY(-100vh) translateX(-10px); opacity: 0; }
-}
-
-@keyframes shimmer {
-  0% { background-position: -200% center; }
-  100% { background-position: 200% center; }
-}
-
-@keyframes neon-pulse {
-  0%, 100% { border-color: rgba(168, 85, 247, 0.3); box-shadow: 0 0 8px rgba(168, 85, 247, 0.15); }
-  50% { border-color: rgba(168, 85, 247, 0.6); box-shadow: 0 0 20px rgba(168, 85, 247, 0.25); }
-}
-
-@keyframes neon-border-cycle {
-  0% { border-color: rgba(168, 85, 247, 0.4); }
-  33% { border-color: rgba(255, 215, 0, 0.4); }
-  66% { border-color: rgba(56, 189, 248, 0.4); }
-  100% { border-color: rgba(168, 85, 247, 0.4); }
-}
-
-/* --- Dab / Stamp --- */
 @keyframes dab-stamp {
   0% { transform: scale(0); opacity: 0; }
-  40% { transform: scale(1.4); opacity: 0.95; }
-  70% { transform: scale(0.9); opacity: var(--color-dab-opacity); }
-  100% { transform: scale(1.0); opacity: var(--color-dab-opacity); }
+  50% { transform: scale(1.15); opacity: var(--color-dab-opacity); }
+  100% { transform: scale(1); opacity: var(--color-dab-opacity); }
 }
 
-@keyframes dab-ripple {
-  0% { transform: scale(0.5); opacity: 0.6; border-width: 3px; }
-  100% { transform: scale(2.5); opacity: 0; border-width: 0px; }
-}
-
-/* --- Ball / Number --- */
 @keyframes ball-entrance {
-  0% { transform: scale(0) rotate(-180deg); opacity: 0; }
-  40% { transform: scale(1.35) rotate(15deg); opacity: 1; }
-  60% { transform: scale(0.85) rotate(-8deg); }
-  80% { transform: scale(1.1) rotate(3deg); }
-  100% { transform: scale(1) rotate(0deg); opacity: 1; }
+  0% { transform: scale(0); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 @keyframes ball-pulse {
-  0%, 100% { box-shadow: 0 0 0 0 rgba(255, 215, 0, 0.5); }
-  50% { box-shadow: 0 0 0 14px rgba(255, 215, 0, 0); }
+  0%, 100% { box-shadow: 0 0 0 0 rgba(212, 162, 76, 0.3); }
+  50% { box-shadow: 0 0 0 10px rgba(212, 162, 76, 0); }
 }
 
-@keyframes number-pop {
-  0% { transform: scale(1); }
-  30% { transform: scale(1.25); }
-  60% { transform: scale(0.95); }
-  100% { transform: scale(1); }
-}
-
-/* --- Glow effects --- */
-@keyframes gold-pulse {
-  0%, 100% {
-    box-shadow: 0 0 15px var(--color-gold-glow), 0 0 30px var(--color-gold-glow);
-  }
-  50% {
-    box-shadow: 0 0 30px var(--color-gold-glow), 0 0 60px var(--color-gold-glow), 0 0 100px rgba(255, 215, 0, 0.12);
-  }
-}
-
-@keyframes bingo-glow {
-  0%, 100% {
-    box-shadow: 0 0 20px var(--color-gold-glow), 0 0 40px var(--color-gold-glow), inset 0 0 20px rgba(255, 255, 255, 0.1);
-  }
-  50% {
-    box-shadow: 0 0 40px var(--color-gold-glow), 0 0 80px var(--color-gold-glow), 0 0 120px rgba(255, 215, 0, 0.15), inset 0 0 30px rgba(255, 255, 255, 0.2);
-  }
-}
-
-@keyframes glow-breathe {
-  0%, 100% { filter: brightness(1); box-shadow: 0 0 8px var(--color-gold-glow), 0 4px 12px rgba(0, 0, 0, 0.3); }
-  50% { filter: brightness(1.2); box-shadow: 0 0 22px var(--color-gold-glow), 0 4px 16px rgba(0, 0, 0, 0.3); }
-}
-
-@keyframes winner-text-glow {
-  0%, 100% { text-shadow: 0 0 10px currentColor, 0 0 30px currentColor, 0 0 60px currentColor; }
-  50% { text-shadow: 0 0 20px currentColor, 0 0 50px currentColor, 0 0 100px currentColor, 0 0 150px currentColor; }
-}
-
-@keyframes called-cell-pulse {
-  0%, 100% { box-shadow: inset 0 0 0 1px rgba(168, 85, 247, 0.2); }
-  50% { box-shadow: inset 0 0 0 2px rgba(168, 85, 247, 0.5), 0 0 8px rgba(168, 85, 247, 0.2); }
-}
-
-/* --- Win / Celebration --- */
 @keyframes win-entrance {
   0% { transform: scale(0); opacity: 0; }
-  60% { transform: scale(1.3); opacity: 1; }
-  80% { transform: scale(0.95); }
-  100% { transform: scale(1.0); opacity: 1; }
-}
-
-@keyframes coin-fall {
-  0% { transform: translateY(-120vh) rotateY(0deg) rotateX(0deg); opacity: 1; }
-  25% { transform: translateY(-60vh) rotateY(180deg) rotateX(90deg) translateX(15px); }
-  50% { transform: translateY(0) rotateY(360deg) rotateX(180deg) translateX(-10px); opacity: 0.9; }
-  75% { transform: translateY(50vh) rotateY(540deg) rotateX(270deg) translateX(20px); }
-  100% { transform: translateY(100vh) rotateY(720deg) rotateX(360deg) translateX(-5px); opacity: 0; }
-}
-
-@keyframes firework-burst {
-  0% { transform: scale(0); opacity: 1; }
-  50% { transform: scale(1); opacity: 0.8; }
-  100% { transform: scale(1.5); opacity: 0; }
+  60% { transform: scale(1.15); opacity: 1; }
+  100% { transform: scale(1); opacity: 1; }
 }
 
 @keyframes confetti-fall {
-  0% { transform: translateY(-100vh) rotate(0deg) translateX(0); opacity: 1; }
-  25% { transform: translateY(-50vh) rotate(180deg) translateX(15px); }
-  50% { transform: translateY(0) rotate(360deg) translateX(-10px); opacity: 0.9; }
-  75% { transform: translateY(50vh) rotate(540deg) translateX(20px); }
-  100% { transform: translateY(100vh) rotate(720deg) translateX(-5px); opacity: 0; }
+  0% { transform: translateY(-100vh) rotate(0deg); opacity: 1; }
+  100% { transform: translateY(100vh) rotate(720deg); opacity: 0; }
 }
 
-/* --- UI Transitions --- */
 @keyframes page-enter {
-  from { opacity: 0; transform: translateY(16px); }
+  from { opacity: 0; transform: translateY(8px); }
   to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes slide-down {
-  from { transform: translateY(-20px); opacity: 0; }
-  to { transform: translateY(0); opacity: 1; }
-}
-
-@keyframes slide-up {
-  from { transform: translateY(100%); opacity: 0; }
+  from { transform: translateY(-12px); opacity: 0; }
   to { transform: translateY(0); opacity: 1; }
 }
 
@@ -361,303 +196,163 @@ body {
   to { transform: translateY(0); }
 }
 
-@keyframes shake {
-  0%, 100% { transform: translateX(0); }
-  10%, 30%, 50%, 70%, 90% { transform: translateX(-4px); }
-  20%, 40%, 60%, 80% { transform: translateX(4px); }
-}
-
 @keyframes emoji-float {
   0% { opacity: 0; transform: translateY(10px) scale(0.8); }
-  15% { opacity: 1; transform: translateY(0) scale(1.1); }
-  30% { transform: translateY(-5px) scale(1); }
-  70% { opacity: 1; transform: translateY(-30px) scale(1); }
-  100% { opacity: 0; transform: translateY(-60px) scale(0.8); }
-}
-
-@keyframes card-deal {
-  0% { transform: scale(0.8) rotateY(90deg); opacity: 0; }
-  50% { transform: scale(1.05) rotateY(-5deg); opacity: 1; }
-  100% { transform: scale(1) rotateY(0deg); opacity: 1; }
-}
-
-@keyframes counter-tick {
-  0% { transform: translateY(100%); opacity: 0; }
-  100% { transform: translateY(0); opacity: 1; }
+  15% { opacity: 1; transform: translateY(0) scale(1); }
+  70% { opacity: 1; transform: translateY(-25px); }
+  100% { opacity: 0; transform: translateY(-50px) scale(0.8); }
 }
 
 /* ============================================================
-   Animation Utility Classes
+   Animation Utilities — minimal set
    ============================================================ */
 
-.animate-dab { animation: dab-stamp 0.35s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-.animate-ball-entrance { animation: ball-entrance 0.7s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
+.animate-dab { animation: dab-stamp 0.25s ease-out forwards; }
+.animate-ball-entrance { animation: ball-entrance 0.4s ease-out forwards; }
 .animate-ball-pulse { animation: ball-pulse 2s ease-in-out infinite; }
-.animate-slide-up { animation: slide-up 0.3s ease-out forwards; }
-.animate-slide-down { animation: slide-down 0.3s ease-out forwards; }
-.animate-fade-in { animation: fade-in 0.3s ease-out forwards; }
-.animate-bingo-glow { animation: bingo-glow 1.5s ease-in-out infinite; }
-.animate-shake { animation: shake 0.5s ease-in-out; }
-.animate-pulse-subtle { animation: glow-breathe 2.5s ease-in-out infinite; }
+.animate-slide-down { animation: slide-down 0.2s ease-out forwards; }
+.animate-fade-in { animation: fade-in 0.2s ease-out forwards; }
+.animate-page-enter { animation: page-enter 0.3s ease-out forwards; }
 .animate-emoji-float { animation: emoji-float 2s ease-out forwards; }
-.animate-page-enter { animation: page-enter 0.5s ease-out forwards; }
-.animate-winner-glow { animation: winner-text-glow 1.5s ease-in-out infinite; }
-.animate-gold-pulse { animation: gold-pulse 2s ease-in-out infinite; }
-.animate-win-entrance { animation: win-entrance 0.6s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-.animate-slide-in-right { animation: slide-in-right 0.3s ease-out forwards; }
-.animate-slide-in-up { animation: slide-in-up 0.3s ease-out forwards; }
-.animate-shimmer {
-  background-size: 200% 100%;
-  animation: shimmer 3s linear infinite;
-}
-.animate-neon-pulse { animation: neon-pulse 2s ease-in-out infinite; }
-.animate-neon-border { animation: neon-border-cycle 4s ease-in-out infinite; }
-.animate-number-pop { animation: number-pop 0.3s cubic-bezier(0.34, 1.56, 0.64, 1); }
-.animate-card-deal { animation: card-deal 0.5s cubic-bezier(0.34, 1.56, 0.64, 1) forwards; }
-.animate-called-pulse { animation: called-cell-pulse 2s ease-in-out infinite; }
+.animate-win-entrance { animation: win-entrance 0.4s ease-out forwards; }
+.animate-slide-in-right { animation: slide-in-right 0.25s ease-out forwards; }
+.animate-slide-in-up { animation: slide-in-up 0.25s ease-out forwards; }
+
+/* Legacy compat aliases */
+.animate-bingo-glow { /* removed — no glow */ }
+.animate-shake { /* removed */ }
+.animate-pulse-subtle { /* removed */ }
+.animate-winner-glow { /* removed */ }
+.animate-gold-pulse { /* removed */ }
+.animate-shimmer { /* removed */ }
+.animate-neon-pulse { /* removed */ }
+.animate-neon-border { /* removed */ }
+.animate-number-pop { /* removed */ }
+.animate-card-deal { animation: page-enter 0.3s ease-out forwards; }
+.animate-called-pulse { /* removed */ }
+.animate-slide-up { animation: slide-in-up 0.25s ease-out forwards; }
 
 /* ============================================================
-   Custom Utility Classes
+   Utility Classes
    ============================================================ */
 
 .touch-target { min-width: 48px; min-height: 48px; }
+.text-shadow-glow { /* removed — too heavy */ }
+.text-shadow-neon { /* removed */ }
 
-.text-shadow-glow {
-  text-shadow: 0 0 20px currentColor, 0 0 40px currentColor;
-}
-
-.text-shadow-neon {
-  text-shadow: 0 0 10px currentColor, 0 0 30px currentColor, 0 0 60px currentColor;
-}
-
-.bg-gradient-game {
-  background: linear-gradient(135deg, var(--color-bg-primary) 0%, var(--color-bg-tertiary) 50%, var(--color-bg-secondary) 100%);
-}
-
-/* Gold gradient text */
 .text-gold {
-  background: linear-gradient(135deg, #ffd700 0%, #ffaa00 30%, #ffe066 60%, #ffd700 100%);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--color-gold);
 }
-
 .light .text-gold {
-  background: linear-gradient(135deg, #b45309, #92400e, #b45309);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
+  color: var(--color-gold);
 }
 
-/* Shimmer text effect */
-.text-shimmer {
-  background: linear-gradient(90deg, #ffd700 0%, #fff8dc 25%, #ffd700 50%, #ffaa00 75%, #ffd700 100%);
-  background-size: 200% 100%;
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-  animation: shimmer 3s linear infinite;
-}
-
-/* Neon text per color */
-.text-neon-purple { color: var(--color-neon-purple); text-shadow: 0 0 10px rgba(168, 85, 247, 0.5), 0 0 30px rgba(168, 85, 247, 0.2); }
-.text-neon-blue { color: var(--color-neon-blue); text-shadow: 0 0 10px rgba(56, 189, 248, 0.5), 0 0 30px rgba(56, 189, 248, 0.2); }
-.text-neon-gold { color: var(--color-gold); text-shadow: 0 0 10px rgba(255, 215, 0, 0.5), 0 0 30px rgba(255, 215, 0, 0.2); }
+/* Legacy compat — now just static gold color */
+.text-shimmer { color: var(--color-gold); }
+.text-neon-purple { color: #a78bfa; }
+.text-neon-blue { color: #60a5fa; }
+.text-neon-gold { color: var(--color-gold); }
 
 /* ============================================================
-   Glassmorphism Utilities — Neon Casino Edition
-   Deeper glass with purple tint and neon edge highlights
+   Glass Panels — simple translucent, no backdrop-filter
+   Mobile-first: avoid GPU-heavy blur entirely.
+   Use solid translucent backgrounds instead.
    ============================================================ */
 
-@supports not (backdrop-filter: blur(1px)) {
-  .glass { background: rgba(13, 11, 46, 0.9) !important; }
-  .glass-light { background: rgba(13, 11, 46, 0.8) !important; }
-  .glass-strong { background: rgba(5, 5, 17, 0.95) !important; }
-  .glass-card { background: rgba(13, 11, 46, 0.92) !important; }
-}
-
 .glass {
-  background: rgba(168, 85, 247, 0.04);
-  backdrop-filter: blur(14px) saturate(140%);
-  -webkit-backdrop-filter: blur(14px) saturate(140%);
-  border: 1px solid rgba(168, 85, 247, 0.12);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.4), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-  transform: translateZ(0);
+  background: rgba(14, 18, 40, 0.85);
+  border: 1px solid var(--color-border);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.3);
 }
 
 .glass-light {
-  background: rgba(168, 85, 247, 0.03);
-  backdrop-filter: blur(10px) saturate(120%);
-  -webkit-backdrop-filter: blur(10px) saturate(120%);
-  border: 1px solid rgba(168, 85, 247, 0.08);
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.25);
-  transform: translateZ(0);
+  background: rgba(14, 18, 40, 0.7);
+  border: 1px solid var(--color-border);
 }
 
 .glass-strong {
-  background: rgba(11, 8, 30, 0.8);
-  backdrop-filter: blur(16px) saturate(130%);
-  -webkit-backdrop-filter: blur(16px) saturate(130%);
-  border: 1px solid rgba(168, 85, 247, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.5), inset 0 1px 0 0 rgba(255, 255, 255, 0.06);
-  transform: translateZ(0);
+  background: rgba(7, 10, 26, 0.92);
+  border: 1px solid var(--color-border-light);
+  box-shadow: 0 4px 20px rgba(0, 0, 0, 0.4);
 }
 
 .glass-card {
-  background: rgba(168, 85, 247, 0.05);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  border: 1px solid rgba(168, 85, 247, 0.15);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-  transform: translateZ(0);
+  background: rgba(17, 21, 48, 0.9);
+  border: 1px solid var(--color-border-light);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 }
 
-/* Neon glass card — animated border */
+/* Neon card → now just gold-bordered card */
 .glass-card-neon {
-  background: rgba(168, 85, 247, 0.05);
-  backdrop-filter: blur(12px) saturate(140%);
-  -webkit-backdrop-filter: blur(12px) saturate(140%);
-  border: 1.5px solid rgba(168, 85, 247, 0.25);
-  box-shadow: 0 8px 32px rgba(0, 0, 0, 0.35), 0 0 15px rgba(168, 85, 247, 0.08), inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-  transform: translateZ(0);
-  animation: neon-border-cycle 6s ease-in-out infinite;
+  background: rgba(17, 21, 48, 0.9);
+  border: 1px solid rgba(212, 162, 76, 0.2);
+  box-shadow: 0 2px 12px rgba(0, 0, 0, 0.25);
 }
 
-/* Cell glass — no blur for performance at scale */
 .glass-cell {
-  background: rgba(168, 85, 247, 0.05);
-  border: 1px solid rgba(168, 85, 247, 0.08);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.03);
+  background: var(--color-cell-bg);
+  border: 1px solid rgba(255, 255, 255, 0.05);
 }
 
-/* Interactive glass button */
 .glass-btn {
-  background: rgba(168, 85, 247, 0.08);
-  backdrop-filter: blur(8px) saturate(120%);
-  -webkit-backdrop-filter: blur(8px) saturate(120%);
-  border: 1px solid rgba(168, 85, 247, 0.15);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.05);
-  transition: all 0.2s ease;
+  background: rgba(255, 255, 255, 0.05);
+  border: 1px solid var(--color-border);
+  transition: background 0.15s ease, border-color 0.15s ease;
 }
-
 .glass-btn:hover {
-  background: rgba(168, 85, 247, 0.15);
-  border-color: rgba(168, 85, 247, 0.3);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.08), 0 0 16px rgba(168, 85, 247, 0.12);
+  background: rgba(255, 255, 255, 0.08);
+  border-color: var(--color-border-light);
 }
 
-/* Light theme glass variants */
-.light .glass {
-  background: rgba(255, 255, 255, 0.2);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.12), inset 0 2px 12px rgba(255, 255, 255, 0.15);
-}
-.light .glass-light {
-  background: rgba(255, 255, 255, 0.12);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: 0 4px 16px rgba(31, 38, 135, 0.08);
-}
-.light .glass-strong {
-  background: rgba(255, 255, 255, 0.65);
-  border: 1px solid rgba(0, 0, 0, 0.1);
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1), inset 0 2px 12px rgba(255, 255, 255, 0.2);
-}
-.light .glass-card, .light .glass-card-neon {
-  background: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-  box-shadow: 0 8px 32px rgba(31, 38, 135, 0.1), inset 0 2px 12px rgba(255, 255, 255, 0.2);
-  animation: none;
-}
-.light .glass-cell {
-  background: rgba(255, 255, 255, 0.3);
-  border: 1px solid rgba(0, 0, 0, 0.06);
-  box-shadow: inset 0 1px 0 0 rgba(255, 255, 255, 0.5);
-}
-.light .glass-btn {
-  background: rgba(255, 255, 255, 0.25);
-  border: 1px solid rgba(0, 0, 0, 0.08);
-}
-.light .glass-btn:hover {
-  background: rgba(255, 255, 255, 0.4);
-  border-color: rgba(0, 0, 0, 0.12);
-}
+/* Light theme */
+.light .glass { background: rgba(255, 255, 255, 0.85); border: 1px solid var(--color-border); box-shadow: 0 2px 12px rgba(0,0,0,0.06); }
+.light .glass-light { background: rgba(255, 255, 255, 0.7); border: 1px solid var(--color-border); }
+.light .glass-strong { background: rgba(255, 255, 255, 0.95); border: 1px solid var(--color-border-light); }
+.light .glass-card, .light .glass-card-neon { background: rgba(255, 255, 255, 0.9); border: 1px solid var(--color-border); }
+.light .glass-cell { background: var(--color-cell-bg); border: 1px solid rgba(0,0,0,0.04); }
+.light .glass-btn { background: rgba(0,0,0,0.03); border: 1px solid var(--color-border); }
+.light .glass-btn:hover { background: rgba(0,0,0,0.05); border-color: var(--color-border-light); }
 
 /* ============================================================
-   Cell & Card Depth Effects
+   Card & Cell Depth
    ============================================================ */
 
 .cell-depth {
-  box-shadow: inset 0 1px 3px rgba(0, 0, 0, 0.2), inset 0 -1px 1px rgba(168, 85, 247, 0.05);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.15);
 }
-
 .light .cell-depth {
-  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.06), inset 0 -1px 1px rgba(255, 255, 255, 0.6);
-}
-
-.dab-mark {
-  background: var(--color-dab);
-  box-shadow: 0 0 12px rgba(34, 197, 94, 0.5), inset 0 0 6px rgba(255, 255, 255, 0.15);
-}
-
-.dab-stamp {
-  box-shadow: 0 0 10px rgba(34, 197, 94, 0.4), inset 0 0 6px rgba(255, 255, 255, 0.15);
-  border: 1px solid rgba(255, 255, 255, 0.1);
+  box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
 }
 
 .col-header {
-  text-shadow: 0 1px 3px rgba(0, 0, 0, 0.5);
-  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25), inset 0 1px 0 rgba(255, 255, 255, 0.25);
+  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.4);
 }
 
-.glow-gold { box-shadow: 0 0 25px var(--color-gold-glow); }
+.glow-gold { box-shadow: 0 0 12px var(--color-gold-glow); }
+
+/* Legacy compat */
+.neon-border-purple { border-color: var(--color-border-light); }
+.neon-border-gold { border-color: rgba(212, 162, 76, 0.25); }
+.dab-mark { background: var(--color-dab); }
+.dab-stamp { border: 1px solid rgba(255,255,255,0.1); }
 
 /* ============================================================
-   Neon-bordered sections
-   ============================================================ */
-
-.neon-border-purple {
-  border: 1px solid rgba(168, 85, 247, 0.3);
-  box-shadow: 0 0 10px rgba(168, 85, 247, 0.1), inset 0 0 10px rgba(168, 85, 247, 0.03);
-}
-
-.neon-border-gold {
-  border: 1px solid rgba(255, 215, 0, 0.3);
-  box-shadow: 0 0 10px rgba(255, 215, 0, 0.1), inset 0 0 10px rgba(255, 215, 0, 0.03);
-}
-
-/* ============================================================
-   Theme Transitions
-   ============================================================ */
-
-.theme-transition,
-.theme-transition *,
-.theme-transition *::before,
-.theme-transition *::after {
-  transition: background-color 0.3s ease, border-color 0.3s ease, color 0.15s ease, box-shadow 0.3s ease !important;
-}
-
-/* ============================================================
-   Radix UI Overrides
-   ============================================================ */
-
-[data-radix-popper-content-wrapper] {
-  z-index: 50 !important;
-}
-
-/* ============================================================
-   Scrollbar-hidden & Drawer Overlay
+   Misc
    ============================================================ */
 
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
 
 .drawer-overlay {
-  position: fixed;
-  inset: 0;
-  background: rgba(0, 0, 0, 0.6);
+  position: fixed; inset: 0;
+  background: rgba(0, 0, 0, 0.5);
   z-index: 35;
 }
 
-.safe-bottom {
-  padding-bottom: env(safe-area-inset-bottom);
+.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+
+.theme-transition, .theme-transition *, .theme-transition *::before, .theme-transition *::after {
+  transition: background-color 0.2s ease, border-color 0.2s ease, color 0.1s ease !important;
 }
+
+[data-radix-popper-content-wrapper] { z-index: 50 !important; }

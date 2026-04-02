@@ -58,12 +58,11 @@ export function StatCards({
       {cards.map((card, index) => (
         <div
           key={card.label}
-          className="glass-card-neon rounded-xl p-4 text-center space-y-1 hover:shadow-lg transition-shadow duration-200 animate-card-deal"
+          className="glass-card rounded-xl p-4 text-center space-y-1 hover:shadow-lg transition-shadow duration-200 animate-card-deal"
           style={{ animationDelay: `${index * 0.1}s` }}
         >
           <p
             className={`text-2xl font-bold ${card.iconClass}`}
-            style={{ textShadow: "0 0 10px currentColor" }}
           >
             {card.icon}
           </p>

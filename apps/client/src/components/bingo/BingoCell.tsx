@@ -42,8 +42,7 @@ export function BingoCell({
         "glass-cell cell-depth",
         isFree
           ? "border border-[var(--color-gold)]/30 cursor-default"
-          : "text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] hover:shadow-[0_0_12px_rgba(168,85,247,0.2)] active:scale-[0.92] cursor-pointer",
-        dabbed && !isFree && "hover:shadow-none",
+          : "text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] active:scale-[0.92] cursor-pointer",
         disabled && !isFree && "opacity-60 cursor-not-allowed",
       )}
       style={isFree ? { background: 'linear-gradient(135deg, rgba(255,215,0,0.15), rgba(245,158,11,0.1))', boxShadow: '0 0 12px rgba(255,215,0,0.15)' } : undefined}
@@ -55,7 +54,7 @@ export function BingoCell({
     >
       {/* Number or FREE star icon */}
       {isFree ? (
-        <span className="z-10 relative flex items-center justify-center animate-pulse-subtle">
+        <span className="z-10 relative flex items-center justify-center">
           <svg
             viewBox="0 0 24 24"
             fill="url(#goldStar)"
@@ -93,7 +92,6 @@ export function BingoCell({
               boxShadow: `0 0 8px ${columnColor}66`,
             }}
           />
-          <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-[dab-ripple_0.6s_ease-out_forwards]" />
         </>
       )}
       {/* FREE space gold overlay */}

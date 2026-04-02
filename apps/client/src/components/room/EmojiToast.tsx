@@ -15,7 +15,7 @@ export function EmojiToast({ reactions }: EmojiToastProps) {
 
   return (
     <div className="fixed top-20 left-1/2 -translate-x-1/2 z-50 pointer-events-none flex flex-col items-center gap-2">
-      {reactions.map((reaction) => (
+      {reactions.slice(-8).map((reaction) => (
         <div
           key={reaction.id}
           className={cn(

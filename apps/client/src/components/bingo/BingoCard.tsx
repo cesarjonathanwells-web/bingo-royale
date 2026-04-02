@@ -36,7 +36,7 @@ export function BingoCard({
       className={cn(
         "w-full mx-auto",
         "rounded-xl sm:rounded-2xl overflow-hidden",
-        "glass-card-neon",
+        "glass-card",
         "shadow-xl shadow-black/30",
         className,
       )}
@@ -51,7 +51,6 @@ export function BingoCard({
               className="col-header flex items-center justify-center py-1 sm:py-1.5 lg:py-2 rounded font-black text-sm sm:text-base lg:text-lg text-white"
               style={{
                 backgroundColor: color,
-                textShadow: `0 0 8px ${color}66`,
               }}
             >
               {letter}
