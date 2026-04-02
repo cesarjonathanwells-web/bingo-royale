@@ -228,10 +228,11 @@ export function GameView({
                 myCards.length <= 2
                   ? "grid-cols-1 sm:grid-cols-2 max-w-[600px]"
                   : "grid-cols-1 sm:grid-cols-2 max-w-[600px]",
+                myCards.length > 2 && "sm:grid-rows-2",
               )} style={{ maxHeight: "100%" }}>
                 {myCards.map((card, ci) => (
                   <div key={ci} className={cn(
-                    "min-h-0 min-w-0 flex items-center justify-center",
+                    "min-h-0 min-w-0 flex items-center justify-center overflow-hidden",
                     myCards.length === 3 && ci === 2 && "sm:col-span-2 sm:max-w-[50%] sm:mx-auto",
                   )}>
                     {room.variant === "75" ? (
