@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect } from "react";
+import { useCallback, useState, useRef, useEffect, useSyncExternalStore } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   Room,
@@ -93,6 +93,14 @@ export function GameView({
   onLeave,
 }: GameViewProps) {
   const { t } = useTranslation("game");
+
+  // Detect mobile (< 640px = below Tailwind's sm breakpoint)
+  const isMobile = useSyncExternalStore(
+    (cb) => { window.addEventListener("resize", cb); return () => window.removeEventListener("resize", cb); },
+    () => window.innerWidth < 640,
+    () => true, // SSR fallback
+  );
+
   const [chatOpen, setChatOpen] = useState(false);
   const [playersOpen, setPlayersOpen] = useState(false);
   const [numbersOpen, setNumbersOpen] = useState(false);
@@ -190,9 +198,9 @@ export function GameView({
           </div>
         )}
 
-        {/* View toggle for multi-card */}
+        {/* View toggle for multi-card — hidden on mobile (carousel only) */}
         {myCards.length > 1 && (
-          <div className="flex items-center justify-center gap-2 py-0.5 shrink-0">
+          <div className="hidden sm:flex items-center justify-center gap-2 py-0.5 shrink-0">
             <button
               onClick={() => setViewAll(false)}
               className={cn(
@@ -220,7 +228,7 @@ export function GameView({
 
         {/* Card display - constrained to fit available height */}
         <div className="flex-1 flex items-center justify-center w-full min-h-0 overflow-hidden">
-          {viewAll && myCards.length > 1 ? (
+          {viewAll && !isMobile && myCards.length > 1 ? (
             /* All cards grid - fit within available space */
             <div className="w-full h-full flex items-center justify-center p-2 lg:p-4">
               <div className={cn(
