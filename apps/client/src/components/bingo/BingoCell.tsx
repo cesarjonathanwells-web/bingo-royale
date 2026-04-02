@@ -37,12 +37,13 @@ export function BingoCell({
       disabled={disabled || isFree}
       className={cn(
         "relative flex items-center justify-center",
-        "aspect-square w-full rounded font-bold text-xs sm:text-base lg:text-lg",
+        "aspect-square w-full rounded-lg font-bold text-xs sm:text-base lg:text-lg",
         "transition-all duration-150 select-none",
-        "cell-depth",
+        "glass-cell cell-depth",
         isFree
           ? "border border-[var(--color-gold)]/30 cursor-default"
-          : "glass-cell text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] active:scale-[0.92] cursor-pointer",
+          : "text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] hover:shadow-[0_0_12px_rgba(168,85,247,0.2)] active:scale-[0.92] cursor-pointer",
+        dabbed && !isFree && "hover:shadow-none",
         disabled && !isFree && "opacity-60 cursor-not-allowed",
       )}
       style={isFree ? { background: 'linear-gradient(135deg, rgba(255,215,0,0.15), rgba(245,158,11,0.1))', boxShadow: '0 0 12px rgba(255,215,0,0.15)' } : undefined}
@@ -52,27 +53,48 @@ export function BingoCell({
           : `${letter ?? ""}${value ?? ""} ${dabbed ? "dabbed" : ""}`
       }
     >
-      {/* Number or FREE text */}
-      <span
-        className={cn(
-          "z-10 relative font-extrabold",
-          dabbed && !isFree && "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]",
-          isFree && "text-xs sm:text-sm font-black tracking-wide text-gold",
-        )}
-      >
-        {isFree ? t("game.free") : (value ?? "")}
-      </span>
+      {/* Number or FREE star icon */}
+      {isFree ? (
+        <span className="z-10 relative flex items-center justify-center animate-pulse-subtle">
+          <svg
+            viewBox="0 0 24 24"
+            fill="url(#goldStar)"
+            className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 drop-shadow-[0_0_6px_rgba(255,215,0,0.5)]"
+            aria-hidden="true"
+          >
+            <defs>
+              <linearGradient id="goldStar" x1="0" y1="0" x2="1" y2="1">
+                <stop offset="0%" stopColor="#ffd700" />
+                <stop offset="100%" stopColor="#f59e0b" />
+              </linearGradient>
+            </defs>
+            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
+          </svg>
+        </span>
+      ) : (
+        <span
+          className={cn(
+            "z-10 relative font-black",
+            dabbed && "text-white drop-shadow-[0_1px_3px_rgba(0,0,0,0.5)]",
+          )}
+        >
+          {value ?? ""}
+        </span>
+      )}
 
       {/* Dab overlay - column color */}
       {dabbed && !isFree && (
-        <div
-          className="absolute inset-[2px] rounded-full animate-dab"
-          style={{
-            backgroundColor: columnColor,
-            opacity: 0.75,
-            boxShadow: `0 0 8px ${columnColor}66`,
-          }}
-        />
+        <>
+          <div
+            className="absolute inset-[2px] rounded-full animate-dab"
+            style={{
+              backgroundColor: columnColor,
+              opacity: 0.75,
+              boxShadow: `0 0 8px ${columnColor}66`,
+            }}
+          />
+          <div className="absolute inset-0 rounded-full border-2 border-white/30 animate-[dab-ripple_0.6s_ease-out_forwards]" />
+        </>
       )}
       {/* FREE space gold overlay */}
       {isFree && (

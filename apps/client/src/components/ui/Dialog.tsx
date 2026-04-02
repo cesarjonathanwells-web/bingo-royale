@@ -31,18 +31,18 @@ export function DialogContent({
 }: DialogContentProps) {
   return (
     <DialogPrimitive.Portal>
-      <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-black/65 backdrop-blur-md animate-fade-in" />
+      <DialogPrimitive.Overlay className="fixed inset-0 z-40 bg-[#050511]/75 backdrop-blur-md animate-fade-in" />
       <DialogPrimitive.Content
         className={cn(
           "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
           "w-[calc(100%-2rem)] max-w-md max-h-[85vh] overflow-y-auto",
-          "rounded-2xl glass-strong",
-          "p-6 shadow-2xl shadow-black/30 animate-slide-down",
+          "rounded-2xl glass-strong neon-border-purple",
+          "p-6 shadow-2xl shadow-[var(--color-neon-purple)]/10 animate-slide-down",
           "focus:outline-none",
           className,
         )}
       >
-        <DialogPrimitive.Title className="text-xl font-bold text-[var(--color-text-primary)] mb-1">
+        <DialogPrimitive.Title className="text-xl font-gaming tracking-wider text-gold mb-1">
           {title}
         </DialogPrimitive.Title>
         {description && (

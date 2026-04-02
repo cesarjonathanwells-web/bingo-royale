@@ -27,24 +27,24 @@ export function Stats() {
   // Loading skeleton
   if (loading) {
     return (
-      <div className="flex-1 px-4 py-8 max-w-lg mx-auto w-full">
-        <div className="h-8 w-40 mx-auto mb-6 rounded bg-[var(--color-bg-secondary)] animate-pulse" />
+      <div className="flex-1 px-4 py-8 max-w-lg mx-auto w-full animate-page-enter">
+        <div className="h-8 w-40 mx-auto mb-6 rounded bg-purple-900/40 animate-pulse" />
         <div className="grid grid-cols-2 gap-4 mb-8">
           {[...Array(4)].map((_, i) => (
             <div
               key={i}
-              className="rounded-xl bg-[var(--color-bg-secondary)] border border-[var(--color-border)] p-4 space-y-2"
+              className="rounded-xl glass p-4 space-y-2 border border-purple-500/20"
             >
-              <div className="h-8 w-16 mx-auto rounded bg-[var(--color-border)] animate-pulse" />
-              <div className="h-3 w-20 mx-auto rounded bg-[var(--color-border)] animate-pulse" />
+              <div className="h-8 w-16 mx-auto rounded bg-purple-800/30 animate-pulse" />
+              <div className="h-3 w-20 mx-auto rounded bg-purple-800/30 animate-pulse" />
             </div>
           ))}
         </div>
-        <div className="h-6 w-32 mb-4 rounded bg-[var(--color-bg-secondary)] animate-pulse" />
+        <div className="h-6 w-32 mb-4 rounded bg-purple-900/40 animate-pulse" />
         {[...Array(3)].map((_, i) => (
           <div
             key={i}
-            className="h-12 mb-2 rounded bg-[var(--color-bg-secondary)] animate-pulse"
+            className="h-12 mb-2 rounded glass border border-purple-500/20 animate-pulse"
           />
         ))}
       </div>
@@ -69,7 +69,7 @@ export function Stats() {
 
   return (
     <div className="flex-1 px-4 py-8 pb-20 max-w-lg mx-auto w-full animate-page-enter">
-      <h2 className="text-2xl font-bold text-[var(--color-text-primary)] mb-6 text-center">
+      <h2 className="font-gaming text-2xl text-gold mb-6 text-center">
         {t("stats.title")}
       </h2>
 

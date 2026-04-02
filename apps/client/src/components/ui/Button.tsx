@@ -12,7 +12,7 @@ interface ButtonProps extends ButtonHTMLAttributes<HTMLButtonElement> {
 
 const variantClasses: Record<ButtonVariant, string> = {
   primary:
-    "bg-gradient-to-b from-amber-400 to-amber-600 hover:from-amber-300 hover:to-amber-500 text-white shadow-lg shadow-amber-500/25 active:scale-[0.97] border-t border-yellow-300/20",
+    "bg-gradient-to-b from-amber-400 via-yellow-500 to-amber-600 hover:from-amber-300 hover:via-yellow-400 hover:to-amber-500 text-white shadow-lg shadow-amber-500/30 active:scale-[0.97] border-t border-yellow-300/30 font-gaming tracking-wider",
   secondary:
     "glass-btn text-[var(--color-text-primary)] active:scale-[0.97]",
   danger:

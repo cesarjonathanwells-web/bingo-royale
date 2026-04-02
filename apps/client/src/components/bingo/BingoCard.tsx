@@ -36,22 +36,28 @@ export function BingoCard({
       className={cn(
         "w-full mx-auto",
         "rounded-xl sm:rounded-2xl overflow-hidden",
-        "glass-card",
+        "glass-card-neon",
         "shadow-xl shadow-black/30",
         className,
       )}
     >
       {/* Column letters */}
       <div className="grid grid-cols-5 gap-1 lg:gap-1.5 px-1.5 lg:px-2 pt-1.5 lg:pt-2">
-        {LETTERS.map((letter) => (
-          <div
-            key={letter}
-            className="col-header flex items-center justify-center py-1 sm:py-1.5 lg:py-2 rounded font-black text-sm sm:text-base lg:text-lg text-white"
-            style={{ backgroundColor: BALL_COLORS[letter] ?? "#f59e0b" }}
-          >
-            {letter}
-          </div>
-        ))}
+        {LETTERS.map((letter) => {
+          const color = BALL_COLORS[letter] ?? "#f59e0b";
+          return (
+            <div
+              key={letter}
+              className="col-header flex items-center justify-center py-1 sm:py-1.5 lg:py-2 rounded font-black text-sm sm:text-base lg:text-lg text-white"
+              style={{
+                backgroundColor: color,
+                textShadow: `0 0 8px ${color}66`,
+              }}
+            >
+              {letter}
+            </div>
+          );
+        })}
       </div>
 
       {/* Grid */}

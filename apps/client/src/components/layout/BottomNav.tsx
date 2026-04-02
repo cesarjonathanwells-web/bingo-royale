@@ -79,7 +79,7 @@ export function BottomNav() {
   return (
     <nav
       className="fixed bottom-0 left-0 right-0 z-30 glass"
-      style={{ height: "56px", paddingBottom: "env(safe-area-inset-bottom)" }}
+      style={{ height: "56px", paddingBottom: "env(safe-area-inset-bottom)", borderTop: "1px solid rgba(168, 85, 247, 0.12)" }}
     >
       <div className="flex items-center justify-around h-full max-w-5xl mx-auto">
         {tabs.map((tab) => {

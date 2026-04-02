@@ -110,14 +110,14 @@ export function RoomLobby({ room }: RoomLobbyProps) {
       <div className="flex-1 space-y-6">
         {/* Room Code */}
         <div className="text-center space-y-2">
-          <p className="text-xs font-bold text-[var(--color-text-muted)] uppercase tracking-[0.15em]">
+          <p className="text-[10px] font-bold text-[var(--color-text-muted)] uppercase tracking-[0.2em]">
             {t("lobby.roomCode")}
           </p>
           <button
             onClick={copyInviteLink}
-            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl glass hover:border-[var(--color-accent)]/50 hover:shadow-lg hover:shadow-[var(--color-accent)]/10 transition-all duration-200 group"
+            className="inline-flex items-center gap-3 px-8 py-4 rounded-2xl glass-card-neon hover:shadow-lg hover:shadow-[var(--color-neon-purple)]/15 transition-all duration-300 group"
           >
-            <span className="text-3xl sm:text-4xl font-mono font-extrabold tracking-[0.3em] sm:tracking-[0.4em] text-[var(--color-text-primary)]">
+            <span className="text-3xl sm:text-4xl font-gaming tracking-[0.3em] sm:tracking-[0.4em] text-shimmer">
               {generateRoomCode(room.code)}
             </span>
             <svg
@@ -143,8 +143,8 @@ export function RoomLobby({ room }: RoomLobbyProps) {
 
         {/* Host Settings */}
         {isHost && (
-          <div className="space-y-4 rounded-xl glass p-4">
-            <h3 className="text-sm font-semibold text-[var(--color-text-primary)]">
+          <div className="space-y-4 rounded-xl glass p-4 neon-border-purple">
+            <h3 className="text-sm font-gaming tracking-wider text-[var(--color-neon-purple)]">
               {t("lobby.settings")}
             </h3>
 
@@ -266,8 +266,8 @@ export function RoomLobby({ room }: RoomLobbyProps) {
         )}
 
         {/* Card Count Selector (all players) */}
-        <div className="rounded-xl glass p-4 space-y-3">
-          <label className="block text-sm font-semibold text-[var(--color-text-primary)]">
+        <div className="rounded-xl glass p-4 space-y-3 neon-border-purple">
+          <label className="block text-sm font-gaming tracking-wider text-[var(--color-neon-purple)]">
             {t("cards.count")}
           </label>
           <p className="text-xs text-[var(--color-text-muted)]">
@@ -282,8 +282,8 @@ export function RoomLobby({ room }: RoomLobbyProps) {
                 className={cn(
                   "flex-1 py-2.5 rounded-xl text-sm font-bold transition-all duration-150 border cursor-pointer",
                   cardCount === n
-                    ? "bg-[var(--color-accent)] text-white border-[var(--color-accent)] shadow-md shadow-[var(--color-accent)]/30"
-                    : "bg-[var(--color-bg-primary)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:bg-[var(--color-bg-tertiary)]",
+                    ? "bg-[var(--color-neon-purple)] text-white border-[var(--color-neon-purple)] shadow-md shadow-[var(--color-neon-purple)]/30"
+                    : "bg-[var(--color-bg-primary)] text-[var(--color-text-secondary)] border-[var(--color-border)] hover:bg-[var(--color-bg-tertiary)] hover:border-[var(--color-neon-purple)]/30",
                 )}
               >
                 {n}

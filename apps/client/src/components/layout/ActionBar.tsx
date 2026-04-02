@@ -27,7 +27,7 @@ export function ActionBar({
   return (
     <div
       className="flex items-center justify-between px-2 glass-light"
-      style={{ height: "44px" }}
+      style={{ height: "44px", borderTop: "1px solid rgba(168, 85, 247, 0.1)" }}
     >
       {/* Left side: Power-up icons (compact) */}
       <div className="flex items-center gap-1 overflow-x-auto">

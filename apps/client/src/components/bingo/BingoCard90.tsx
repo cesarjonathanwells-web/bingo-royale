@@ -37,7 +37,7 @@ export function BingoCard90({
       className={cn(
         "w-full mx-auto",
         "rounded-xl sm:rounded-2xl overflow-hidden",
-        "glass-card",
+        "glass-card-neon",
         "shadow-xl shadow-black/25",
         className,
       )}

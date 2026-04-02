@@ -21,19 +21,19 @@ export function Settings() {
 
   return (
     <div className="flex-1 px-4 py-8 pb-24 max-w-lg mx-auto w-full animate-page-enter">
-      <h1 className="text-2xl font-bold text-[var(--color-text-primary)] mb-6">
+      <h1 className="font-gaming text-2xl text-gold mb-6">
         {t("settings.title")}
       </h1>
 
       <div className="space-y-4">
         {/* Player Section */}
         {user && (
-          <section className="rounded-xl glass p-4">
+          <section className="rounded-xl glass p-4 neon-border-purple">
             <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
               {t("settings.player")}
             </h2>
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-10 h-10 rounded-full bg-[var(--color-accent)] flex items-center justify-center text-base font-bold text-white shrink-0">
+              <div className="w-10 h-10 rounded-full bg-gradient-to-br from-[var(--color-neon-purple)] to-[var(--color-neon-blue)] flex items-center justify-center text-base font-bold text-white shrink-0 ring-2 ring-[var(--color-neon-purple)]/30 ring-offset-2 ring-offset-[var(--color-bg-primary)]">
                 {user.name.charAt(0).toUpperCase()}
               </div>
               <div>
@@ -55,7 +55,7 @@ export function Settings() {
         )}
 
         {/* Language Section */}
-        <section className="rounded-xl glass p-4">
+        <section className="rounded-xl glass p-4 neon-border-purple">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
             {t("settings.language")}
           </h2>
@@ -65,7 +65,7 @@ export function Settings() {
               className={cn(
                 "flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer",
                 currentLang === "en"
-                  ? "bg-[var(--color-accent)] text-white"
+                  ? "bg-[var(--color-neon-purple)] text-white shadow-[0_0_12px_rgba(168,85,247,0.3)]"
                   : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
               )}
             >
@@ -76,7 +76,7 @@ export function Settings() {
               className={cn(
                 "flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer",
                 currentLang === "es"
-                  ? "bg-[var(--color-accent)] text-white"
+                  ? "bg-[var(--color-neon-purple)] text-white shadow-[0_0_12px_rgba(168,85,247,0.3)]"
                   : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
               )}
             >
@@ -86,7 +86,7 @@ export function Settings() {
         </section>
 
         {/* Theme Section */}
-        <section className="rounded-xl glass p-4">
+        <section className="rounded-xl glass p-4 neon-border-purple">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
             {t("settings.theme")}
           </h2>
@@ -98,7 +98,7 @@ export function Settings() {
               className={cn(
                 "flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer",
                 theme === "dark"
-                  ? "bg-[var(--color-accent)] text-white"
+                  ? "bg-[var(--color-neon-purple)] text-white shadow-[0_0_12px_rgba(168,85,247,0.3)]"
                   : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
               )}
             >
@@ -111,7 +111,7 @@ export function Settings() {
               className={cn(
                 "flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer",
                 theme === "light"
-                  ? "bg-[var(--color-accent)] text-white"
+                  ? "bg-[var(--color-neon-purple)] text-white shadow-[0_0_12px_rgba(168,85,247,0.3)]"
                   : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
               )}
             >
@@ -121,7 +121,7 @@ export function Settings() {
         </section>
 
         {/* Sound Section */}
-        <section className="rounded-xl glass p-4">
+        <section className="rounded-xl glass p-4 neon-border-purple">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
             {t("settings.sound")}
           </h2>
@@ -133,7 +133,7 @@ export function Settings() {
               className={cn(
                 "flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer",
                 !muted
-                  ? "bg-[var(--color-accent)] text-white"
+                  ? "bg-[var(--color-neon-purple)] text-white shadow-[0_0_12px_rgba(168,85,247,0.3)]"
                   : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
               )}
             >
@@ -146,7 +146,7 @@ export function Settings() {
               className={cn(
                 "flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer",
                 muted
-                  ? "bg-[var(--color-accent)] text-white"
+                  ? "bg-[var(--color-neon-purple)] text-white shadow-[0_0_12px_rgba(168,85,247,0.3)]"
                   : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
               )}
             >
@@ -156,7 +156,7 @@ export function Settings() {
         </section>
 
         {/* Auto-Daub Section */}
-        <section className="rounded-xl glass p-4">
+        <section className="rounded-xl glass p-4 neon-border-purple">
           <h2 className="text-sm font-semibold text-[var(--color-text-muted)] uppercase tracking-wide mb-3">
             {t("settings.autoDaub")}
           </h2>
@@ -168,7 +168,7 @@ export function Settings() {
               className={cn(
                 "flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer",
                 autoDaub
-                  ? "bg-[var(--color-accent)] text-white"
+                  ? "bg-[var(--color-neon-purple)] text-white shadow-[0_0_12px_rgba(168,85,247,0.3)]"
                   : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
               )}
             >
@@ -181,7 +181,7 @@ export function Settings() {
               className={cn(
                 "flex-1 py-2.5 text-sm font-semibold transition-colors cursor-pointer",
                 !autoDaub
-                  ? "bg-[var(--color-accent)] text-white"
+                  ? "bg-[var(--color-neon-purple)] text-white shadow-[0_0_12px_rgba(168,85,247,0.3)]"
                   : "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
               )}
             >
@@ -194,7 +194,7 @@ export function Settings() {
         </section>
 
         {/* About Section */}
-        <section className="rounded-xl glass p-4">
+        <section className="rounded-xl glass p-4 neon-border-purple">
           <p className="text-sm text-[var(--color-text-muted)] text-center">
             {t("settings.about")} &mdash; Bingo Royale {t("settings.version")}
           </p>

@@ -47,13 +47,14 @@ export function PlayerDrawer({ open, onClose, players, roomCode }: PlayerDrawerP
           "flex flex-col",
           "glass-strong",
           "animate-slide-in-right",
+          "border-l border-[var(--color-neon-purple)]/20",
         )}
         style={{ zIndex: 36 }}
       >
         {/* Header */}
         <div className="flex items-center justify-between px-4 py-4 border-b border-[var(--color-border)]">
           <div>
-            <h3 className="text-base font-bold text-[var(--color-text-primary)]">
+            <h3 className="text-base font-gaming tracking-wider text-[var(--color-neon-purple)]">
               {t("lobby.players")}
             </h3>
             <div className="flex items-center gap-2 mt-1">

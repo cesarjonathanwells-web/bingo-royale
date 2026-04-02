@@ -27,12 +27,12 @@ export function Header() {
   }, [room]);
 
   return (
-    <header className="sticky top-0 z-30 glass">
+    <header className="sticky top-0 z-30 glass" style={{ borderBottom: '1px solid rgba(168, 85, 247, 0.12)' }}>
       <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 max-w-5xl mx-auto">
         {/* Logo - clickable to go home */}
         <button
           onClick={goHome}
-          className="text-sm sm:text-lg font-extrabold tracking-tight text-gold hover:opacity-80 transition-opacity cursor-pointer"
+          className="font-gaming text-sm sm:text-lg tracking-wider text-shimmer hover:opacity-80 transition-opacity cursor-pointer"
         >
           {t("app.title")}
         </button>

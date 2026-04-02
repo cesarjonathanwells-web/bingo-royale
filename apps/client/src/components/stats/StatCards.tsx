@@ -11,7 +11,7 @@ interface StatCardsProps {
 interface StatCardItem {
   label: string;
   value: string | number;
-  color: string;
+  iconClass: string;
   icon: string;
 }
 
@@ -28,25 +28,25 @@ export function StatCards({
       {
         label: t("stats.gamesPlayed"),
         value: gamesPlayed,
-        color: "var(--color-ball-b)",
+        iconClass: "text-neon-blue",
         icon: "#",
       },
       {
         label: t("stats.gamesWon"),
         value: gamesWon,
-        color: "var(--color-ball-g)",
+        iconClass: "text-neon-gold",
         icon: "W",
       },
       {
         label: t("stats.winRate"),
         value: `${winRate}%`,
-        color: "var(--color-ball-o)",
+        iconClass: "text-neon-purple",
         icon: "%",
       },
       {
         label: t("stats.totalDabs"),
         value: totalDabs,
-        color: "var(--color-ball-i)",
+        iconClass: "text-emerald-400",
         icon: "D",
       },
     ],
@@ -55,24 +55,24 @@ export function StatCards({
 
   return (
     <div className="grid grid-cols-2 gap-4 mb-8">
-      {cards.map((card) => (
+      {cards.map((card, index) => (
         <div
           key={card.label}
-          className="rounded-xl glass p-4 text-center space-y-1 hover:shadow-lg transition-shadow duration-200"
+          className="glass-card-neon rounded-xl p-4 text-center space-y-1 hover:shadow-lg transition-shadow duration-200 animate-card-deal"
+          style={{ animationDelay: `${index * 0.1}s` }}
         >
           <p
-            className="text-xs font-bold uppercase tracking-wider"
-            style={{ color: card.color, opacity: 0.7 }}
+            className={`text-2xl font-bold ${card.iconClass}`}
+            style={{ textShadow: "0 0 10px currentColor" }}
           >
             {card.icon}
           </p>
           <p
-            className="text-3xl font-extrabold"
-            style={{ color: card.color }}
+            className={`font-gaming text-3xl ${card.iconClass}`}
           >
             {card.value}
           </p>
-          <p className="text-xs text-[var(--color-text-secondary)] font-medium">
+          <p className="text-[var(--color-text-muted)] uppercase tracking-wider text-[10px] font-bold">
             {card.label}
           </p>
         </div>

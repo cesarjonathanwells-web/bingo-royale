@@ -38,7 +38,7 @@ export function GameTopBar({
       : "#f59e0b";
 
   return (
-    <div className="sticky top-0 z-30 glass">
+    <div className="sticky top-0 z-30 glass" style={{ borderBottom: '1px solid rgba(168, 85, 247, 0.15)' }}>
       <div className="flex items-center justify-between px-2 py-1.5 h-12">
         {/* Left: Current ball + letter-number */}
         <button
@@ -50,10 +50,10 @@ export function GameTopBar({
             <>
               {/* Small ball */}
               <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-extrabold shrink-0 shadow-sm"
+                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-extrabold shrink-0 animate-ball-pulse"
                 style={{
                   background: `radial-gradient(circle at 35% 30%, ${ballColor}cc, ${ballColor})`,
-                  boxShadow: `0 2px 6px ${ballColor}44`,
+                  boxShadow: `0 2px 8px ${ballColor}66, 0 0 20px ${ballColor}33`,
                 }}
               >
                 {currentNumber}
@@ -85,10 +85,10 @@ export function GameTopBar({
           <button
             onClick={handleCopyCode}
             className={cn(
-              "px-2 py-1 rounded-lg text-[10px] font-mono font-bold",
-              "bg-[var(--color-bg-tertiary)] text-[var(--color-text-secondary)]",
+              "px-2.5 py-1 rounded-lg text-[10px] font-mono font-bold",
+              "bg-[var(--color-bg-tertiary)] text-[var(--color-neon-purple)]",
               "hover:bg-[var(--color-bg-tertiary)]/80 transition-colors cursor-pointer select-none",
-              "border border-[var(--color-border)]/40",
+              "neon-border-purple",
             )}
             title={t("game.share")}
           >

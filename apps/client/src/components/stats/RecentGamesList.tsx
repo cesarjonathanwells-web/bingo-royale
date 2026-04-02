@@ -20,10 +20,15 @@ export function RecentGamesList({ games }: RecentGamesListProps) {
         </p>
       ) : (
         <div className="space-y-2">
-          {games.map((game) => (
+          {games.map((game, index) => (
             <div
               key={game.id}
-              className="flex items-center justify-between rounded-lg bg-[var(--color-bg-secondary)] border border-[var(--color-border)] px-4 py-3"
+              className={`flex items-center justify-between rounded-lg glass px-4 py-3 border-l-3 transition-all duration-200 hover:neon-border-purple animate-card-deal ${
+                game.isWinner
+                  ? "border-l-[var(--color-neon-gold)]"
+                  : "border-l-red-500/60"
+              }`}
+              style={{ animationDelay: `${index * 0.08}s` }}
             >
               <div className="flex items-center gap-3">
                 <span className="text-xs font-bold px-2 py-0.5 rounded bg-[var(--color-border)] text-[var(--color-text-secondary)]">
@@ -37,9 +42,9 @@ export function RecentGamesList({ games }: RecentGamesListProps) {
               </div>
               <div className="flex items-center gap-3">
                 <span
-                  className={`text-xs font-bold px-2 py-0.5 rounded ${
+                  className={`font-gaming text-xs font-bold px-2 py-0.5 rounded ${
                     game.isWinner
-                      ? "bg-green-500/20 text-green-400"
+                      ? "bg-[var(--color-neon-gold)]/20 text-neon-gold"
                       : "bg-red-500/20 text-red-400"
                   }`}
                 >
