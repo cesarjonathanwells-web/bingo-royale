@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect, useSyncExternalStore } from "react";
+import { useCallback, useState, useRef, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   Room,
@@ -94,18 +94,51 @@ export function GameView({
 }: GameViewProps) {
   const { t } = useTranslation("game");
 
-  // Detect mobile (< 640px = below Tailwind's sm breakpoint)
-  const isMobile = useSyncExternalStore(
-    (cb) => { window.addEventListener("resize", cb); return () => window.removeEventListener("resize", cb); },
-    () => window.innerWidth < 640,
-    () => true, // SSR fallback
-  );
+  // Dynamic card grid sizing — measures container and calculates max card width
+  // so all cards fit without scrolling on ANY screen size
+  const gridContainerRef = useRef<HTMLDivElement>(null);
+  const [gridMaxWidth, setGridMaxWidth] = useState<number>(600);
+
+  useEffect(() => {
+    const el = gridContainerRef.current;
+    if (!el) return;
+
+    const calculate = () => {
+      const W = el.clientWidth;
+      const H = el.clientHeight;
+      if (W === 0 || H === 0) return;
+
+      const count = myCards.length;
+      if (count <= 1) { setGridMaxWidth(420); return; }
+
+      const gap = 8; // gap-2 = 8px
+      const cols = count <= 2 ? (W > 400 ? 2 : 1) : 2;
+      const rows = count <= 2 ? (cols === 2 ? 1 : count) : Math.ceil(count / 2);
+
+      // Card aspect ratio: content_height ≈ cardWidth + 52 (header overhead for 75-ball)
+      const headerOverhead = 52;
+
+      // Max width from container width
+      const maxFromW = (W - gap * (cols - 1)) / cols;
+      // Max width from container height: rows*(cardW+header)+gaps ≤ H
+      const maxFromH = (H - gap * (rows - 1) - headerOverhead * rows) / rows;
+
+      const cardW = Math.min(maxFromW, maxFromH, 300);
+      const gridW = cardW * cols + gap * (cols - 1);
+
+      setGridMaxWidth(Math.max(gridW, 100));
+    };
+
+    const ro = new ResizeObserver(calculate);
+    ro.observe(el);
+    calculate();
+    return () => ro.disconnect();
+  }, [myCards.length]);
 
   const [chatOpen, setChatOpen] = useState(false);
   const [playersOpen, setPlayersOpen] = useState(false);
   const [numbersOpen, setNumbersOpen] = useState(false);
   const [emojiOpen, setEmojiOpen] = useState(false);
-  const [viewAll, setViewAll] = useState(myCards.length > 1);
   const [unreadChat, setUnreadChat] = useState(0);
   const prevChatLength = useRef(chatMessages.length);
 
@@ -198,84 +231,44 @@ export function GameView({
           </div>
         )}
 
-        {/* View toggle for multi-card — hidden on mobile (carousel only) */}
-        {myCards.length > 1 && (
-          <div className="hidden sm:flex items-center justify-center gap-2 py-0.5 shrink-0">
-            <button
-              onClick={() => setViewAll(false)}
-              className={cn(
-                "px-3 py-0.5 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer",
-                !viewAll
-                  ? "bg-[var(--color-accent)] text-white"
-                  : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
-              )}
-            >
-              {t("cards.singleView")}
-            </button>
-            <button
-              onClick={() => setViewAll(true)}
-              className={cn(
-                "px-3 py-0.5 rounded-lg text-[10px] font-semibold transition-colors cursor-pointer",
-                viewAll
-                  ? "bg-[var(--color-accent)] text-white"
-                  : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
-              )}
-            >
-              {t("cards.allView")}
-            </button>
-          </div>
-        )}
+        {/* All cards always visible — no toggle needed */}
 
-        {/* Card display - constrained to fit available height */}
-        <div className="flex-1 flex items-center justify-center w-full min-h-0 overflow-hidden">
-          {viewAll && !isMobile && myCards.length > 1 ? (
-            /* All cards grid - fit within available space */
-            <div className="w-full h-full flex items-center justify-center p-2 lg:p-4">
-              <div className={cn(
-                "grid gap-2 lg:gap-3 w-full h-full",
-                myCards.length <= 2
-                  ? "grid-cols-1 sm:grid-cols-2 max-w-[600px]"
-                  : "grid-cols-1 sm:grid-cols-2",
-                myCards.length > 2 && "sm:grid-rows-2",
-              )} style={{
-                maxHeight: "100%",
-                maxWidth: myCards.length > 2 ? "min(600px, calc(100dvh - 25rem))" : "600px",
-              }}>
-                {myCards.map((card, ci) => (
-                  <div key={ci} className={cn(
-                    "min-h-0 min-w-0 flex items-center justify-center overflow-hidden",
-                    myCards.length === 3 && ci === 2 && "sm:col-span-2 sm:max-w-[50%] sm:mx-auto",
-                  )}>
-                    {room.variant === "75" ? (
-                      <BingoCard
-                        card={card as BingoCard75}
-                        dabs={myDabs[ci] ?? new Set()}
-                        onDab={(cellIndex) => onDabMulti(ci, cellIndex)}
-                        className="max-h-full"
-                      />
-                    ) : (
-                      <BingoCard90
-                        card={card as BingoCard90Type}
-                        dabs={myDabs[ci] ?? new Set()}
-                        onDab={(cellIndex) => onDabMulti(ci, cellIndex)}
-                        className="max-h-full"
-                      />
-                    )}
-                  </div>
-                ))}
-              </div>
+        {/* Card display — dynamically sized to fit ALL cards on ANY screen */}
+        <div ref={gridContainerRef} className="flex-1 flex items-center justify-center w-full min-h-0 overflow-hidden p-1">
+          {myCards.length > 1 ? (
+            <div
+              className={cn(
+                "grid gap-2 w-full h-full",
+                myCards.length <= 2 ? "grid-cols-2" : "grid-cols-2",
+                myCards.length > 2 && "grid-rows-2",
+              )}
+              style={{ maxHeight: "100%", maxWidth: `${gridMaxWidth}px` }}
+            >
+              {myCards.map((card, ci) => (
+                <div key={ci} className={cn(
+                  "min-h-0 min-w-0 flex items-center justify-center overflow-hidden",
+                  myCards.length === 3 && ci === 2 && "col-span-2 max-w-[50%] mx-auto",
+                )}>
+                  {room.variant === "75" ? (
+                    <BingoCard
+                      card={card as BingoCard75}
+                      dabs={myDabs[ci] ?? new Set()}
+                      onDab={(cellIndex) => onDabMulti(ci, cellIndex)}
+                      className="max-h-full"
+                    />
+                  ) : (
+                    <BingoCard90
+                      card={card as BingoCard90Type}
+                      dabs={myDabs[ci] ?? new Set()}
+                      onDab={(cellIndex) => onDabMulti(ci, cellIndex)}
+                      className="max-h-full"
+                    />
+                  )}
+                </div>
+              ))}
             </div>
-          ) : myCards.length > 1 ? (
-            <CardCarousel
-              cards={myCards}
-              dabs={myDabs}
-              variant={room.variant}
-              onDab={onDabMulti}
-              activeIndex={activeCardIndex}
-              onIndexChange={onSetActiveCard}
-            />
           ) : (
-            <div className="w-full max-w-[380px] lg:max-w-[420px] max-h-full mx-auto">
+            <div style={{ maxWidth: `${Math.min(gridMaxWidth, 420)}px` }} className="w-full max-h-full mx-auto">
               {myCard && (
                 <>
                   {room.variant === "75" ? (
