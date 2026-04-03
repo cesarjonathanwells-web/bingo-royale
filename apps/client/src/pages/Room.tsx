@@ -4,6 +4,7 @@ import { useNavigate } from "@tanstack/react-router";
 import { useRoomStore } from "@/stores/room-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { useSound } from "@/hooks/useSound";
+import { useBingoCaller } from "@/hooks/useBingoCaller";
 import { useToast } from "@/components/ui/Toast";
 import { RoomLobby } from "@/components/room/RoomLobby";
 import { GameView } from "@/components/game/GameView";
@@ -41,6 +42,7 @@ export function Room({ code }: RoomPageProps) {
   const user = useAuthStore((s) => s.user);
   const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const { play } = useSound();
+  const { announce, preload: preloadCalls } = useBingoCaller();
   const { toast } = useToast();
   const navigate = useNavigate();
   const joinAttempted = useRef(false);
@@ -80,6 +82,14 @@ export function Room({ code }: RoomPageProps) {
     };
   }, [leaveRoom]);
 
+  // Preload voice call audio files when game is in progress
+  useEffect(() => {
+    if (room?.state === "in_progress" && room.variant) {
+      const variant = room.variant === "90" ? "90" : "75";
+      preloadCalls(variant as "75" | "90");
+    }
+  }, [room?.state, room?.variant, preloadCalls]);
+
   // Listen for sound-triggering events
   useEffect(() => {
     const socket = getSocket();
@@ -105,8 +115,13 @@ export function Room({ code }: RoomPageProps) {
       }
     };
 
-    const handleNumberCalled = () => {
+    const handleNumberCalled = (data: {
+      number: number;
+      letter?: string;
+    }) => {
       play("numberCalled");
+      const variant = room?.variant === "90" ? "90" : "75";
+      announce(data.number, variant as "75" | "90");
     };
 
     socket.on("game:bingo_claimed", handleBingoClaimed);
@@ -116,7 +131,7 @@ export function Room({ code }: RoomPageProps) {
       socket.off("game:bingo_claimed", handleBingoClaimed);
       socket.off("game:number_called", handleNumberCalled);
     };
-  }, [play, toast, t, user?.id]);
+  }, [play, announce, toast, t, user?.id, room?.variant]);
 
   // Listen for power-up used events
   useEffect(() => {

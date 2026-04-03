@@ -21,6 +21,7 @@ import { CardCarousel } from "@/components/bingo/CardCarousel";
 import { EmojiToast } from "@/components/room/EmojiToast";
 import { Button } from "@/components/ui/Button";
 import { GameTopBar } from "@/components/layout/GameTopBar";
+import { BallCallStrip } from "@/components/bingo/BallCallStrip";
 import { ActionBar } from "@/components/layout/ActionBar";
 import { GameBottomBar } from "@/components/layout/GameBottomBar";
 import { ChatDrawer } from "@/components/layout/ChatDrawer";
@@ -182,14 +183,20 @@ export function GameView({
 
   return (
     <div className="fixed inset-0 flex flex-col bg-[var(--color-bg-primary)]">
-      {/* Top bar with current ball + room code */}
+      {/* Top bar with room code + controls */}
       <GameTopBar
         gameState={gameState}
         variant={room.variant}
         roomCode={room.code}
-        onBallPress={() => setNumbersOpen(!numbersOpen)}
         onMenuPress={() => setPlayersOpen(true)}
         onLeave={onLeave}
+      />
+
+      {/* Ball call strip: current ball (25% larger) + last 3 called */}
+      <BallCallStrip
+        gameState={gameState}
+        variant={room.variant}
+        onPress={() => setNumbersOpen(!numbersOpen)}
       />
 
       {/* Called numbers dropdown */}

@@ -1,7 +1,6 @@
 import { useCallback } from "react";
 import { useTranslation } from "react-i18next";
 import type { GameState, BingoVariant } from "@bingo/shared";
-import { getLetterForNumber, BALL_COLORS } from "@bingo/shared";
 import { generateRoomCode, cn } from "@/lib/utils";
 
 interface GameTopBarProps {
@@ -9,7 +8,6 @@ interface GameTopBarProps {
   variant: BingoVariant;
   roomCode: string;
   onMenuPress: () => void;
-  onBallPress: () => void;
   onLeave: () => void;
 }
 
@@ -18,60 +16,20 @@ export function GameTopBar({
   variant,
   roomCode,
   onMenuPress,
-  onBallPress,
   onLeave,
 }: GameTopBarProps) {
   const { t } = useTranslation("game");
   const is75 = variant === "75";
   const total = is75 ? 75 : 90;
-  const currentNumber = gameState.currentNumber;
-  const currentLetter = gameState.currentLetter;
 
   const handleCopyCode = useCallback(() => {
     navigator.clipboard.writeText(roomCode.toUpperCase());
   }, [roomCode]);
 
-  // Determine ball color
-  const ballColor =
-    is75 && currentNumber && currentNumber <= 75
-      ? BALL_COLORS[getLetterForNumber(currentNumber)] ?? "#f59e0b"
-      : "#f59e0b";
-
   return (
     <div className="sticky top-0 z-30 glass" style={{ borderBottom: '1px solid var(--color-border)' }}>
       <div className="flex items-center justify-between px-2 py-1.5 h-12">
-        {/* Left: Current ball + letter-number */}
-        <button
-          onClick={onBallPress}
-          className="flex items-center gap-2 px-1 py-0.5 rounded-lg hover:bg-[var(--color-bg-tertiary)]/50 transition-colors cursor-pointer select-none"
-          aria-label={t("game.tapHistory")}
-        >
-          {currentNumber ? (
-            <>
-              {/* Small ball */}
-              <div
-                className="w-8 h-8 rounded-full flex items-center justify-center text-white text-xs font-extrabold shrink-0"
-                style={{
-                  background: `radial-gradient(circle at 35% 30%, ${ballColor}cc, ${ballColor})`,
-                  boxShadow: `0 2px 6px ${ballColor}44`,
-                }}
-              >
-                {currentNumber}
-              </div>
-              {/* Letter-Number text */}
-              <span className="text-sm font-bold text-[var(--color-text-primary)]">
-                {is75 && currentLetter ? `${currentLetter}-` : ""}
-                {currentNumber}
-              </span>
-            </>
-          ) : (
-            <div className="w-8 h-8 rounded-full bg-[var(--color-bg-tertiary)]/60 border border-[var(--color-border)] flex items-center justify-center">
-              <span className="text-[8px] text-[var(--color-text-muted)]">--</span>
-            </div>
-          )}
-        </button>
-
-        {/* Center: Called count */}
+        {/* Left: Called count */}
         <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
           {t("game.calledOf", {
             called: gameState.calledNumbers.length,
