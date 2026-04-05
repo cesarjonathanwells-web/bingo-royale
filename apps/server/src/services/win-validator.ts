@@ -238,7 +238,7 @@ export async function isStageExpired90(
   for (let row = 0; row < 3; row++) {
     let rowComplete = true;
     for (let col = 0; col < 9; col++) {
-      const value = card.grid[col]![row]!;
+      const value = card.grid[col]?.[row] ?? 0;
       if (value !== 0 && !previousCalled.has(value)) {
         rowComplete = false;
         break;

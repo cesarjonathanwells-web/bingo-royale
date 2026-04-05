@@ -12,19 +12,8 @@
     "guestName": "Your Name",
     "guestNamePlaceholder": "Enter your display name",
     "playAsGuest": "Play as Guest",
-    "login": "Log In",
-    "register": "Sign Up",
     "logout": "Log Out",
-    "email": "Email",
-    "emailPlaceholder": "you@example.com",
-    "password": "Password",
-    "passwordPlaceholder": "Enter your password",
-    "confirmPassword": "Confirm Password",
-    "name": "Display Name",
-    "namePlaceholder": "Choose a display name",
-    "orContinueAs": "or continue as",
-    "alreadyHaveAccount": "Already have an account?",
-    "dontHaveAccount": "Don't have an account?"
+    "orContinueAs": "or continue as"
   },
   "settings": {
     "title": "Settings",
@@ -44,28 +33,16 @@
   },
   "errors": {
     "generic": "Something went wrong. Please try again.",
-    "networkError": "Network error. Check your connection.",
     "invalidRoom": "Room not found.",
     "roomFull": "This room is full.",
-    "nameRequired": "Please enter a name.",
-    "nameTooShort": "Name must be at least 2 characters.",
-    "nameTooLong": "Name must be 20 characters or fewer.",
-    "invalidEmail": "Please enter a valid email.",
-    "passwordTooShort": "Password must be at least 6 characters.",
-    "passwordMismatch": "Passwords do not match.",
-    "invalidCredentials": "Invalid email or password.",
-    "connectionLost": "Connection lost. Reconnecting..."
+    "nameTooShort": "Name must be at least 2 characters."
   },
   "actions": {
     "copy": "Copy",
     "copied": "Copied!",
     "close": "Close",
-    "cancel": "Cancel",
-    "confirm": "Confirm",
-    "save": "Save",
     "back": "Back",
-    "loading": "Loading...",
-    "retry": "Retry"
+    "loading": "Loading..."
   },
   "language": {
     "en": "English",

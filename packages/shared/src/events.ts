@@ -83,6 +83,13 @@ const GameStateSchema = z.object({
 
 const RoomStateEnumSchema = z.enum(['lobby', 'in_progress', 'finished']);
 
+const WinPatternSchema = z.object({
+  id: z.string(),
+  name: z.string(),
+  nameEs: z.string(),
+  cells: z.array(z.number()),
+});
+
 const RoomSchema = z.object({
   code: z.string(),
   hostId: z.string(),
@@ -90,6 +97,7 @@ const RoomSchema = z.object({
   state: RoomStateEnumSchema,
   speed: z.number(),
   patterns: z.array(z.string()),
+  customPatterns: z.array(WinPatternSchema).default([]),
   playerLimit: z.number(),
   players: z.array(PlayerSchema),
   createdAt: z.number(),
@@ -161,6 +169,7 @@ export const RoomSetCardCountSchema = z.object({
 export const RoomUpdateSettingsSchema = z.object({
   speed: z.number().optional(),
   patterns: z.array(z.string()).optional(),
+  customPatterns: z.array(WinPatternSchema).optional(),
   playerLimit: z.number().int().min(2).optional(),
   variant: BingoVariantSchema.optional(),
 });

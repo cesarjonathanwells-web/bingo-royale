@@ -28,19 +28,7 @@ import { ChatDrawer } from "@/components/layout/ChatDrawer";
 import { PlayerDrawer } from "@/components/layout/PlayerDrawer";
 import { CalledNumbersDropdown } from "@/components/layout/CalledNumbersDropdown";
 import { cn } from "@/lib/utils";
-
-const AVATAR_COLORS = [
-  "#3b82f6", "#ef4444", "#22c55e", "#f59e0b", "#a855f7",
-  "#ec4899", "#06b6d4", "#f97316", "#8b5cf6", "#14b8a6",
-];
-
-function getPlayerColor(name: string): string {
-  let hash = 0;
-  for (let i = 0; i < name.length; i++) {
-    hash = name.charCodeAt(i) + ((hash << 5) - hash);
-  }
-  return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]!;
-}
+import { getAvatarColor } from "@/lib/avatar";
 
 interface EmojiReaction {
   emoji: string;
@@ -272,16 +260,15 @@ export function GameView({
           {viewAll && myCards.length > 1 ? (
             <div
               className={cn(
-                "grid gap-2 w-full h-full",
-                myCards.length <= 2 ? "grid-cols-2" : "grid-cols-2",
-                myCards.length > 2 && "grid-rows-2",
+                "grid gap-2 w-full h-full overflow-y-auto",
+                "grid-cols-1 sm:grid-cols-2",
               )}
               style={{ maxHeight: "100%", maxWidth: `${gridMaxWidth}px` }}
             >
               {myCards.map((card, ci) => (
                 <div key={ci} className={cn(
                   "min-h-0 min-w-0 flex items-center justify-center overflow-hidden",
-                  myCards.length === 3 && ci === 2 && "col-span-2 max-w-[50%] mx-auto",
+                  myCards.length === 3 && ci === 2 && "sm:col-span-2 sm:max-w-[50%] sm:mx-auto",
                 )}>
                   {room.variant === "75" ? (
                     <BingoCard
@@ -381,7 +368,7 @@ export function GameView({
                       "w-7 h-7 rounded-full shrink-0 flex items-center justify-center text-xs font-bold text-white",
                       !player.connected && "opacity-40",
                     )}
-                    style={{ backgroundColor: getPlayerColor(player.name) }}
+                    style={{ backgroundColor: getAvatarColor(player.name) }}
                   >
                     {player.name.charAt(0).toUpperCase()}
                   </div>

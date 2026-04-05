@@ -11,12 +11,10 @@
     "variant90": "90 bolas (Estilo europeo)"
   },
   "lobby": {
-    "title": "Sala de espera",
     "roomCode": "Código de sala",
     "copyInvite": "Copiar enlace de invitación",
     "inviteCopied": "¡Enlace copiado!",
     "players": "Jugadores",
-    "playerCount": "{{count}} / {{max}} jugadores",
     "waitingForHost": "Esperando a que el anfitrión inicie el juego...",
     "startGame": "Iniciar juego",
     "leaveRoom": "Salir de la sala",
@@ -29,7 +27,6 @@
     "speed": "Velocidad",
     "patterns": "Patrones de victoria",
     "playerLimit": "Límite de jugadores",
-    "selectPatterns": "Seleccionar patrones",
     "needMorePlayers": "Se necesitan al menos 2 jugadores para iniciar",
     "createPattern": "Crear patrón",
     "customPatternTitle": "Crear patrón de victoria",

@@ -11,12 +11,10 @@
     "variant90": "90-Ball (UK Style)"
   },
   "lobby": {
-    "title": "Game Lobby",
     "roomCode": "Room Code",
     "copyInvite": "Copy Invite Link",
     "inviteCopied": "Invite link copied!",
     "players": "Players",
-    "playerCount": "{{count}} / {{max}} players",
     "waitingForHost": "Waiting for host to start the game...",
     "startGame": "Start Game",
     "leaveRoom": "Leave Room",
@@ -29,7 +27,6 @@
     "speed": "Speed",
     "patterns": "Win Patterns",
     "playerLimit": "Player Limit",
-    "selectPatterns": "Select patterns",
     "needMorePlayers": "Need at least 2 players to start",
     "createPattern": "Create Pattern",
     "customPatternTitle": "Create Win Pattern",

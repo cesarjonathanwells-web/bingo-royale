@@ -47,13 +47,14 @@ export async function persistGameResult(
 
     if (!game) return;
 
-    // 2. Insert game_players records for each player
+    // 2. Insert game_players and update user_stats for each player
     for (const player of players) {
       if (player.isSpectator) continue;
 
       const cards = await roomStore.getCard(roomCode, player.id);
       const dabs = await roomStore.getDabs(roomCode, player.id);
       const isWinner = winners.some((w) => w.playerId === player.id);
+      const dabCount = Array.isArray(dabs) ? dabs.flat().length : 0;
 
       await db.insert(schema.gamePlayers).values({
         gameId: game.id,
@@ -62,16 +63,8 @@ export async function persistGameResult(
         dabState: dabs ?? [],
         isWinner,
       });
-    }
 
-    // 3. Update user_stats for all players
-    for (const player of players) {
-      if (player.isSpectator) continue;
-      const isWinner = winners.some((w) => w.playerId === player.id);
-      const dabs = await roomStore.getDabs(roomCode, player.id);
-      const dabCount = Array.isArray(dabs) ? dabs.length : 0;
-
-      // Upsert stats
+      // Update user_stats
       await db.insert(schema.userStats).values({
         userId: player.id,
         gamesPlayed: 1,

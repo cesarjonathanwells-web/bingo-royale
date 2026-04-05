@@ -12,19 +12,8 @@
     "guestName": "Tu nombre",
     "guestNamePlaceholder": "Escribe tu nombre",
     "playAsGuest": "Jugar como invitado",
-    "login": "Iniciar sesión",
-    "register": "Registrarse",
     "logout": "Cerrar sesión",
-    "email": "Correo electrónico",
-    "emailPlaceholder": "tu@ejemplo.com",
-    "password": "Contraseña",
-    "passwordPlaceholder": "Escribe tu contraseña",
-    "confirmPassword": "Confirmar contraseña",
-    "name": "Nombre de jugador",
-    "namePlaceholder": "Elige un nombre",
-    "orContinueAs": "Jugando como",
-    "alreadyHaveAccount": "¿Ya tienes una cuenta?",
-    "dontHaveAccount": "¿No tienes cuenta?"
+    "orContinueAs": "Jugando como"
   },
   "settings": {
     "title": "Ajustes",
@@ -44,28 +33,16 @@
   },
   "errors": {
     "generic": "Algo salió mal. Inténtalo de nuevo.",
-    "networkError": "Error de red. Verifica tu conexión.",
     "invalidRoom": "Sala no encontrada.",
     "roomFull": "Esta sala está llena.",
-    "nameRequired": "Por favor escribe un nombre.",
-    "nameTooShort": "El nombre debe tener al menos 2 caracteres.",
-    "nameTooLong": "El nombre debe tener 20 caracteres o menos.",
-    "invalidEmail": "Por favor escribe un correo válido.",
-    "passwordTooShort": "La contraseña debe tener al menos 6 caracteres.",
-    "passwordMismatch": "Las contraseñas no coinciden.",
-    "invalidCredentials": "Correo o contraseña incorrectos.",
-    "connectionLost": "Conexión perdida. Reconectando..."
+    "nameTooShort": "El nombre debe tener al menos 2 caracteres."
   },
   "actions": {
     "copy": "Copiar",
     "copied": "¡Copiado!",
     "close": "Cerrar",
-    "cancel": "Cancelar",
-    "confirm": "Confirmar",
-    "save": "Guardar",
     "back": "Volver",
-    "loading": "Cargando...",
-    "retry": "Reintentar"
+    "loading": "Cargando..."
   },
   "language": {
     "en": "English",
