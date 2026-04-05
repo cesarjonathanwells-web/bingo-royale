@@ -97,6 +97,12 @@ export function registerGameHandlers(
       const count = typeof data?.count === 'number' ? data.count : 1;
       await roomStore.setCardCount(code, user.id, count);
 
+      // Broadcast to room so everyone sees the card count
+      io.to(code).emit('room:card_count_updated', {
+        playerId: user.id,
+        count: Math.max(1, Math.min(4, count)),
+      });
+
       succeed(callback);
     } catch (err) {
       handleError(socket, 'setting card count', callback, err);

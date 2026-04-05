@@ -5,6 +5,7 @@ import { cn } from "@/lib/utils";
 
 interface PlayerListProps {
   players: Player[];
+  playerCardCounts?: Record<string, number>;
   className?: string;
 }
 
@@ -22,7 +23,7 @@ function getAvatarColor(name: string): string {
   return AVATAR_COLORS[Math.abs(hash) % AVATAR_COLORS.length]!;
 }
 
-export function PlayerList({ players, className }: PlayerListProps) {
+export function PlayerList({ players, playerCardCounts, className }: PlayerListProps) {
   const { t } = useTranslation("game");
 
   const activePlayers = players.filter((p) => !p.isSpectator);
@@ -48,7 +49,7 @@ export function PlayerList({ players, className }: PlayerListProps) {
       {/* Active players */}
       <ul className="max-h-[200px] sm:max-h-[250px] md:max-h-[350px] lg:max-h-[400px] overflow-y-auto">
         {activePlayers.map((player) => (
-          <PlayerRow key={player.id} player={player} />
+          <PlayerRow key={player.id} player={player} cardCount={playerCardCounts?.[player.id]} />
         ))}
 
         {/* Spectators section */}
@@ -69,7 +70,7 @@ export function PlayerList({ players, className }: PlayerListProps) {
   );
 }
 
-const PlayerRow = memo(function PlayerRow({ player }: { player: Player }) {
+const PlayerRow = memo(function PlayerRow({ player, cardCount }: { player: Player; cardCount?: number }) {
   const { t } = useTranslation("game");
   const color = getAvatarColor(player.name);
 
@@ -133,6 +134,18 @@ const PlayerRow = memo(function PlayerRow({ player }: { player: Player }) {
           )}
         </div>
       </div>
+
+      {/* Card count badge */}
+      {!player.isSpectator && cardCount != null && cardCount > 0 && (
+        <span className="shrink-0 flex items-center gap-0.5 text-[11px] font-bold text-[var(--color-accent)] bg-[var(--color-accent)]/10 px-2 py-0.5 rounded-full">
+          <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round">
+            <rect x="3" y="3" width="18" height="18" rx="2" />
+            <line x1="3" y1="9" x2="21" y2="9" />
+            <line x1="9" y1="3" x2="9" y2="21" />
+          </svg>
+          {cardCount}
+        </span>
+      )}
     </li>
   );
 });

@@ -27,6 +27,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
   const updateSettings = useRoomStore((s) => s.updateSettings);
   const cardCount = useRoomStore((s) => s.cardCount);
   const setCardCount = useRoomStore((s) => s.setCardCount);
+  const playerCardCounts = useRoomStore((s) => s.playerCardCounts);
   const { toast } = useToast();
   const navigate = useNavigate();
 
@@ -385,7 +386,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
 
       {/* Right / Player list */}
       <div className="w-full lg:w-72 shrink-0 max-h-[40vh] lg:max-h-none overflow-hidden">
-        <PlayerList players={room.players} />
+        <PlayerList players={room.players} playerCardCounts={playerCardCounts} />
       </div>
     </div>
   );

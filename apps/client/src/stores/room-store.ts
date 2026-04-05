@@ -59,6 +59,7 @@ interface RoomState {
   myDabs: Set<number>[];
   activeCardIndex: number;
   cardCount: number;
+  playerCardCounts: Record<string, number>;
   chatMessages: ChatMessage[];
   isConnecting: boolean;
   error: string | null;
@@ -103,6 +104,7 @@ const initialState = {
   myDabs: [] as Set<number>[],
   activeCardIndex: 0,
   cardCount: 1,
+  playerCardCounts: {} as Record<string, number>,
   chatMessages: [],
   isConnecting: false,
   error: null,
@@ -303,6 +305,12 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
               chatMessages: state.chatMessages, // Preserve chat
             }
           : {}),
+      }));
+    });
+
+    socket.on("room:card_count_updated", (data: { playerId: string; count: number }) => {
+      set((state) => ({
+        playerCardCounts: { ...state.playerCardCounts, [data.playerId]: data.count },
       }));
     });
 
@@ -596,6 +604,7 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     const socket = getSocket();
     const events = [
       "room:state",
+      "room:card_count_updated",
       "room:player_joined",
       "room:player_left",
       "room:player_updated",
