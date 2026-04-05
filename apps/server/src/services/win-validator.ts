@@ -163,3 +163,92 @@ export async function validateBingo90(
 
   return { valid: false };
 }
+
+// --------------- Bingo expiration checks ---------------
+
+/**
+ * Check if a 75-ball pattern was already completable before the most recently
+ * called number.  If it was, the player missed their window to claim bingo
+ * with this pattern (they should have called before the next number was drawn).
+ */
+export async function isPatternExpired75(
+  roomCode: string,
+  playerId: string,
+  patternId: string,
+  cardIndex: number,
+): Promise<boolean> {
+  const cards = await roomStore.getCard(roomCode, playerId);
+  if (!cards || cards.length === 0) return false;
+
+  const safeIndex = Math.max(0, Math.min(cardIndex, cards.length - 1));
+  const card = cards[safeIndex] as BingoCard75;
+
+  const callerState = await roomStore.getCallerState(roomCode);
+  if (!callerState || callerState.called.length <= 1) return false;
+
+  // Numbers called before the most recent one
+  const previousCalled = new Set(callerState.called.slice(0, -1));
+
+  const pattern = WIN_PATTERNS.find((p) => p.id === patternId);
+  if (!pattern) return false;
+
+  // If every cell value in the pattern was already called before the last
+  // number, the pattern was completable earlier → expired.
+  for (const cellIndex of pattern.cells) {
+    if (cellIndex === FREE_SPACE_INDEX) continue;
+
+    const row = Math.floor(cellIndex / 5);
+    const col = cellIndex % 5;
+    const cellValue = card.grid[col]?.[row];
+
+    if (cellValue === null || cellValue === undefined) continue;
+    if (!previousCalled.has(cellValue)) return false;
+  }
+
+  return true;
+}
+
+/**
+ * Check if a 90-ball stage was already completable before the most recently
+ * called number.
+ */
+export async function isStageExpired90(
+  roomCode: string,
+  playerId: string,
+  stage: WinStage90,
+  cardIndex: number,
+): Promise<boolean> {
+  const cards = await roomStore.getCard(roomCode, playerId);
+  if (!cards || cards.length === 0) return false;
+
+  const safeIndex = Math.max(0, Math.min(cardIndex, cards.length - 1));
+  const card = cards[safeIndex] as BingoCard90;
+
+  const callerState = await roomStore.getCallerState(roomCode);
+  if (!callerState || callerState.called.length <= 1) return false;
+
+  const previousCalled = new Set(callerState.called.slice(0, -1));
+
+  // Count rows where every non-blank cell value was called before the last number
+  let completableRows = 0;
+  for (let row = 0; row < 3; row++) {
+    let rowComplete = true;
+    for (let col = 0; col < 9; col++) {
+      const value = card.grid[col]![row]!;
+      if (value !== 0 && !previousCalled.has(value)) {
+        rowComplete = false;
+        break;
+      }
+    }
+    if (rowComplete) completableRows++;
+  }
+
+  switch (stage) {
+    case 'one_line':
+      return completableRows >= 1;
+    case 'two_lines':
+      return completableRows >= 2;
+    case 'full_house':
+      return completableRows >= 3;
+  }
+}

@@ -9,7 +9,7 @@ import type { AuthenticatedSocket } from '../../services/auth.js';
 import * as roomStore from '../../redis/room-store.js';
 import { CallerManager } from '../../services/caller.js';
 import { generateCardsForRoom } from '../../services/card-generator.js';
-import { validateBingo75, validateBingo90 } from '../../services/win-validator.js';
+import { validateBingo75, validateBingo90, isPatternExpired75, isStageExpired90 } from '../../services/win-validator.js';
 import { persistGameResult } from '../../services/game-persistence.js';
 
 // --------------- Shared handler helpers ---------------
@@ -257,6 +257,7 @@ export function registerGameHandlers(
       // Try ALL cards with server-stored dabs (not client-sent dabs)
       // This prevents desync between client and server dab state
       let result: { valid: boolean; pattern?: string } = { valid: false };
+      let winningCardIndex = 0;
 
       for (let ci = 0; ci < cards.length; ci++) {
         const serverDabs = allDabs[ci] ?? [];
@@ -274,6 +275,7 @@ export function registerGameHandlers(
 
         if (cardResult.valid) {
           result = cardResult;
+          winningCardIndex = ci;
           break;
         }
       }
@@ -289,6 +291,32 @@ export function registerGameHandlers(
           } else if (stage) {
             result = await validateBingo90(code, user.id, rawMarkedCells, stage, cardIndex);
           }
+          if (result.valid) {
+            winningCardIndex = cardIndex;
+          }
+        }
+      }
+
+      // Check if the winning pattern/stage was already completable before the
+      // last called number.  If so, the player missed their window — they must
+      // wait for a new bingo.
+      if (result.valid && result.pattern) {
+        let expired = false;
+        if (room.variant === '75') {
+          expired = await isPatternExpired75(code, user.id, result.pattern, winningCardIndex);
+        } else {
+          expired = await isStageExpired90(code, user.id, result.pattern as WinStage90, winningCardIndex);
+        }
+
+        if (expired) {
+          console.log(`[Game] Bingo EXPIRED for ${user.name}: pattern=${result.pattern} was completable before last number`);
+          socket.emit('game:bingo_claimed', {
+            valid: false,
+            playerId: user.id,
+            playerName: user.name,
+            message: 'Bingo expired - you must call bingo before the next number is drawn',
+          });
+          return void succeed(callback, { valid: false, expired: true });
         }
       }
 
