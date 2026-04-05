@@ -30,7 +30,16 @@
     "patterns": "Patrones de victoria",
     "playerLimit": "Límite de jugadores",
     "selectPatterns": "Seleccionar patrones",
-    "needMorePlayers": "Se necesitan al menos 2 jugadores para iniciar"
+    "needMorePlayers": "Se necesitan al menos 2 jugadores para iniciar",
+    "createPattern": "Crear patrón",
+    "customPatternTitle": "Crear patrón de victoria",
+    "customPatternDesc": "Toca las celdas para diseñar tu patrón",
+    "patternName": "Nombre del patrón",
+    "patternNameEs": "Nombre (español)",
+    "patternNamePlaceholder": "ej. Mi Patrón",
+    "patternNameEsPlaceholder": "ej. Mi Patrón",
+    "savePattern": "Guardar patrón",
+    "minCells": "Selecciona al menos 3 celdas"
   },
   "game": {
     "calledNumbers": "Números cantados",

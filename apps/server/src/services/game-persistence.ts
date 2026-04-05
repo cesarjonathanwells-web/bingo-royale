@@ -36,6 +36,7 @@ export async function persistGameResult(
       state: 'finished',
       speed: room.speed,
       patterns: room.patterns,
+      customPatterns: room.customPatterns ?? [],
       calledNumbers,
       winnerId: winners[0]?.playerId ?? null,
       winPattern: winners[0]?.pattern ?? null,

@@ -234,6 +234,7 @@ export function Room({ code }: RoomPageProps) {
     return (
       <GameFinished
         gameState={gameState}
+        customPatterns={room.customPatterns}
         isHost={isHost}
         onNewRound={newRound}
         onLeave={handleLeave}

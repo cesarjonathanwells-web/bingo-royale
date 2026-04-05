@@ -1,11 +1,14 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
+import type { WinPattern } from "@bingo/shared";
 import { WIN_PATTERNS } from "@bingo/shared";
 import { cn } from "@/lib/utils";
 
 interface PatternDisplayProps {
   /** Pattern IDs or 90-ball win stages */
   patternIds: string[];
+  /** Custom patterns for lookup (alongside built-in) */
+  customPatterns?: WinPattern[];
   /** If true, shows as a compact single pattern. Otherwise shows a grid of patterns. */
   compact?: boolean;
   className?: string;
@@ -13,10 +16,12 @@ interface PatternDisplayProps {
 
 export function PatternDisplay({
   patternIds,
+  customPatterns = [],
   compact = false,
   className,
 }: PatternDisplayProps) {
-  const { t } = useTranslation("game");
+  const { t, i18n } = useTranslation("game");
+  const isEs = i18n.language === "es";
 
   const patterns = useMemo(() => {
     return patternIds
@@ -25,6 +30,11 @@ export function PatternDisplay({
         if (pattern) {
           return { id: pattern.id, name: t(`patterns.${pattern.id}`), cells: pattern.cells };
         }
+        // Check custom patterns
+        const custom = customPatterns.find((p) => p.id === id);
+        if (custom) {
+          return { id: custom.id, name: isEs ? custom.nameEs : custom.name, cells: custom.cells };
+        }
         // 90-ball stages
         if (id === "one_line" || id === "two_lines" || id === "full_house") {
           return { id, name: t(`patterns.${id}`), cells: [] };
@@ -32,7 +42,7 @@ export function PatternDisplay({
         return null;
       })
       .filter(Boolean) as { id: string; name: string; cells: number[] }[];
-  }, [patternIds, t]);
+  }, [patternIds, customPatterns, t, isEs]);
 
   if (compact && patterns.length > 0) {
     const first = patterns[0]!;

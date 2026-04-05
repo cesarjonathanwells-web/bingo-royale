@@ -8,7 +8,9 @@ import {
   checkWinStage90,
   FREE_SPACE_INDEX,
   WIN_PATTERNS,
+  resolvePattern,
 } from '@bingo/shared';
+import type { WinPattern } from '@bingo/shared';
 import * as roomStore from '../redis/room-store.js';
 
 export interface ValidationResult {
@@ -89,10 +91,11 @@ export async function validateBingo75(
 
   const dabbedSet = new Set(markedCells);
 
-  // Check against each active pattern
-  const activePatterns = WIN_PATTERNS.filter((p) =>
-    room.patterns.includes(p.id),
-  );
+  // Build active patterns list (built-in + custom)
+  const customPatterns = room.customPatterns ?? [];
+  const activePatterns = room.patterns
+    .map((id) => resolvePattern(id, customPatterns))
+    .filter((p): p is WinPattern => p !== undefined);
 
   for (const pattern of activePatterns) {
     if (checkWin75(dabbedSet, pattern)) {
@@ -100,7 +103,7 @@ export async function validateBingo75(
     }
   }
 
-  // If no specific patterns are set, check all patterns
+  // If no specific patterns are set, check all built-in patterns
   if (room.patterns.length === 0) {
     for (const pattern of WIN_PATTERNS) {
       if (checkWin75(dabbedSet, pattern)) {
@@ -189,7 +192,8 @@ export async function isPatternExpired75(
   // Numbers called before the most recent one
   const previousCalled = new Set(callerState.called.slice(0, -1));
 
-  const pattern = WIN_PATTERNS.find((p) => p.id === patternId);
+  const room = await roomStore.getRoom(roomCode);
+  const pattern = resolvePattern(patternId, room?.customPatterns);
   if (!pattern) return false;
 
   // If every cell value in the pattern was already called before the last

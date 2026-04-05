@@ -1,10 +1,12 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import type { GameState } from "@bingo/shared";
+import type { GameState, WinPattern } from "@bingo/shared";
+import { resolvePattern } from "@bingo/shared";
 import { Button } from "@/components/ui/Button";
 
 interface GameFinishedProps {
   gameState: GameState;
+  customPatterns?: WinPattern[];
   isHost: boolean;
   onNewRound: () => void;
   onLeave: () => void;
@@ -21,12 +23,23 @@ const COIN_COLORS = [
 
 export function GameFinished({
   gameState,
+  customPatterns = [],
   isHost,
   onNewRound,
   onLeave,
 }: GameFinishedProps) {
-  const { t } = useTranslation("game");
+  const { t, i18n } = useTranslation("game");
+  const isEs = i18n.language === "es";
   const latestWinner = gameState.winners[gameState.winners.length - 1];
+
+  const winPatternName = useMemo(() => {
+    if (!latestWinner?.pattern) return "";
+    const resolved = resolvePattern(latestWinner.pattern, customPatterns);
+    if (resolved) {
+      return isEs ? resolved.nameEs : resolved.name;
+    }
+    return t(`patterns.${latestWinner.pattern}`, latestWinner.pattern);
+  }, [latestWinner, customPatterns, t, isEs]);
 
   // Stable coin pieces (avoid re-randomizing on every render)
   const coinPieces = useMemo(
@@ -81,7 +94,7 @@ export function GameFinished({
             <p className="text-lg sm:text-xl font-semibold text-[var(--color-text-secondary)]">
               {t("game.winnerAnnouncement", {
                 name: latestWinner.playerName,
-                pattern: latestWinner.pattern,
+                pattern: winPatternName,
               })}
             </p>
           </div>

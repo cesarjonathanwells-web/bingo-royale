@@ -74,6 +74,7 @@ export interface Room {
   state: RoomState;
   speed: number; // ms between calls
   patterns: string[]; // pattern IDs (75-ball) or win stages (90-ball)
+  customPatterns: WinPattern[]; // host-created patterns (75-ball only)
   playerLimit: number;
   players: Player[];
   createdAt: number;

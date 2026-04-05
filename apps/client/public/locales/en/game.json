@@ -30,7 +30,16 @@
     "patterns": "Win Patterns",
     "playerLimit": "Player Limit",
     "selectPatterns": "Select patterns",
-    "needMorePlayers": "Need at least 2 players to start"
+    "needMorePlayers": "Need at least 2 players to start",
+    "createPattern": "Create Pattern",
+    "customPatternTitle": "Create Win Pattern",
+    "customPatternDesc": "Click cells to design your pattern",
+    "patternName": "Pattern Name",
+    "patternNameEs": "Name (Spanish)",
+    "patternNamePlaceholder": "e.g. My Pattern",
+    "patternNameEsPlaceholder": "e.g. Mi Patrón",
+    "savePattern": "Save Pattern",
+    "minCells": "Select at least 3 cells"
   },
   "game": {
     "calledNumbers": "Called Numbers",

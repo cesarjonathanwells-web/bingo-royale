@@ -214,3 +214,31 @@ export const WIN_PATTERNS: readonly WinPattern[] = [
 export const WIN_PATTERNS_MAP: ReadonlyMap<string, WinPattern> = new Map(
   WIN_PATTERNS.map((p) => [p.id, p]),
 );
+
+// --------------- Custom pattern helpers ---------------
+
+/** Max custom patterns a host can create per room. */
+export const MAX_CUSTOM_PATTERNS = 5;
+
+/** Minimum cells required for a valid custom pattern. */
+export const MIN_PATTERN_CELLS = 3;
+
+/** Maximum length for a custom pattern name. */
+export const MAX_PATTERN_NAME_LENGTH = 30;
+
+/** Check if a pattern ID belongs to a custom (host-created) pattern. */
+export function isCustomPatternId(id: string): boolean {
+  return id.startsWith('custom_');
+}
+
+/**
+ * Resolve a pattern ID to its WinPattern definition.
+ * Checks built-in patterns first, then the provided custom patterns.
+ */
+export function resolvePattern(
+  patternId: string,
+  customPatterns: WinPattern[] = [],
+): WinPattern | undefined {
+  return WIN_PATTERNS_MAP.get(patternId)
+    ?? customPatterns.find((p) => p.id === patternId);
+}

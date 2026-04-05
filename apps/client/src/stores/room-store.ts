@@ -9,6 +9,7 @@ import type {
   BingoVariant,
   Player,
   WinEvent,
+  WinPattern,
   PlayerPowerUp,
   PowerUpId,
 } from "@bingo/shared";
@@ -83,6 +84,7 @@ interface RoomState {
     speed?: number;
     patterns?: string[];
     playerLimit?: number;
+    customPatterns?: WinPattern[];
   }) => void;
   usePowerUp: (powerupId: PowerUpId, targetCellIndex?: number) => void;
   sendReaction: (emoji: string) => void;

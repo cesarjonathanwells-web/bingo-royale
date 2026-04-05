@@ -1,14 +1,15 @@
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
-import type { Room } from "@bingo/shared";
-import { SPEED_PRESETS, WIN_PATTERNS } from "@bingo/shared";
+import type { Room, WinPattern } from "@bingo/shared";
+import { SPEED_PRESETS, WIN_PATTERNS, MAX_CUSTOM_PATTERNS, isCustomPatternId } from "@bingo/shared";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRoomStore } from "@/stores/room-store";
 import { Button } from "@/components/ui/Button";
 import { Select } from "@/components/ui/Select";
 import { PlayerList } from "./PlayerList";
 import { PatternDisplay } from "@/components/bingo/PatternDisplay";
+import { CreatePatternDialog } from "@/components/bingo/CreatePatternDialog";
 import { useToast } from "@/components/ui/Toast";
 import { generateRoomCode, cn } from "@/lib/utils";
 
@@ -100,6 +101,40 @@ export function RoomLobby({ room }: RoomLobbyProps) {
       });
     },
     [updateSettings],
+  );
+
+  const [showCreatePattern, setShowCreatePattern] = useState(false);
+
+  const customPatterns = room.customPatterns ?? [];
+
+  // All patterns: built-in + custom
+  const allPatterns = useMemo<WinPattern[]>(
+    () => [...WIN_PATTERNS, ...customPatterns],
+    [customPatterns],
+  );
+
+  const handleSaveCustomPattern = useCallback(
+    (pattern: WinPattern) => {
+      const updatedCustom = [...customPatterns, pattern];
+      const updatedActive = [...Array.from(localPatterns), pattern.id];
+      setLocalPatterns(new Set(updatedActive));
+      updateSettings({ customPatterns: updatedCustom, patterns: updatedActive });
+      setShowCreatePattern(false);
+    },
+    [customPatterns, localPatterns, updateSettings],
+  );
+
+  const handleDeleteCustomPattern = useCallback(
+    (patternId: string) => {
+      const updatedCustom = customPatterns.filter((p) => p.id !== patternId);
+      const updatedActive = Array.from(localPatterns).filter((id) => id !== patternId);
+      setLocalPatterns(new Set(updatedActive.length > 0 ? updatedActive : localPatterns));
+      updateSettings({
+        customPatterns: updatedCustom,
+        patterns: updatedActive.length > 0 ? updatedActive : Array.from(localPatterns),
+      });
+    },
+    [customPatterns, localPatterns, updateSettings],
   );
 
   const currentSpeed = SPEED_PRESETS.find((p) => p.ms === room.speed);
@@ -213,29 +248,57 @@ export function RoomLobby({ room }: RoomLobbyProps) {
 
                 {showPatterns && (
                   <div className="mt-3 flex flex-wrap gap-2 animate-slide-down">
-                    {WIN_PATTERNS.map((p) => {
+                    {allPatterns.map((p) => {
                       const active = localPatterns.has(p.id);
+                      const isCustom = isCustomPatternId(p.id);
                       return (
                         <button
                           key={p.id}
                           onClick={() => togglePattern(p.id)}
                           className={cn(
-                            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all",
+                            "px-3 py-1.5 rounded-lg text-xs font-medium transition-all inline-flex items-center gap-1.5",
                             active
                               ? "bg-[var(--color-accent)] text-white"
                               : "bg-[var(--color-bg-primary)] text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)]",
+                            isCustom && "border border-dashed border-[var(--color-accent)]/40",
                           )}
                         >
                           {isEs ? p.nameEs : p.name}
+                          {isCustom && (
+                            <span
+                              role="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleDeleteCustomPattern(p.id);
+                              }}
+                              className="ml-0.5 hover:text-red-400 transition-colors"
+                            >
+                              ×
+                            </span>
+                          )}
                         </button>
                       );
                     })}
+                    {customPatterns.length < MAX_CUSTOM_PATTERNS && (
+                      <button
+                        onClick={() => setShowCreatePattern(true)}
+                        className="px-3 py-1.5 rounded-lg text-xs font-medium border-2 border-dashed border-[var(--color-accent)]/40 text-[var(--color-accent)] hover:bg-[var(--color-accent)]/10 transition-all"
+                      >
+                        + {t("lobby.createPattern")}
+                      </button>
+                    )}
                   </div>
                 )}
 
+                <CreatePatternDialog
+                  open={showCreatePattern}
+                  onOpenChange={setShowCreatePattern}
+                  onSave={handleSaveCustomPattern}
+                />
+
                 {localPatterns.size > 0 && !showPatterns && (
                   <div className="mt-2">
-                    <PatternDisplay patternIds={Array.from(localPatterns)} compact />
+                    <PatternDisplay patternIds={Array.from(localPatterns)} customPatterns={customPatterns} compact />
                   </div>
                 )}
               </div>
@@ -260,7 +323,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
             </div>
 
             {room.variant === "75" && localPatterns.size > 0 && (
-              <PatternDisplay patternIds={Array.from(localPatterns)} />
+              <PatternDisplay patternIds={Array.from(localPatterns)} customPatterns={customPatterns} />
             )}
           </div>
         )}

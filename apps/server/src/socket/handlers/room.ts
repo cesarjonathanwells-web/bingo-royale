@@ -4,10 +4,13 @@
 
 import { randomUUID } from 'crypto';
 import type { Server } from 'socket.io';
-import type { Room, Player, BingoVariant } from '@bingo/shared';
+import type { Room, Player, BingoVariant, WinPattern } from '@bingo/shared';
 import {
   DEFAULT_PLAYER_LIMIT,
   MAX_PLAYERS,
+  MAX_CUSTOM_PATTERNS,
+  MIN_PATTERN_CELLS,
+  MAX_PATTERN_NAME_LENGTH,
   SPEED_PRESETS,
   WIN_PATTERNS,
 } from '@bingo/shared';
@@ -27,6 +30,23 @@ function generateRoomCode(): string {
     code += chars[bytes[i]! % chars.length];
   }
   return code;
+}
+
+/** Validate that a value is a well-formed custom WinPattern. */
+function isValidCustomPattern(p: unknown): p is WinPattern {
+  if (!p || typeof p !== 'object') return false;
+  const { id, name, nameEs, cells } = p as Record<string, unknown>;
+  if (typeof id !== 'string' || !id.startsWith('custom_')) return false;
+  if (typeof name !== 'string' || name.length < 1 || name.length > MAX_PATTERN_NAME_LENGTH) return false;
+  if (typeof nameEs !== 'string' || nameEs.length < 1 || nameEs.length > MAX_PATTERN_NAME_LENGTH) return false;
+  if (!Array.isArray(cells) || cells.length < MIN_PATTERN_CELLS || cells.length > 25) return false;
+  const cellSet = new Set<number>();
+  for (const c of cells) {
+    if (typeof c !== 'number' || !Number.isInteger(c) || c < 0 || c > 24) return false;
+    cellSet.add(c);
+  }
+  if (cellSet.size !== cells.length) return false; // duplicates
+  return true;
 }
 
 export function registerRoomHandlers(
@@ -77,6 +97,7 @@ export function registerRoomHandlers(
         state: 'lobby',
         speed,
         patterns,
+        customPatterns: [],
         playerLimit,
         players: [hostPlayer],
         createdAt: Date.now(),
@@ -304,10 +325,31 @@ export function registerRoomHandlers(
         'full_house',
       ]);
 
+      // Existing custom patterns on the room are valid IDs
+      for (const cp of room.customPatterns ?? []) {
+        validPatternIds.add(cp.id);
+      }
+
       const updates: Partial<Room> = {};
       if (typeof data?.speed === 'number' && validSpeeds.includes(data.speed)) {
         updates.speed = data.speed;
       }
+
+      // Handle custom patterns update (must be processed before patterns)
+      if (Array.isArray(data?.customPatterns)) {
+        const validated: WinPattern[] = [];
+        for (const cp of data.customPatterns) {
+          if (isValidCustomPattern(cp) && validated.length < MAX_CUSTOM_PATTERNS) {
+            validated.push({ id: cp.id, name: cp.name, nameEs: cp.nameEs, cells: cp.cells });
+          }
+        }
+        updates.customPatterns = validated;
+        // Add new custom IDs so they pass the patterns filter below
+        for (const cp of validated) {
+          validPatternIds.add(cp.id);
+        }
+      }
+
       if (Array.isArray(data?.patterns)) {
         const filtered = data.patterns.filter(
           (id: string) => typeof id === 'string' && validPatternIds.has(id),

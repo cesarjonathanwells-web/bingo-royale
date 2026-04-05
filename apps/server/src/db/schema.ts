@@ -39,6 +39,7 @@ export const games = pgTable('games', {
   state: varchar('state', { length: 20 }).notNull().$type<'lobby' | 'in_progress' | 'finished'>(),
   speed: integer('speed').notNull(),
   patterns: jsonb('patterns').$type<string[]>().notNull().default([]),
+  customPatterns: jsonb('custom_patterns').$type<{ id: string; name: string; nameEs: string; cells: number[] }[]>().notNull().default([]),
   calledNumbers: jsonb('called_numbers').$type<number[]>().notNull().default([]),
   winnerId: uuid('winner_id').references(() => users.id),
   winPattern: varchar('win_pattern', { length: 50 }),
