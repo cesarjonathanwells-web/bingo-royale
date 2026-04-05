@@ -32,14 +32,18 @@ export function GameFinished({
   const isEs = i18n.language === "es";
   const latestWinner = gameState.winners[gameState.winners.length - 1];
 
+  const winPattern = useMemo(() => {
+    if (!latestWinner?.pattern) return undefined;
+    return resolvePattern(latestWinner.pattern, customPatterns);
+  }, [latestWinner, customPatterns]);
+
   const winPatternName = useMemo(() => {
     if (!latestWinner?.pattern) return "";
-    const resolved = resolvePattern(latestWinner.pattern, customPatterns);
-    if (resolved) {
-      return isEs ? resolved.nameEs : resolved.name;
+    if (winPattern) {
+      return isEs ? winPattern.nameEs : winPattern.name;
     }
     return t(`patterns.${latestWinner.pattern}`, latestWinner.pattern);
-  }, [latestWinner, customPatterns, t, isEs]);
+  }, [latestWinner, winPattern, t, isEs]);
 
   // Stable coin pieces (avoid re-randomizing on every render)
   const coinPieces = useMemo(
@@ -87,7 +91,7 @@ export function GameFinished({
         </h2>
 
         {latestWinner ? (
-          <div className="space-y-3 animate-page-enter">
+          <div className="space-y-4 animate-page-enter">
             <p className="text-4xl sm:text-5xl font-gaming text-gold">
               {latestWinner.playerName}
             </p>
@@ -97,6 +101,30 @@ export function GameFinished({
                 pattern: winPatternName,
               })}
             </p>
+
+            {/* Winning pattern grid */}
+            {winPattern && winPattern.cells.length > 0 && (
+              <div className="flex flex-col items-center gap-2 pt-2">
+                <div className="grid grid-cols-5 gap-1 w-fit">
+                  {Array.from({ length: 25 }, (_, i) => {
+                    const isActive = winPattern.cells.includes(i);
+                    return (
+                      <div
+                        key={i}
+                        className={
+                          isActive
+                            ? "w-5 h-5 sm:w-6 sm:h-6 rounded-sm bg-[var(--color-accent)] shadow-[0_0_6px_var(--color-accent)]"
+                            : "w-5 h-5 sm:w-6 sm:h-6 rounded-sm bg-[var(--color-bg-tertiary)]/40"
+                        }
+                      />
+                    );
+                  })}
+                </div>
+                <p className="text-xs text-[var(--color-text-muted)] uppercase tracking-wider">
+                  {winPatternName}
+                </p>
+              </div>
+            )}
           </div>
         ) : (
           <p className="text-lg text-[var(--color-text-secondary)] animate-page-enter">
