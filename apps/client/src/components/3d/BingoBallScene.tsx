@@ -6,7 +6,7 @@ import * as THREE from "three";
 /*  Shared geometry — created once                                     */
 /* ------------------------------------------------------------------ */
 
-const SHARED_SPHERE = new THREE.SphereGeometry(0.42, 32, 32);
+const SHARED_SPHERE = new THREE.SphereGeometry(0.55, 32, 32);
 
 const BALL_DATA = [
   { number: 7, color: "#3b82f6", letter: "B", slot: -2 },
@@ -183,7 +183,7 @@ function AdaptiveCamera() {
 
 export function BingoBallScene() {
   return (
-    <div className="w-full" style={{ aspectRatio: "4 / 1", maxHeight: "14rem" }}>
+    <div className="w-[90vw] max-w-3xl mx-auto" style={{ aspectRatio: "5 / 2" }}>
       <Canvas
         camera={{ position: [0, 0, 5], fov: 40 }}
         dpr={[1, 1.5]}
