@@ -1,78 +1,106 @@
-import { useRef, useMemo } from "react";
-import { Canvas, useFrame } from "@react-three/fiber";
-import { Float, Environment } from "@react-three/drei";
+import { useRef, useMemo, useEffect } from "react";
+import { Canvas, useFrame, useThree } from "@react-three/fiber";
+import { Float } from "@react-three/drei";
 import * as THREE from "three";
 
 /* ------------------------------------------------------------------ */
-/*  Single 3D Bingo Ball                                               */
+/*  Shared resources — created once, reused across all balls           */
+/* ------------------------------------------------------------------ */
+
+const SHARED_SPHERE = new THREE.SphereGeometry(0.42, 32, 32);
+
+const BALL_DATA = [
+  { number: 7, color: "#3b82f6", letter: "B", xSlot: -2 },
+  { number: 22, color: "#ef4444", letter: "I", xSlot: -1 },
+  { number: 38, color: "#a78bfa", letter: "N", xSlot: 0 },
+  { number: 51, color: "#22c55e", letter: "G", xSlot: 1 },
+  { number: 65, color: "#f59e0b", letter: "O", xSlot: 2 },
+] as const;
+
+/* ------------------------------------------------------------------ */
+/*  Texture factory — draws a bingo ball face onto a canvas            */
+/* ------------------------------------------------------------------ */
+
+function createBallTexture(color: string, letter: string, num: number): THREE.CanvasTexture {
+  const canvas = document.createElement("canvas");
+  canvas.width = 256;
+  canvas.height = 256;
+  const ctx = canvas.getContext("2d")!;
+
+  // Outer color
+  ctx.fillStyle = color;
+  ctx.beginPath();
+  ctx.arc(128, 128, 128, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Specular highlight baked into the texture
+  const specGrad = ctx.createRadialGradient(85, 75, 10, 128, 128, 128);
+  specGrad.addColorStop(0, "rgba(255,255,255,0.4)");
+  specGrad.addColorStop(0.25, "rgba(255,255,255,0.1)");
+  specGrad.addColorStop(1, "rgba(0,0,0,0)");
+  ctx.fillStyle = specGrad;
+  ctx.beginPath();
+  ctx.arc(128, 128, 128, 0, Math.PI * 2);
+  ctx.fill();
+
+  // White inner circle
+  ctx.fillStyle = "#ffffff";
+  ctx.beginPath();
+  ctx.arc(128, 128, 72, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Subtle inner shadow
+  const innerGrad = ctx.createRadialGradient(128, 118, 20, 128, 128, 72);
+  innerGrad.addColorStop(0, "rgba(255,255,255,0)");
+  innerGrad.addColorStop(1, "rgba(0,0,0,0.06)");
+  ctx.fillStyle = innerGrad;
+  ctx.beginPath();
+  ctx.arc(128, 128, 72, 0, Math.PI * 2);
+  ctx.fill();
+
+  // Letter
+  ctx.fillStyle = color;
+  ctx.font = "bold 28px 'Russo One', sans-serif";
+  ctx.textAlign = "center";
+  ctx.textBaseline = "middle";
+  ctx.fillText(letter, 128, 96);
+
+  // Number
+  ctx.fillStyle = "#0f1330";
+  ctx.font = "bold 52px 'Russo One', sans-serif";
+  ctx.fillText(String(num), 128, 148);
+
+  const tex = new THREE.CanvasTexture(canvas);
+  return tex;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Single 3D Bingo Ball — uses shared geometry, disposes texture      */
 /* ------------------------------------------------------------------ */
 
 interface Ball3DProps {
-  position: [number, number, number];
+  xSlot: number;
   color: string;
   letter: string;
   number: number;
-  floatSpeed?: number;
-  floatIntensity?: number;
-  rotationSpeed?: number;
+  index: number;
 }
 
-function Ball3D({
-  position,
-  color,
-  letter,
-  number,
-  floatSpeed = 1,
-  floatIntensity = 1,
-  rotationSpeed = 0.3,
-}: Ball3DProps) {
+function Ball3D({ xSlot, color, letter, number, index }: Ball3DProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const meshRef = useRef<THREE.Mesh>(null);
+  const rotationSpeed = 0.2 + index * 0.08;
 
-  // Create canvas texture for ball face (letter + number)
-  const texture = useMemo(() => {
-    const canvas = document.createElement("canvas");
-    canvas.width = 256;
-    canvas.height = 256;
-    const ctx = canvas.getContext("2d")!;
+  // Responsive positioning: derive X from viewport width
+  const vw = useThree((s) => s.viewport.width);
+  const x = xSlot * (vw / 7);
+  const y = (index % 2 === 0 ? 0.2 : -0.15) * (vw / 6);
 
-    // Draw the ball's outer color
-    ctx.fillStyle = color;
-    ctx.beginPath();
-    ctx.arc(128, 128, 128, 0, Math.PI * 2);
-    ctx.fill();
-
-    // White stripe/circle for number
-    ctx.fillStyle = "#ffffff";
-    ctx.beginPath();
-    ctx.arc(128, 128, 72, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Subtle inner shadow on white circle
-    const grad = ctx.createRadialGradient(128, 118, 20, 128, 128, 72);
-    grad.addColorStop(0, "rgba(255,255,255,0)");
-    grad.addColorStop(1, "rgba(0,0,0,0.06)");
-    ctx.fillStyle = grad;
-    ctx.beginPath();
-    ctx.arc(128, 128, 72, 0, Math.PI * 2);
-    ctx.fill();
-
-    // Letter
-    ctx.fillStyle = color;
-    ctx.font = "bold 28px 'Russo One', sans-serif";
-    ctx.textAlign = "center";
-    ctx.textBaseline = "middle";
-    ctx.fillText(letter, 128, 96);
-
-    // Number
-    ctx.fillStyle = "#0f1330";
-    ctx.font = "bold 52px 'Russo One', sans-serif";
-    ctx.fillText(String(number), 128, 148);
-
-    const tex = new THREE.CanvasTexture(canvas);
-    tex.needsUpdate = true;
-    return tex;
-  }, [color, letter, number]);
+  // Create and dispose texture properly
+  const texture = useMemo(
+    () => createBallTexture(color, letter, number),
+    [color, letter, number],
+  );
+  useEffect(() => () => { texture.dispose(); }, [texture]);
 
   useFrame((_, delta) => {
     if (groupRef.current) {
@@ -83,30 +111,18 @@ function Ball3D({
 
   return (
     <Float
-      speed={floatSpeed}
-      rotationIntensity={0.4}
-      floatIntensity={floatIntensity}
-      floatingRange={[-0.15, 0.15]}
+      speed={1.2 + index * 0.2}
+      rotationIntensity={0.3}
+      floatIntensity={0.6 + index * 0.08}
+      floatingRange={[-0.1, 0.1]}
     >
-      <group ref={groupRef} position={position}>
-        <mesh ref={meshRef} castShadow>
-          <sphereGeometry args={[0.42, 64, 64]} />
+      <group ref={groupRef} position={[x, y, 0]}>
+        <mesh geometry={SHARED_SPHERE}>
           <meshStandardMaterial
             map={texture}
-            roughness={0.15}
-            metalness={0.1}
-            envMapIntensity={0.8}
-          />
-        </mesh>
-        {/* Specular highlight sphere (inner glow) */}
-        <mesh scale={[0.43, 0.43, 0.43]}>
-          <sphereGeometry args={[0.42, 32, 32]} />
-          <meshStandardMaterial
-            transparent
-            opacity={0.08}
-            color="#ffffff"
-            roughness={0}
-            metalness={1}
+            roughness={0.18}
+            metalness={0.08}
+            envMapIntensity={0.6}
           />
         </mesh>
       </group>
@@ -115,19 +131,18 @@ function Ball3D({
 }
 
 /* ------------------------------------------------------------------ */
-/*  Floating particles in the background                               */
+/*  Floating gold particles — InstancedMesh, reused dummy Object3D    */
 /* ------------------------------------------------------------------ */
 
-function FloatingParticles({ count = 50 }: { count?: number }) {
+function FloatingParticles({ count = 30 }: { count?: number }) {
   const meshRef = useRef<THREE.InstancedMesh>(null);
+  const dummy = useMemo(() => new THREE.Object3D(), []);
 
   const particles = useMemo(() => {
     return Array.from({ length: count }, () => ({
-      position: new THREE.Vector3(
-        (Math.random() - 0.5) * 12,
-        (Math.random() - 0.5) * 8,
-        (Math.random() - 0.5) * 6 - 2,
-      ),
+      x: (Math.random() - 0.5) * 10,
+      y: (Math.random() - 0.5) * 6,
+      z: (Math.random() - 0.5) * 4 - 2,
       speed: Math.random() * 0.5 + 0.1,
       offset: Math.random() * Math.PI * 2,
     }));
@@ -136,71 +151,79 @@ function FloatingParticles({ count = 50 }: { count?: number }) {
   useFrame(({ clock }) => {
     if (!meshRef.current) return;
     const t = clock.getElapsedTime();
-    const dummy = new THREE.Object3D();
 
-    particles.forEach((p, i) => {
+    for (let i = 0; i < particles.length; i++) {
+      const p = particles[i];
       dummy.position.set(
-        p.position.x + Math.sin(t * p.speed + p.offset) * 0.3,
-        p.position.y + Math.cos(t * p.speed * 0.7 + p.offset) * 0.4,
-        p.position.z,
+        p.x + Math.sin(t * p.speed + p.offset) * 0.3,
+        p.y + Math.cos(t * p.speed * 0.7 + p.offset) * 0.4,
+        p.z,
       );
       dummy.scale.setScalar(0.02 + Math.sin(t * p.speed + p.offset) * 0.01);
       dummy.updateMatrix();
-      meshRef.current!.setMatrixAt(i, dummy.matrix);
-    });
+      meshRef.current.setMatrixAt(i, dummy.matrix);
+    }
     meshRef.current.instanceMatrix.needsUpdate = true;
   });
 
   return (
     <instancedMesh ref={meshRef} args={[undefined, undefined, count]}>
-      <sphereGeometry args={[1, 8, 8]} />
+      <sphereGeometry args={[1, 6, 6]} />
       <meshBasicMaterial color="#d4a24c" transparent opacity={0.3} />
     </instancedMesh>
   );
 }
 
 /* ------------------------------------------------------------------ */
-/*  Main scene exported for the Home page                              */
+/*  Adaptive camera — adjusts Z based on viewport to keep balls       */
+/*  properly framed at any aspect ratio                                */
 /* ------------------------------------------------------------------ */
 
-const BALLS = [
-  { number: 7, color: "#3b82f6", letter: "B", pos: [-1.8, 0.3, 0] as [number, number, number] },
-  { number: 22, color: "#ef4444", letter: "I", pos: [-0.8, -0.2, 0.5] as [number, number, number] },
-  { number: 38, color: "#a78bfa", letter: "N", pos: [0.0, 0.35, -0.3] as [number, number, number] },
-  { number: 51, color: "#22c55e", letter: "G", pos: [0.8, -0.15, 0.3] as [number, number, number] },
-  { number: 65, color: "#f59e0b", letter: "O", pos: [1.8, 0.25, -0.2] as [number, number, number] },
-];
+function AdaptiveCamera() {
+  const camera = useThree((s) => s.camera);
+  const vw = useThree((s) => s.viewport.width);
+
+  useEffect(() => {
+    // Pull camera back on narrow viewports so balls aren't clipped
+    const z = vw < 4 ? 6.5 : vw < 6 ? 5.5 : 5;
+    camera.position.z = z;
+    camera.updateProjectionMatrix();
+  }, [vw, camera]);
+
+  return null;
+}
+
+/* ------------------------------------------------------------------ */
+/*  Main scene — responsive container, lightweight lighting            */
+/* ------------------------------------------------------------------ */
 
 export function BingoBallScene() {
   return (
-    <div className="w-full h-28 sm:h-36 lg:h-56">
+    <div className="w-full" style={{ aspectRatio: "4 / 1", maxHeight: "14rem" }}>
       <Canvas
-        camera={{ position: [0, 0, 5.5], fov: 40 }}
-        dpr={[1, 2]}
+        camera={{ position: [0, 0, 5], fov: 40 }}
+        dpr={[1, 1.5]}
         gl={{ antialias: true, alpha: true }}
         style={{ background: "transparent" }}
       >
-        <ambientLight intensity={0.5} />
-        <directionalLight position={[5, 5, 5]} intensity={1} castShadow />
-        <pointLight position={[-3, 2, 4]} intensity={0.6} color="#d4a24c" />
-        <pointLight position={[3, -2, 3]} intensity={0.3} color="#a78bfa" />
+        <AdaptiveCamera />
 
-        <Environment preset="city" />
+        <ambientLight intensity={0.6} />
+        <directionalLight position={[5, 5, 5]} intensity={0.9} />
+        <pointLight position={[-2, 1, 3]} intensity={0.4} color="#d4a24c" />
 
-        {BALLS.map((ball, i) => (
+        {BALL_DATA.map((ball, i) => (
           <Ball3D
             key={ball.number}
-            position={ball.pos}
+            xSlot={ball.xSlot}
             color={ball.color}
             letter={ball.letter}
             number={ball.number}
-            floatSpeed={1.2 + i * 0.2}
-            floatIntensity={0.8 + i * 0.1}
-            rotationSpeed={0.2 + i * 0.08}
+            index={i}
           />
         ))}
 
-        <FloatingParticles count={40} />
+        <FloatingParticles count={30} />
       </Canvas>
     </div>
   );

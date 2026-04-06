@@ -148,7 +148,7 @@ export function Home() {
         >
           <Suspense
             fallback={
-              <div className="flex justify-center gap-3 py-1 h-28 sm:h-36 lg:h-56 items-center">
+              <div className="flex justify-center gap-3 items-center w-full" style={{ aspectRatio: "4 / 1", maxHeight: "14rem" }}>
                 {[
                   { n: 7, c: "#3b82f6", l: "B" },
                   { n: 22, c: "#ef4444", l: "I" },

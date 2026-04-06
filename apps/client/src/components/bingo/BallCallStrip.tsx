@@ -92,7 +92,7 @@ export function BallCallStrip({
             <BallCall3D
               number={currentNumber}
               is75={is75}
-              className="w-20 sm:w-24 -my-6 sm:-my-7"
+              className="w-16 sm:w-20 -my-4 sm:-my-5"
             />
           </Suspense>
         ) : (
