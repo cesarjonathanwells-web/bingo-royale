@@ -102,7 +102,7 @@ export function Home() {
       </div>
 
       {/* ── Main content ── */}
-      <PageTransition className="relative z-10 w-full max-w-md space-y-3 sm:space-y-5 lg:space-y-6">
+      <PageTransition className="relative z-10 w-full flex flex-col items-center space-y-3 sm:space-y-5 lg:space-y-6">
         {/* ── Title ── */}
         <div className="text-center space-y-2 sm:space-y-4">
           <motion.h1
@@ -140,15 +140,16 @@ export function Home() {
           </motion.p>
         </div>
 
-        {/* ── 3D Bingo Balls ── */}
+        {/* ── 3D Bingo Balls — full width, breaks out of max-w-md ── */}
         <motion.div
+          className="w-[90vw] max-w-3xl"
           initial={{ opacity: 0, scale: 0.9 }}
           animate={{ opacity: 1, scale: 1 }}
           transition={{ delay: 0.2, duration: 0.6 }}
         >
           <Suspense
             fallback={
-              <div className="flex justify-center gap-3 items-center w-[90vw] max-w-3xl mx-auto" style={{ aspectRatio: "5 / 2" }}>
+              <div className="flex justify-center gap-4 sm:gap-6 items-center w-full" style={{ aspectRatio: "5 / 2" }}>
                 {[
                   { n: 7, c: "#3b82f6", l: "B" },
                   { n: 22, c: "#ef4444", l: "I" },
@@ -158,17 +159,17 @@ export function Home() {
                 ].map(({ n, c, l }) => (
                   <div
                     key={n}
-                    className="w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white shadow-lg animate-pulse"
+                    className="w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white shadow-lg animate-pulse"
                     style={{
                       background: `radial-gradient(circle at 30% 25%, ${c}ff, ${c} 60%, ${c}99 100%)`,
                     }}
                   >
                     <div
-                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex flex-col items-center justify-center"
+                      className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex flex-col items-center justify-center"
                       style={{ background: "radial-gradient(circle at 50% 40%, #ffffff, #e0e0e0 100%)" }}
                     >
-                      <span style={{ color: c, fontSize: "6px", fontWeight: 700 }}>{l}</span>
-                      <span style={{ color: "#0f1330", fontSize: "11px", fontWeight: 800 }}>{n}</span>
+                      <span style={{ color: c, fontSize: "7px", fontWeight: 700 }}>{l}</span>
+                      <span style={{ color: "#0f1330", fontSize: "12px", fontWeight: 800 }}>{n}</span>
                     </div>
                   </div>
                 ))}
@@ -179,7 +180,8 @@ export function Home() {
           </Suspense>
         </motion.div>
 
-        {/* ── Auth / Name section ── */}
+        {/* ── Auth / Name section — constrained width ── */}
+        <div className="w-full max-w-md">
         {!isAuthenticated ? (
           <motion.form
             onSubmit={handleGuest}
@@ -300,6 +302,7 @@ export function Home() {
             </StaggerItem>
           </StaggerContainer>
         )}
+        </div>{/* end max-w-md auth wrapper */}
       </PageTransition>
 
       {/* ── Create Room Dialog ── */}
