@@ -1,5 +1,6 @@
-import { useState, useCallback, useMemo, type FormEvent } from "react";
+import { useState, useCallback, useMemo, lazy, Suspense, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
+import { motion } from "framer-motion";
 import { useAuthStore } from "@/stores/auth-store";
 import { useRoomStore } from "@/stores/room-store";
 import { Button } from "@/components/ui/Button";
@@ -7,7 +8,12 @@ import { Input } from "@/components/ui/Input";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Select } from "@/components/ui/Select";
 import { useToast } from "@/components/ui/Toast";
+import { PageTransition, StaggerContainer, StaggerItem } from "@/components/fx/PageTransition";
 import type { BingoVariant } from "@bingo/shared";
+
+const BingoBallScene = lazy(() =>
+  import("@/components/3d/BingoBallScene").then((m) => ({ default: m.BingoBallScene })),
+);
 
 /* ------------------------------------------------------------------ */
 /*  Floating particle config — generated once per mount               */
@@ -96,10 +102,15 @@ export function Home() {
       </div>
 
       {/* ── Main content ── */}
-      <div className="relative z-10 w-full max-w-md space-y-10 animate-page-enter">
+      <PageTransition className="relative z-10 w-full max-w-md space-y-10">
         {/* ── Title ── */}
         <div className="text-center space-y-4">
-          <h1 className="font-gaming tracking-tight leading-none">
+          <motion.h1
+            className="font-gaming tracking-tight leading-none"
+            initial={{ scale: 0.5, opacity: 0 }}
+            animate={{ scale: 1, opacity: 1 }}
+            transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
+          >
             <span
               className="text-gold block text-7xl sm:text-8xl lg:text-9xl drop-shadow-lg"
               style={{
@@ -117,73 +128,66 @@ export function Home() {
             >
               ROYALE
             </span>
-          </h1>
+          </motion.h1>
 
-          <p className="text-sm sm:text-base text-neon-purple font-medium tracking-widest uppercase">
+          <motion.p
+            className="text-sm sm:text-base text-neon-purple font-medium tracking-widest uppercase"
+            initial={{ opacity: 0, y: 10 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.3, duration: 0.5 }}
+          >
             The Ultimate Multiplayer Bingo Experience
-          </p>
+          </motion.p>
         </div>
 
-        {/* ── Decorative bingo balls ── */}
-        <div className="flex justify-center gap-4 rounded-full py-2">
-          {[
-            { n: 7, c: "#3b82f6", l: "B" },
-            { n: 22, c: "#ef4444", l: "I" },
-            { n: 38, c: "#a78bfa", l: "N" },
-            { n: 51, c: "#22c55e", l: "G" },
-            { n: 65, c: "#f59e0b", l: "O" },
-          ].map(({ n, c, l }, idx) => (
-            <div
-              key={n}
-              className="relative"
-              style={{
-                animation: `particle-float ${4 + idx * 0.6}s ease-in-out infinite`,
-                animationDelay: `${idx * 0.3}s`,
-              }}
-            >
-              <div
-                className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white shadow-lg transition-transform duration-300 hover:scale-110"
-                style={{
-                  background: `radial-gradient(circle at 30% 25%, ${c}ff, ${c} 60%, ${c}99 100%)`,
-                  boxShadow: `0 4px 15px ${c}66, 0 0 25px ${c}33, inset 0 -2px 4px rgba(0,0,0,0.2), inset 0 2px 4px rgba(255,255,255,0.3)`,
-                }}
-              >
-                <div
-                  className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex flex-col items-center justify-center"
-                  style={{
-                    background:
-                      "radial-gradient(circle at 50% 40%, #ffffff, #f0f0f0 70%, #e0e0e0 100%)",
-                  }}
-                >
-                  <span
+        {/* ── 3D Bingo Balls ── */}
+        <motion.div
+          initial={{ opacity: 0, scale: 0.9 }}
+          animate={{ opacity: 1, scale: 1 }}
+          transition={{ delay: 0.2, duration: 0.6 }}
+        >
+          <Suspense
+            fallback={
+              <div className="flex justify-center gap-4 py-2 h-48 items-center">
+                {[
+                  { n: 7, c: "#3b82f6", l: "B" },
+                  { n: 22, c: "#ef4444", l: "I" },
+                  { n: 38, c: "#a78bfa", l: "N" },
+                  { n: 51, c: "#22c55e", l: "G" },
+                  { n: 65, c: "#f59e0b", l: "O" },
+                ].map(({ n, c, l }) => (
+                  <div
+                    key={n}
+                    className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg animate-pulse"
                     style={{
-                      color: c,
-                      fontSize: "7px",
-                      fontWeight: 700,
-                      lineHeight: 1,
+                      background: `radial-gradient(circle at 30% 25%, ${c}ff, ${c} 60%, ${c}99 100%)`,
                     }}
                   >
-                    {l}
-                  </span>
-                  <span
-                    style={{
-                      color: "#0f1330",
-                      fontSize: "13px",
-                      fontWeight: 800,
-                      lineHeight: 1,
-                    }}
-                  >
-                    {n}
-                  </span>
-                </div>
+                    <div
+                      className="w-8 h-8 rounded-full flex flex-col items-center justify-center"
+                      style={{ background: "radial-gradient(circle at 50% 40%, #ffffff, #e0e0e0 100%)" }}
+                    >
+                      <span style={{ color: c, fontSize: "7px", fontWeight: 700 }}>{l}</span>
+                      <span style={{ color: "#0f1330", fontSize: "13px", fontWeight: 800 }}>{n}</span>
+                    </div>
+                  </div>
+                ))}
               </div>
-            </div>
-          ))}
-        </div>
+            }
+          >
+            <BingoBallScene />
+          </Suspense>
+        </motion.div>
 
         {/* ── Auth / Name section ── */}
         {!isAuthenticated ? (
-          <form onSubmit={handleGuest} className="space-y-5">
+          <motion.form
+            onSubmit={handleGuest}
+            className="space-y-5"
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.4, duration: 0.5 }}
+          >
             <Input
               label={t("auth.guestName")}
               placeholder={t("auth.guestNamePlaceholder")}
@@ -199,92 +203,104 @@ export function Home() {
             >
               {t("auth.playAsGuest")}
             </Button>
-          </form>
+          </motion.form>
         ) : (
-          <div className="space-y-6">
+          <StaggerContainer className="space-y-6">
             {/* Current player */}
-            <div className="flex items-center justify-between px-5 py-4 rounded-2xl glass neon-border-purple">
-              <div>
-                <p className="text-xs text-[var(--color-text-muted)] tracking-wide uppercase">
-                  {t("auth.orContinueAs")}
-                </p>
-                <p className="text-base font-bold text-gold mt-0.5">
-                  {user?.name}
-                </p>
+            <StaggerItem>
+              <div className="flex items-center justify-between px-5 py-4 rounded-2xl glass neon-border-purple">
+                <div>
+                  <p className="text-xs text-[var(--color-text-muted)] tracking-wide uppercase">
+                    {t("auth.orContinueAs")}
+                  </p>
+                  <p className="text-base font-bold text-gold mt-0.5">
+                    {user?.name}
+                  </p>
+                </div>
+                <Button variant="ghost" size="sm" onClick={logout}>
+                  {t("auth.logout")}
+                </Button>
               </div>
-              <Button variant="ghost" size="sm" onClick={logout}>
-                {t("auth.logout")}
-              </Button>
-            </div>
+            </StaggerItem>
 
             {/* Room actions */}
-            <div className="grid grid-cols-2 gap-4">
-              {/* Create Room button */}
-              <button
-                type="button"
-                disabled={isConnecting}
-                onClick={() => setShowCreate(true)}
-                className="glass-card rounded-2xl px-4 py-5 flex flex-col items-center gap-3 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50 group cursor-pointer"
-                style={{
-                  boxShadow:
-                    "0 0 15px rgba(168,85,247,0.1), 0 4px 20px rgba(0,0,0,0.2)",
-                }}
-              >
-                {/* Dice icon */}
-                <svg
-                  className="w-8 h-8 text-neon-gold transition-transform duration-300 group-hover:rotate-12"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+            <StaggerItem>
+              <div className="grid grid-cols-2 gap-4">
+                {/* Create Room button */}
+                <motion.button
+                  type="button"
+                  disabled={isConnecting}
+                  onClick={() => setShowCreate(true)}
+                  className="glass-card rounded-2xl px-4 py-5 flex flex-col items-center gap-3 disabled:opacity-50 group cursor-pointer"
+                  style={{
+                    boxShadow:
+                      "0 0 15px rgba(168,85,247,0.1), 0 4px 20px rgba(0,0,0,0.2)",
+                  }}
+                  whileHover={{ scale: 1.04, boxShadow: "0 0 25px rgba(212,162,76,0.2), 0 8px 30px rgba(0,0,0,0.3)" }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
-                  <rect x="2" y="2" width="20" height="20" rx="3" />
-                  <circle cx="8" cy="8" r="1.2" fill="currentColor" />
-                  <circle cx="16" cy="8" r="1.2" fill="currentColor" />
-                  <circle cx="12" cy="12" r="1.2" fill="currentColor" />
-                  <circle cx="8" cy="16" r="1.2" fill="currentColor" />
-                  <circle cx="16" cy="16" r="1.2" fill="currentColor" />
-                </svg>
-                <span className="text-sm font-bold text-gold tracking-wide">
-                  {t("home.createRoom", { ns: "game" })}
-                </span>
-              </button>
+                  {/* Dice icon */}
+                  <motion.svg
+                    className="w-8 h-8 text-neon-gold"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                    whileHover={{ rotate: 15 }}
+                    transition={{ type: "spring", stiffness: 300 }}
+                  >
+                    <rect x="2" y="2" width="20" height="20" rx="3" />
+                    <circle cx="8" cy="8" r="1.2" fill="currentColor" />
+                    <circle cx="16" cy="8" r="1.2" fill="currentColor" />
+                    <circle cx="12" cy="12" r="1.2" fill="currentColor" />
+                    <circle cx="8" cy="16" r="1.2" fill="currentColor" />
+                    <circle cx="16" cy="16" r="1.2" fill="currentColor" />
+                  </motion.svg>
+                  <span className="text-sm font-bold text-gold tracking-wide">
+                    {t("home.createRoom", { ns: "game" })}
+                  </span>
+                </motion.button>
 
-              {/* Join Room button */}
-              <button
-                type="button"
-                disabled={isConnecting}
-                onClick={() => setShowJoin(true)}
-                className="glass-card rounded-2xl px-4 py-5 flex flex-col items-center gap-3 transition-all duration-300 hover:scale-[1.03] active:scale-[0.98] disabled:opacity-50 group cursor-pointer"
-                style={{
-                  boxShadow:
-                    "0 0 15px rgba(168,85,247,0.1), 0 4px 20px rgba(0,0,0,0.2)",
-                }}
-              >
-                {/* Door / enter icon */}
-                <svg
-                  className="w-8 h-8 text-neon-gold transition-transform duration-300 group-hover:translate-x-0.5"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="1.5"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
+                {/* Join Room button */}
+                <motion.button
+                  type="button"
+                  disabled={isConnecting}
+                  onClick={() => setShowJoin(true)}
+                  className="glass-card rounded-2xl px-4 py-5 flex flex-col items-center gap-3 disabled:opacity-50 group cursor-pointer"
+                  style={{
+                    boxShadow:
+                      "0 0 15px rgba(168,85,247,0.1), 0 4px 20px rgba(0,0,0,0.2)",
+                  }}
+                  whileHover={{ scale: 1.04, boxShadow: "0 0 25px rgba(212,162,76,0.2), 0 8px 30px rgba(0,0,0,0.3)" }}
+                  whileTap={{ scale: 0.96 }}
+                  transition={{ type: "spring", stiffness: 400, damping: 25 }}
                 >
-                  <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
-                  <polyline points="10 17 15 12 10 7" />
-                  <line x1="15" y1="12" x2="3" y2="12" />
-                </svg>
-                <span className="text-sm font-bold text-gold tracking-wide">
-                  {t("home.joinRoom", { ns: "game" })}
-                </span>
-              </button>
-            </div>
-          </div>
+                  {/* Door / enter icon */}
+                  <svg
+                    className="w-8 h-8 text-neon-gold transition-transform duration-300 group-hover:translate-x-0.5"
+                    viewBox="0 0 24 24"
+                    fill="none"
+                    stroke="currentColor"
+                    strokeWidth="1.5"
+                    strokeLinecap="round"
+                    strokeLinejoin="round"
+                  >
+                    <path d="M15 3h4a2 2 0 0 1 2 2v14a2 2 0 0 1-2 2h-4" />
+                    <polyline points="10 17 15 12 10 7" />
+                    <line x1="15" y1="12" x2="3" y2="12" />
+                  </svg>
+                  <span className="text-sm font-bold text-gold tracking-wide">
+                    {t("home.joinRoom", { ns: "game" })}
+                  </span>
+                </motion.button>
+              </div>
+            </StaggerItem>
+          </StaggerContainer>
         )}
-      </div>
+      </PageTransition>
 
       {/* ── Create Room Dialog ── */}
       <Dialog open={showCreate} onOpenChange={setShowCreate}>

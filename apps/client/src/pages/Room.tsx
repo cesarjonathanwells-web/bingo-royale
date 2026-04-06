@@ -1,6 +1,7 @@
 import { useEffect, useCallback, useRef } from "react";
 import { useTranslation } from "react-i18next";
 import { useNavigate } from "@tanstack/react-router";
+import { motion, AnimatePresence } from "framer-motion";
 import { useRoomStore } from "@/stores/room-store";
 import { useAuthStore } from "@/stores/auth-store";
 import { useSound } from "@/hooks/useSound";
@@ -208,10 +209,18 @@ export function Room({ code }: RoomPageProps) {
 
   // ---- State-based rendering ----
 
+  const stateKey = !room ? "loading" : room.state;
+
   // Loading state
   if (!room) {
     return (
-      <div className="flex-1 flex items-center justify-center">
+      <motion.div
+        key="loading"
+        className="flex-1 flex items-center justify-center"
+        initial={{ opacity: 0 }}
+        animate={{ opacity: 1 }}
+        exit={{ opacity: 0 }}
+      >
         <div className="text-center space-y-3">
           <div className="flex justify-center">
             <div className="w-10 h-10 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
@@ -220,53 +229,80 @@ export function Room({ code }: RoomPageProps) {
             {t("actions.loading", { ns: "common" })}
           </p>
         </div>
-      </div>
+      </motion.div>
     );
   }
-
-  // Lobby
-  if (room.state === "lobby") {
-    return <RoomLobby room={room} />;
-  }
-
-  // Finished
-  if (room.state === "finished" && gameState) {
-    return (
-      <GameFinished
-        gameState={gameState}
-        customPatterns={room.customPatterns}
-        isHost={isHost}
-        onNewRound={newRound}
-        onLeave={handleLeave}
-      />
-    );
-  }
-
-  // In Progress
-  if (!gameState) return null;
 
   return (
-    <GameView
-      room={room}
-      gameState={gameState}
-      myCards={myCards}
-      myDabs={myDabs}
-      activeCardIndex={activeCardIndex}
-      myPowerUps={myPowerUps}
-      peekedNumbers={peekedNumbers}
-      chatMessages={chatMessages}
-      reactions={reactions}
-      isHost={isHost}
-      onSetActiveCard={setActiveCard}
-      onDab={handleDab}
-      onDabMulti={handleDabMulti}
-      onClaimBingo={claimBingo}
-      onPauseGame={pauseGame}
-      onResumeGame={resumeGame}
-      onUsePowerUp={handleUsePowerUp}
-      onSendChat={sendChat}
-      onSendReaction={sendReaction}
-      onLeave={handleLeave}
-    />
+    <AnimatePresence mode="wait">
+      {/* Lobby */}
+      {room.state === "lobby" && (
+        <motion.div
+          key="lobby"
+          className="flex-1 flex flex-col py-4"
+          initial={{ opacity: 0, x: -20 }}
+          animate={{ opacity: 1, x: 0 }}
+          exit={{ opacity: 0, x: 20 }}
+          transition={{ duration: 0.3, ease: "easeInOut" }}
+        >
+          <RoomLobby room={room} />
+        </motion.div>
+      )}
+
+      {/* Finished */}
+      {room.state === "finished" && gameState && (
+        <motion.div
+          key="finished"
+          className="flex-1 flex flex-col"
+          initial={{ opacity: 0, scale: 0.95 }}
+          animate={{ opacity: 1, scale: 1 }}
+          exit={{ opacity: 0, scale: 1.05 }}
+          transition={{ duration: 0.4, ease: "easeOut" }}
+        >
+          <GameFinished
+            gameState={gameState}
+            customPatterns={room.customPatterns}
+            isHost={isHost}
+            onNewRound={newRound}
+            onLeave={handleLeave}
+          />
+        </motion.div>
+      )}
+
+      {/* In Progress */}
+      {room.state === "in_progress" && gameState && (
+        <motion.div
+          key="in_progress"
+          className="flex-1 flex flex-col"
+          initial={{ opacity: 0 }}
+          animate={{ opacity: 1 }}
+          exit={{ opacity: 0 }}
+          transition={{ duration: 0.3 }}
+        >
+          <GameView
+            room={room}
+            gameState={gameState}
+            myCards={myCards}
+            myDabs={myDabs}
+            activeCardIndex={activeCardIndex}
+            myPowerUps={myPowerUps}
+            peekedNumbers={peekedNumbers}
+            chatMessages={chatMessages}
+            reactions={reactions}
+            isHost={isHost}
+            onSetActiveCard={setActiveCard}
+            onDab={handleDab}
+            onDabMulti={handleDabMulti}
+            onClaimBingo={claimBingo}
+            onPauseGame={pauseGame}
+            onResumeGame={resumeGame}
+            onUsePowerUp={handleUsePowerUp}
+            onSendChat={sendChat}
+            onSendReaction={sendReaction}
+            onLeave={handleLeave}
+          />
+        </motion.div>
+      )}
+    </AnimatePresence>
   );
 }

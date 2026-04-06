@@ -211,6 +211,26 @@ body {
 .animate-slide-up { animation: slide-in-up 0.25s ease-out forwards; }
 .animate-card-deal { animation: page-enter 0.3s ease-out forwards; }
 
+/* Particle float — used by home page decorative elements */
+@keyframes particle-float {
+  0%, 100% { transform: translateY(0) rotate(0deg); }
+  25% { transform: translateY(-8px) rotate(2deg); }
+  50% { transform: translateY(-3px) rotate(-1deg); }
+  75% { transform: translateY(-10px) rotate(1deg); }
+}
+
+/* Glow pulse for interactive elements */
+@keyframes glow-breathe {
+  0%, 100% { box-shadow: 0 0 10px rgba(212,162,76,0.2); }
+  50% { box-shadow: 0 0 25px rgba(212,162,76,0.35), 0 0 50px rgba(212,162,76,0.1); }
+}
+.animate-glow-breathe { animation: glow-breathe 3s ease-in-out infinite; }
+
+/* 3D ball call container sizing */
+.ball-call-3d-container {
+  perspective: 800px;
+}
+
 /* Legacy no-ops — classes still referenced but effects removed */
 .animate-bingo-glow, .animate-shake, .animate-pulse-subtle,
 .animate-winner-glow, .animate-gold-pulse, .animate-shimmer,

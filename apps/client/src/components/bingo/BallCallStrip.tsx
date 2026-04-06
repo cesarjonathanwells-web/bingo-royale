@@ -1,8 +1,13 @@
-import { useMemo } from "react";
+import { useMemo, lazy, Suspense } from "react";
 import { useTranslation } from "react-i18next";
+import { motion, AnimatePresence } from "framer-motion";
 import type { GameState, BingoVariant } from "@bingo/shared";
 import { NumberBall } from "./NumberBall";
 import { cn } from "@/lib/utils";
+
+const BallCall3D = lazy(() =>
+  import("@/components/3d/BallCall3D").then((m) => ({ default: m.BallCall3D })),
+);
 
 interface BallCallStripProps {
   gameState: GameState;
@@ -45,43 +50,51 @@ export function BallCallStrip({
     >
       {/* Previous 3 balls - oldest to newest (left to right) */}
       <div className="flex items-center gap-2">
-        {previousThree.length > 0
-          ? [...previousThree].reverse().map((n, idx) => {
-              // idx 0 = oldest of the 3, idx 2 = most recent
-              const opacity = 0.35 + idx * 0.2; // 0.35, 0.55, 0.75
-              return (
-                <div key={n} style={{ opacity }} className="transition-opacity duration-300">
-                  <NumberBall number={n} is75={is75} size="sm" />
-                </div>
-              );
-            })
-          : /* Placeholder dots when no previous balls */
-            Array.from({ length: 3 }, (_, i) => (
-              <div
-                key={`empty-${i}`}
-                className="w-9 h-9 rounded-full bg-[var(--color-bg-tertiary)]/40 border border-[var(--color-border)]/30"
-                style={{ opacity: 0.35 + i * 0.2 }}
-              />
-            ))}
+        <AnimatePresence mode="popLayout">
+          {previousThree.length > 0
+            ? [...previousThree].reverse().map((n, idx) => {
+                const opacity = 0.35 + idx * 0.2;
+                return (
+                  <motion.div
+                    key={n}
+                    initial={{ scale: 0, opacity: 0, x: 30 }}
+                    animate={{ scale: 1, opacity, x: 0 }}
+                    exit={{ scale: 0, opacity: 0, x: -20 }}
+                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                  >
+                    <NumberBall number={n} is75={is75} size="sm" />
+                  </motion.div>
+                );
+              })
+            : Array.from({ length: 3 }, (_, i) => (
+                <div
+                  key={`empty-${i}`}
+                  className="w-9 h-9 rounded-full bg-[var(--color-bg-tertiary)]/40 border border-[var(--color-border)]/30"
+                  style={{ opacity: 0.35 + i * 0.2 }}
+                />
+              ))}
+        </AnimatePresence>
       </div>
 
       {/* Divider */}
       <div className="w-px h-8 bg-[var(--color-border)]/40" />
 
-      {/* Current ball - 25% larger */}
+      {/* Current ball - 3D animated */}
       <div className="relative">
         {currentNumber ? (
-          <div
-            className="transform scale-125 origin-center animate-ball-pulse"
-            key={currentNumber}
+          <Suspense
+            fallback={
+              <div className="transform scale-125 origin-center animate-ball-pulse">
+                <NumberBall number={currentNumber} is75={is75} size="sm" animate />
+              </div>
+            }
           >
-            <NumberBall
+            <BallCall3D
               number={currentNumber}
               is75={is75}
-              size="sm"
-              animate
+              className="w-28 h-auto -my-8"
             />
-          </div>
+          </Suspense>
         ) : (
           <div className="w-9 h-9 rounded-full bg-[var(--color-bg-tertiary)]/60 border border-[var(--color-border)] flex items-center justify-center">
             <span className="text-[8px] text-[var(--color-text-muted)]">--</span>

@@ -10,6 +10,17 @@ export default defineConfig({
       '@': path.resolve(__dirname, './src'),
     },
   },
+  build: {
+    rollupOptions: {
+      output: {
+        manualChunks: {
+          'three-core': ['three'],
+          'three-fiber': ['@react-three/fiber', '@react-three/drei'],
+          'framer': ['framer-motion'],
+        },
+      },
+    },
+  },
   server: {
     proxy: {
       '/api': 'http://localhost:3000',
