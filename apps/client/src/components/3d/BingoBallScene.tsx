@@ -88,12 +88,14 @@ interface Ball3DProps {
 
 function Ball3D({ xSlot, color, letter, number, index }: Ball3DProps) {
   const groupRef = useRef<THREE.Group>(null);
-  const rotationSpeed = 0.2 + index * 0.08;
 
   // Responsive positioning: derive X from viewport width
   const vw = useThree((s) => s.viewport.width);
   const x = xSlot * (vw / 7);
   const y = (index % 2 === 0 ? 0.2 : -0.15) * (vw / 6);
+
+  // Each ball gets a unique phase offset so they wobble differently
+  const phase = index * 1.3;
 
   // Create and dispose texture properly
   const texture = useMemo(
@@ -102,10 +104,12 @@ function Ball3D({ xSlot, color, letter, number, index }: Ball3DProps) {
   );
   useEffect(() => () => { texture.dispose(); }, [texture]);
 
-  useFrame((_, delta) => {
+  useFrame(({ clock }) => {
     if (groupRef.current) {
-      groupRef.current.rotation.y += delta * rotationSpeed;
-      groupRef.current.rotation.x += delta * rotationSpeed * 0.3;
+      const t = clock.getElapsedTime();
+      // Gentle wobble keeping the number face toward camera (±12°)
+      groupRef.current.rotation.y = Math.sin(t * 0.8 + phase) * 0.2;
+      groupRef.current.rotation.x = Math.sin(t * 0.6 + phase + 1) * 0.1;
     }
   });
 
