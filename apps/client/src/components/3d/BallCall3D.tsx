@@ -95,7 +95,7 @@ function AnimatedBall({ number, color, letter, onAnimationComplete }: AnimatedBa
   return (
     <group ref={groupRef}>
       <mesh castShadow>
-        <sphereGeometry args={[0.8, 64, 64]} />
+        <sphereGeometry args={[0.6, 64, 64]} />
         <meshStandardMaterial
           map={texture}
           roughness={0.12}
@@ -105,7 +105,7 @@ function AnimatedBall({ number, color, letter, onAnimationComplete }: AnimatedBa
       </mesh>
       {/* Glow ring */}
       <mesh rotation={[Math.PI / 2, 0, 0]} position={[0, -0.01, 0]}>
-        <ringGeometry args={[0.85, 1.2, 32]} />
+        <ringGeometry args={[0.65, 0.9, 32]} />
         <meshBasicMaterial
           color={color}
           transparent
@@ -202,7 +202,7 @@ export function BallCall3D({ number, is75 = true, className }: BallCall3DProps) 
   if (!displayNumber) return null;
 
   return (
-    <div className={className} style={{ height: "120px" }}>
+    <div className={className} style={{ height: "80px" }}>
       <Canvas
         key={animKey}
         camera={{ position: [0, 0, 4], fov: 40 }}

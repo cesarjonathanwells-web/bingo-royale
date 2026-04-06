@@ -90,7 +90,7 @@ function Ball3D({
     >
       <group ref={groupRef} position={position}>
         <mesh ref={meshRef} castShadow>
-          <sphereGeometry args={[0.5, 64, 64]} />
+          <sphereGeometry args={[0.42, 64, 64]} />
           <meshStandardMaterial
             map={texture}
             roughness={0.15}
@@ -99,8 +99,8 @@ function Ball3D({
           />
         </mesh>
         {/* Specular highlight sphere (inner glow) */}
-        <mesh scale={[0.51, 0.51, 0.51]}>
-          <sphereGeometry args={[0.5, 32, 32]} />
+        <mesh scale={[0.43, 0.43, 0.43]}>
+          <sphereGeometry args={[0.42, 32, 32]} />
           <meshStandardMaterial
             transparent
             opacity={0.08}
@@ -164,18 +164,18 @@ function FloatingParticles({ count = 50 }: { count?: number }) {
 /* ------------------------------------------------------------------ */
 
 const BALLS = [
-  { number: 7, color: "#3b82f6", letter: "B", pos: [-2.2, 0.4, 0] as [number, number, number] },
-  { number: 22, color: "#ef4444", letter: "I", pos: [-1.0, -0.3, 0.5] as [number, number, number] },
-  { number: 38, color: "#a78bfa", letter: "N", pos: [0.0, 0.5, -0.3] as [number, number, number] },
-  { number: 51, color: "#22c55e", letter: "G", pos: [1.0, -0.2, 0.3] as [number, number, number] },
-  { number: 65, color: "#f59e0b", letter: "O", pos: [2.2, 0.3, -0.2] as [number, number, number] },
+  { number: 7, color: "#3b82f6", letter: "B", pos: [-1.8, 0.3, 0] as [number, number, number] },
+  { number: 22, color: "#ef4444", letter: "I", pos: [-0.8, -0.2, 0.5] as [number, number, number] },
+  { number: 38, color: "#a78bfa", letter: "N", pos: [0.0, 0.35, -0.3] as [number, number, number] },
+  { number: 51, color: "#22c55e", letter: "G", pos: [0.8, -0.15, 0.3] as [number, number, number] },
+  { number: 65, color: "#f59e0b", letter: "O", pos: [1.8, 0.25, -0.2] as [number, number, number] },
 ];
 
 export function BingoBallScene() {
   return (
-    <div className="w-full h-48 sm:h-56 lg:h-64">
+    <div className="w-full h-28 sm:h-48 lg:h-64">
       <Canvas
-        camera={{ position: [0, 0, 5], fov: 45 }}
+        camera={{ position: [0, 0, 5.5], fov: 40 }}
         dpr={[1, 2]}
         gl={{ antialias: true, alpha: true }}
         style={{ background: "transparent" }}

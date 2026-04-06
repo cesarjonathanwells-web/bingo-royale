@@ -80,7 +80,7 @@ export function Home() {
   }, [joinRoom, roomCode, t, toast]);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 py-12 pb-24 bg-gradient-game relative overflow-hidden">
+    <div className="flex-1 flex flex-col items-center justify-center px-4 py-4 sm:py-8 pb-20 sm:pb-24 bg-gradient-game relative overflow-y-auto overflow-x-hidden">
       {/* ── Decorative background orbs ── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -102,9 +102,9 @@ export function Home() {
       </div>
 
       {/* ── Main content ── */}
-      <PageTransition className="relative z-10 w-full max-w-md space-y-10">
+      <PageTransition className="relative z-10 w-full max-w-md space-y-4 sm:space-y-8">
         {/* ── Title ── */}
-        <div className="text-center space-y-4">
+        <div className="text-center space-y-2 sm:space-y-4">
           <motion.h1
             className="font-gaming tracking-tight leading-none"
             initial={{ scale: 0.5, opacity: 0 }}
@@ -112,7 +112,7 @@ export function Home() {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
             <span
-              className="text-gold block text-7xl sm:text-8xl lg:text-9xl drop-shadow-lg"
+              className="text-gold block text-5xl sm:text-8xl lg:text-9xl drop-shadow-lg"
               style={{
                 filter: "drop-shadow(0 4px 30px rgba(255, 215, 0, 0.4))",
               }}
@@ -120,7 +120,7 @@ export function Home() {
               BINGO
             </span>
             <span
-              className="block text-4xl sm:text-5xl lg:text-6xl tracking-[0.25em] mt-1"
+              className="block text-2xl sm:text-5xl lg:text-6xl tracking-[0.25em] mt-1"
               style={{
                 color: "transparent",
                 WebkitTextStroke: "1.5px rgba(212, 162, 76, 0.7)",
@@ -131,7 +131,7 @@ export function Home() {
           </motion.h1>
 
           <motion.p
-            className="text-sm sm:text-base text-neon-purple font-medium tracking-widest uppercase"
+            className="text-xs sm:text-base text-neon-purple font-medium tracking-widest uppercase"
             initial={{ opacity: 0, y: 10 }}
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.3, duration: 0.5 }}
@@ -148,7 +148,7 @@ export function Home() {
         >
           <Suspense
             fallback={
-              <div className="flex justify-center gap-4 py-2 h-48 items-center">
+              <div className="flex justify-center gap-3 py-1 h-28 sm:h-48 items-center">
                 {[
                   { n: 7, c: "#3b82f6", l: "B" },
                   { n: 22, c: "#ef4444", l: "I" },
@@ -158,17 +158,17 @@ export function Home() {
                 ].map(({ n, c, l }) => (
                   <div
                     key={n}
-                    className="w-12 h-12 rounded-full flex items-center justify-center text-white shadow-lg animate-pulse"
+                    className="w-9 h-9 sm:w-12 sm:h-12 rounded-full flex items-center justify-center text-white shadow-lg animate-pulse"
                     style={{
                       background: `radial-gradient(circle at 30% 25%, ${c}ff, ${c} 60%, ${c}99 100%)`,
                     }}
                   >
                     <div
-                      className="w-8 h-8 rounded-full flex flex-col items-center justify-center"
+                      className="w-6 h-6 sm:w-8 sm:h-8 rounded-full flex flex-col items-center justify-center"
                       style={{ background: "radial-gradient(circle at 50% 40%, #ffffff, #e0e0e0 100%)" }}
                     >
-                      <span style={{ color: c, fontSize: "7px", fontWeight: 700 }}>{l}</span>
-                      <span style={{ color: "#0f1330", fontSize: "13px", fontWeight: 800 }}>{n}</span>
+                      <span style={{ color: c, fontSize: "6px", fontWeight: 700 }}>{l}</span>
+                      <span style={{ color: "#0f1330", fontSize: "11px", fontWeight: 800 }}>{n}</span>
                     </div>
                   </div>
                 ))}
