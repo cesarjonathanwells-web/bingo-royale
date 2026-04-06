@@ -173,7 +173,7 @@ const BALLS = [
 
 export function BingoBallScene() {
   return (
-    <div className="w-full h-28 sm:h-48 lg:h-64">
+    <div className="w-full h-28 sm:h-36 lg:h-56">
       <Canvas
         camera={{ position: [0, 0, 5.5], fov: 40 }}
         dpr={[1, 2]}

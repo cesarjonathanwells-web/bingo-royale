@@ -80,7 +80,7 @@ export function Home() {
   }, [joinRoom, roomCode, t, toast]);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 py-4 sm:py-8 pb-20 sm:pb-24 bg-gradient-game relative overflow-y-auto overflow-x-hidden">
+    <div className="flex-1 flex flex-col items-center justify-center px-4 py-4 sm:py-6 pb-20 sm:pb-24 bg-gradient-game relative overflow-y-auto overflow-x-hidden">
       {/* ── Decorative background orbs ── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -102,7 +102,7 @@ export function Home() {
       </div>
 
       {/* ── Main content ── */}
-      <PageTransition className="relative z-10 w-full max-w-md space-y-4 sm:space-y-8">
+      <PageTransition className="relative z-10 w-full max-w-md space-y-3 sm:space-y-5 lg:space-y-6">
         {/* ── Title ── */}
         <div className="text-center space-y-2 sm:space-y-4">
           <motion.h1
@@ -112,7 +112,7 @@ export function Home() {
             transition={{ duration: 0.6, ease: [0.16, 1, 0.3, 1] }}
           >
             <span
-              className="text-gold block text-5xl sm:text-8xl lg:text-9xl drop-shadow-lg"
+              className="text-gold block text-5xl sm:text-6xl lg:text-8xl drop-shadow-lg"
               style={{
                 filter: "drop-shadow(0 4px 30px rgba(255, 215, 0, 0.4))",
               }}
@@ -120,7 +120,7 @@ export function Home() {
               BINGO
             </span>
             <span
-              className="block text-2xl sm:text-5xl lg:text-6xl tracking-[0.25em] mt-1"
+              className="block text-2xl sm:text-3xl lg:text-5xl tracking-[0.25em] mt-1"
               style={{
                 color: "transparent",
                 WebkitTextStroke: "1.5px rgba(212, 162, 76, 0.7)",
@@ -148,7 +148,7 @@ export function Home() {
         >
           <Suspense
             fallback={
-              <div className="flex justify-center gap-3 py-1 h-28 sm:h-48 items-center">
+              <div className="flex justify-center gap-3 py-1 h-28 sm:h-36 lg:h-56 items-center">
                 {[
                   { n: 7, c: "#3b82f6", l: "B" },
                   { n: 22, c: "#ef4444", l: "I" },
