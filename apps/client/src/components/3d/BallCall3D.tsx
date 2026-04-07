@@ -108,17 +108,17 @@ function AnimatedBall({ number, color, letter, trigger }: AnimatedBallProps) {
 
       groupRef.current.position.y = 2.5 - bounce * 2.5;
 
-      // Spin during fall, but land facing camera (end at full rotations)
-      groupRef.current.rotation.y = t * Math.PI * 4; // 2 full turns → faces front
-      groupRef.current.rotation.x = t * Math.PI * 2; // 1 full turn → faces front
+      // Spin during fall, land at Y=PI so texture center faces camera
+      groupRef.current.rotation.y = Math.PI + t * Math.PI * 4;
+      groupRef.current.rotation.x = t * Math.PI * 2;
 
       const scale = t < 0.3 ? t / 0.3 : 1;
       groupRef.current.scale.setScalar(scale);
 
       if (t >= 1) {
         settledRef.current = true;
-        // Snap to face camera — no rotation
-        groupRef.current.rotation.set(0, 0, 0);
+        // Snap to face camera — Y=PI because UV center maps to -Z
+        groupRef.current.rotation.set(0, Math.PI, 0);
       }
     }
   });

@@ -104,7 +104,7 @@ function Ball3D({ slot, color, letter, number, index }: Ball3DProps) {
   });
 
   return (
-    <mesh ref={meshRef} geometry={SHARED_SPHERE}>
+    <mesh ref={meshRef} geometry={SHARED_SPHERE} rotation={[0, Math.PI, 0]}>
       <meshStandardMaterial
         map={texture}
         roughness={0.18}
