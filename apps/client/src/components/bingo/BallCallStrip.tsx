@@ -1,13 +1,10 @@
-import { useMemo, lazy, Suspense } from "react";
+import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import type { GameState, BingoVariant } from "@bingo/shared";
+import { BallCall3D } from "@/components/3d/BallCall3D";
 import { NumberBall } from "./NumberBall";
 import { cn } from "@/lib/utils";
-
-const BallCall3D = lazy(() =>
-  import("@/components/3d/BallCall3D").then((m) => ({ default: m.BallCall3D })),
-);
 
 interface BallCallStripProps {
   gameState: GameState;
@@ -82,19 +79,10 @@ export function BallCallStrip({
       {/* Current ball - 3D animated */}
       <div className="relative">
         {currentNumber ? (
-          <Suspense
-            fallback={
-              <div className="transform scale-125 origin-center animate-ball-pulse">
-                <NumberBall number={currentNumber} is75={is75} size="sm" animate />
-              </div>
-            }
-          >
-            <BallCall3D
-              number={currentNumber}
-              is75={is75}
-              className="w-16 sm:w-20 -my-4 sm:-my-5"
-            />
-          </Suspense>
+          <BallCall3D
+            number={currentNumber}
+            is75={is75}
+          />
         ) : (
           <div className="w-9 h-9 rounded-full bg-[var(--color-bg-tertiary)]/60 border border-[var(--color-border)] flex items-center justify-center">
             <span className="text-[8px] text-[var(--color-text-muted)]">--</span>

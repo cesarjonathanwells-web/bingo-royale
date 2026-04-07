@@ -1,4 +1,4 @@
-import { useState, useCallback, useMemo, lazy, Suspense, type FormEvent } from "react";
+import { useState, useCallback, useMemo, type FormEvent } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { useAuthStore } from "@/stores/auth-store";
@@ -9,11 +9,8 @@ import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Select } from "@/components/ui/Select";
 import { useToast } from "@/components/ui/Toast";
 import { PageTransition, StaggerContainer, StaggerItem } from "@/components/fx/PageTransition";
+import { BingoBallScene } from "@/components/3d/BingoBallScene";
 import type { BingoVariant } from "@bingo/shared";
-
-const BingoBallScene = lazy(() =>
-  import("@/components/3d/BingoBallScene").then((m) => ({ default: m.BingoBallScene })),
-);
 
 /* ------------------------------------------------------------------ */
 /*  Floating particle config — generated once per mount               */
@@ -140,45 +137,8 @@ export function Home() {
           </motion.p>
         </div>
 
-        {/* ── 3D Bingo Balls — full width, breaks out of max-w-md ── */}
-        <motion.div
-          className="w-[90vw] max-w-3xl"
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          transition={{ delay: 0.2, duration: 0.6 }}
-        >
-          <Suspense
-            fallback={
-              <div className="flex justify-center gap-4 sm:gap-6 items-center w-full" style={{ aspectRatio: "5 / 2" }}>
-                {[
-                  { n: 7, c: "#3b82f6", l: "B" },
-                  { n: 22, c: "#ef4444", l: "I" },
-                  { n: 38, c: "#a78bfa", l: "N" },
-                  { n: 51, c: "#22c55e", l: "G" },
-                  { n: 65, c: "#f59e0b", l: "O" },
-                ].map(({ n, c, l }) => (
-                  <div
-                    key={n}
-                    className="w-10 h-10 sm:w-14 sm:h-14 rounded-full flex items-center justify-center text-white shadow-lg animate-pulse"
-                    style={{
-                      background: `radial-gradient(circle at 30% 25%, ${c}ff, ${c} 60%, ${c}99 100%)`,
-                    }}
-                  >
-                    <div
-                      className="w-7 h-7 sm:w-9 sm:h-9 rounded-full flex flex-col items-center justify-center"
-                      style={{ background: "radial-gradient(circle at 50% 40%, #ffffff, #e0e0e0 100%)" }}
-                    >
-                      <span style={{ color: c, fontSize: "7px", fontWeight: 700 }}>{l}</span>
-                      <span style={{ color: "#0f1330", fontSize: "12px", fontWeight: 800 }}>{n}</span>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            }
-          >
-            <BingoBallScene />
-          </Suspense>
-        </motion.div>
+        {/* ── Bingo Balls ── */}
+        <BingoBallScene />
 
         {/* ── Auth / Name section — constrained width ── */}
         <div className="w-full max-w-md">

@@ -1,0 +1,15 @@
+{
+  "name": "bingo-royale-stress-test",
+  "version": "1.0.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "test:http": "node http-load.js",
+    "test:sockets": "node socket-load.js",
+    "test:game": "node game-flow.js",
+    "test:all": "node run-all.js"
+  },
+  "dependencies": {
+    "socket.io-client": "^4.7.0"
+  }
+}
