@@ -81,7 +81,6 @@ function AnimatedBall({ number, color, letter, trigger }: AnimatedBallProps) {
   const groupRef = useRef<THREE.Group>(null);
   const progressRef = useRef(0);
   const settledRef = useRef(false);
-  const settledTimeRef = useRef(0);
 
   const texture = useMemo(
     () => getBallTexture(color, letter, number),
@@ -94,7 +93,6 @@ function AnimatedBall({ number, color, letter, trigger }: AnimatedBallProps) {
   useEffect(() => {
     progressRef.current = 0;
     settledRef.current = false;
-    settledTimeRef.current = 0;
     if (groupRef.current) {
       groupRef.current.scale.setScalar(0);
     }
@@ -119,17 +117,9 @@ function AnimatedBall({ number, color, letter, trigger }: AnimatedBallProps) {
 
       if (t >= 1) {
         settledRef.current = true;
-        settledTimeRef.current = 0;
-        // Snap to face camera
-        groupRef.current.rotation.x = 0;
-        groupRef.current.rotation.y = 0;
+        // Snap to face camera — no rotation
+        groupRef.current.rotation.set(0, 0, 0);
       }
-    } else {
-      // Gentle wobble keeping number visible (±8 degrees)
-      settledTimeRef.current += delta;
-      const wobble = Math.sin(settledTimeRef.current * 1.5) * 0.14;
-      groupRef.current.rotation.y = wobble;
-      groupRef.current.rotation.x = Math.sin(settledTimeRef.current * 1.1) * 0.06;
     }
   });
 

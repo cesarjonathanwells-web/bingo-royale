@@ -97,15 +97,10 @@ function Ball3D({ slot, color, letter, number, index }: Ball3DProps) {
     if (!meshRef.current) return;
     const t = clock.getElapsedTime();
 
-    // Gentle float up/down
+    // Float up/down only — face forward, no rotation
     meshRef.current.position.x = x;
     meshRef.current.position.y = baseY + Math.sin(t * 0.7 + phase) * 0.12;
     meshRef.current.position.z = 0;
-
-    // Small wobble — number stays facing the camera
-    meshRef.current.rotation.y = Math.sin(t * 0.6 + phase) * 0.15;
-    meshRef.current.rotation.x = Math.sin(t * 0.5 + phase + 1.2) * 0.08;
-    meshRef.current.rotation.z = Math.sin(t * 0.4 + phase + 2.5) * 0.05;
   });
 
   return (
