@@ -1,17 +1,37 @@
 {
+  "id": "/",
   "name": "Bingo Royale",
-  "short_name": "Bingo",
-  "description": "Modern online multiplayer bingo game",
+  "short_name": "Bingo Royale",
+  "description": "Play live 75-ball and 90-ball bingo with friends.",
   "start_url": "/",
+  "scope": "/",
   "display": "standalone",
-  "orientation": "portrait",
-  "background_color": "#0f172a",
-  "theme_color": "#0f172a",
+  "orientation": "any",
+  "background_color": "#070a1a",
+  "theme_color": "#070a1a",
+  "categories": [
+    "games",
+    "entertainment"
+  ],
+  "lang": "en",
   "icons": [
     {
-      "src": "/favicon.svg",
-      "sizes": "any",
-      "type": "image/svg+xml"
+      "src": "/icons/icon-192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/icon-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any"
+    },
+    {
+      "src": "/icons/maskable-512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "maskable"
     }
   ]
 }

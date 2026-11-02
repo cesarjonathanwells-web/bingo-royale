@@ -9,6 +9,7 @@ import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Select } from "@/components/ui/Select";
 import { useToast } from "@/components/ui/Toast";
 import { PageTransition, StaggerContainer, StaggerItem } from "@/components/fx/PageTransition";
+import { InstallApp } from "@/pwa/InstallApp";
 import { BingoBallScene } from "@/components/3d/BingoBallScene";
 import type { BingoVariant } from "@bingo/shared";
 
@@ -263,6 +264,7 @@ export function Home() {
           </StaggerContainer>
         )}
         </div>{/* end max-w-md auth wrapper */}
+        <InstallApp compact />
       </PageTransition>
 
       {/* ── Create Room Dialog ── */}

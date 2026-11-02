@@ -5,6 +5,7 @@ import { useAuthStore } from "@/stores/auth-store";
 import { useRoomStore } from "@/stores/room-store";
 import { useTheme } from "@/hooks/useTheme";
 import { useSoundStore } from "@/hooks/useSound";
+import { InstallApp } from "@/pwa/InstallApp";
 import { cn } from "@/lib/utils";
 
 export function Settings() {
@@ -34,6 +35,7 @@ export function Settings() {
       </h1>
 
       <div className="space-y-4">
+        <InstallApp />
         {/* Player Section */}
         {user && (
           <section className="rounded-xl glass p-4">

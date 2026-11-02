@@ -8,6 +8,7 @@ import {
   useParams,
   useNavigate,
 } from "@tanstack/react-router";
+import { ConnectionStatus } from "@/pwa/ConnectionStatus";
 import { Header } from "@/components/layout/Header";
 import { BottomNav } from "@/components/layout/BottomNav";
 import { ToastProvider } from "@/components/ui/Toast";
@@ -74,6 +75,7 @@ function RootLayout() {
 
   return (
     <div className="app-shell flex flex-col min-h-[100dvh]">
+      <ConnectionStatus />
       {!isInGame && <Header />}
       <main className={`flex-1 flex flex-col ${isInGame ? "" : "app-main-with-nav"}`}>
         <Suspense

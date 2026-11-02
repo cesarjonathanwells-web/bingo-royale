@@ -15,6 +15,7 @@ import authRoutes from './routes/auth.js';
 import statsRoutes from './routes/stats.js';
 import healthRoutes from './routes/health.js';
 import profileRoutes from './routes/profile.js';
+import { serveClient } from './client-assets.js';
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -50,23 +51,8 @@ if (config.NODE_ENV === 'production') {
     path.resolve(__dirname, '../../../apps/client/dist'),
   ];
 
-  for (const distPath of clientDistPaths) {
-    try {
-      app.use(express.static(distPath));
-      // SPA fallback - serve index.html for non-API routes
-      app.get('*', (req, res, next) => {
-        if (req.path.startsWith('/api') || req.path.startsWith('/socket.io')) {
-          next();
-          return;
-        }
-        res.sendFile(path.join(distPath, 'index.html'));
-      });
-      console.log(`[Server] Serving static files from ${distPath}`);
-      break;
-    } catch {
-      // Try next path
-    }
-  }
+  const directory = serveClient(app, clientDistPaths);
+  if (directory) console.log(`[Server] Serving static files from ${directory}`);
 }
 
 // --------------- HTTP + Socket.IO Server ---------------
@@ -121,3 +107,4 @@ process.on('uncaughtException', (err) => {
 });
 
 export { app, httpServer, io };
+

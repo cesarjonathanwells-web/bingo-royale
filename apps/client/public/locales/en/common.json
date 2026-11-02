@@ -47,5 +47,20 @@
   "language": {
     "en": "English",
     "es": "Español"
+  },
+  "pwa": {
+    "title": "Bingo Royale on your device",
+    "description": "Add it to your home screen for quick access.",
+    "install": "Install app",
+    "installed": "Running as an app",
+    "helpIntro": "Keep Bingo Royale one tap away.",
+    "ios1": "Open this page in Safari and tap Share.",
+    "ios2": "Choose Add to Home Screen.",
+    "ios3": "Keep Open as Web App enabled if shown, then tap Add.",
+    "other1": "Open your browser menu and choose Install app or Add to Home screen. On Safari for Mac, choose File → Add to Dock.",
+    "other2": "Confirm to add Bingo Royale. If no install option appears, open this page in Chrome, Edge, or Safari.",
+    "onlineRequired": "An internet connection is required for multiplayer games.",
+    "update": "An update is ready. After your game, close all Bingo Royale tabs and app windows, then reopen.",
+    "offline": "You’re offline. Reconnect to continue playing."
   }
 }
