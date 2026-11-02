@@ -289,6 +289,9 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
 
     // Server emits room:state on create, join, settings update, and new round
     socket.on("room:state", (room: Room) => {
+      // A response already in flight can arrive after Exit resets local state.
+      // Accept initial room data only while a create/join request is pending.
+      if (!get().room && !get().isConnecting) return;
       set((state) => ({
         room,
         isConnecting: false,
@@ -638,3 +641,4 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     set({ ...initialState, myDabs: [], myCards: [], myPowerUps: [], peekedNumbers: [] });
   },
 }));
+

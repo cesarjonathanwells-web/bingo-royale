@@ -51,12 +51,17 @@ export function Room({ code }: RoomPageProps) {
   const isHost = user?.id === room?.hostId;
 
   const handleLeave = useCallback(() => {
+    // Clearing room state must not trigger the direct-link auto-join effect.
+    joinAttempted.current = true;
     leaveRoom();
     navigate({ to: "/" });
   }, [leaveRoom, navigate]);
 
   // Auto-join room if navigated directly (only once)
   useEffect(() => {
+    if (room?.code === code) {
+      joinAttempted.current = true;
+    }
     if (isAuthenticated && !room && code && !joinAttempted.current) {
       joinAttempted.current = true;
       joinRoom(code);
@@ -306,3 +311,4 @@ export function Room({ code }: RoomPageProps) {
     </AnimatePresence>
   );
 }
+
