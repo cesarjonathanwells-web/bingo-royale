@@ -1,6 +1,5 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { useTranslation } from "react-i18next";
-import { useNavigate } from "@tanstack/react-router";
 import type { Room, WinPattern } from "@bingo/shared";
 import { SPEED_PRESETS, WIN_PATTERNS, MAX_CUSTOM_PATTERNS, isCustomPatternId } from "@bingo/shared";
 import { useAuthStore } from "@/stores/auth-store";
@@ -17,24 +16,18 @@ const CARD_COUNT_OPTIONS = [1, 2, 3, 4];
 
 interface RoomLobbyProps {
   room: Room;
+  onLeave: () => void;
 }
 
-export function RoomLobby({ room }: RoomLobbyProps) {
+export function RoomLobby({ room, onLeave }: RoomLobbyProps) {
   const { t, i18n } = useTranslation("game");
   const user = useAuthStore((s) => s.user);
   const startGame = useRoomStore((s) => s.startGame);
-  const leaveRoom = useRoomStore((s) => s.leaveRoom);
   const updateSettings = useRoomStore((s) => s.updateSettings);
   const cardCount = useRoomStore((s) => s.cardCount);
   const setCardCount = useRoomStore((s) => s.setCardCount);
   const playerCardCounts = useRoomStore((s) => s.playerCardCounts);
   const { toast } = useToast();
-  const navigate = useNavigate();
-
-  const handleLeave = useCallback(() => {
-    leaveRoom();
-    navigate({ to: "/" });
-  }, [leaveRoom, navigate]);
 
   const isHost = user?.id === room.hostId;
   const isEs = i18n.language === "es";
@@ -376,7 +369,7 @@ export function RoomLobby({ room }: RoomLobbyProps) {
           <Button
             variant="ghost"
             size="md"
-            onClick={handleLeave}
+            onClick={onLeave}
             className="w-full"
           >
             {t("lobby.leaveRoom")}
@@ -391,3 +384,4 @@ export function RoomLobby({ room }: RoomLobbyProps) {
     </div>
   );
 }
+

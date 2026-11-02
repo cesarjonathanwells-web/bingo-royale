@@ -250,7 +250,7 @@ export function Room({ code }: RoomPageProps) {
           exit={{ opacity: 0, x: 20 }}
           transition={{ duration: 0.3, ease: "easeInOut" }}
         >
-          <RoomLobby room={room} />
+          <RoomLobby room={room} onLeave={handleLeave} />
         </motion.div>
       )}
 
