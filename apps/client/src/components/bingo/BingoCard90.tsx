@@ -60,7 +60,7 @@ export function BingoCard90({
                 }}
                 disabled={disabled || isBlank}
                 className={cn(
-                  "relative flex items-center justify-center touch-target",
+                  "relative flex items-center justify-center min-w-0 min-h-11",
                   "aspect-square w-full rounded-md font-bold text-xs sm:text-sm lg:text-base",
                   "transition-all duration-150 select-none",
                   "cell-depth",
@@ -95,3 +95,4 @@ export function BingoCard90({
     </div>
   );
 }
+

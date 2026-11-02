@@ -1,3 +1,4 @@
+import { BlenderBallSurface } from "@/components/3d/BlenderBallSurface";
 import { useMemo } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { getLetterForNumber, BALL_COLORS } from "@bingo/shared";
@@ -50,17 +51,7 @@ export function BallCall3D({ number, is75 = true, className }: BallCall3DProps) 
               `,
             }}
           >
-            {/* Specular highlight */}
-            <div
-              className="absolute rounded-full"
-              style={{
-                width: "40%",
-                height: "22%",
-                top: "12%",
-                left: "18%",
-                background: "radial-gradient(ellipse, rgba(255,255,255,0.6) 0%, rgba(255,255,255,0.1) 50%, transparent 80%)",
-              }}
-            />
+            <BlenderBallSurface letter={letter} />
 
             {/* Inner white circle */}
             <div
@@ -111,3 +102,4 @@ function darken(hex: string, percent: number): string {
   const b = Math.max(0, (num & 255) - Math.round((255 * percent) / 100));
   return `rgb(${r}, ${g}, ${b})`;
 }
+

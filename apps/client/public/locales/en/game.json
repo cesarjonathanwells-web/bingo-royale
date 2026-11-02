@@ -129,7 +129,8 @@
     "card": "Card {{n}}",
     "selectCount": "How many cards?",
     "singleView": "Single",
-    "allView": "All Cards"
+    "allView": "All Cards",
+    "enlarge": "Enlarge card {{n}}"
   },
   "reactions": {
     "title": "Reactions",
@@ -162,3 +163,4 @@
     "variant90": "90-Ball"
   }
 }
+

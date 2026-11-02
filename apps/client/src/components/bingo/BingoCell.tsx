@@ -1,3 +1,4 @@
+import { BlenderIcon } from "@/components/3d/BlenderIcon";
 import { useCallback, useRef, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
@@ -78,6 +79,7 @@ export function BingoCell({
       {/* Number or FREE star icon */}
       {isFree ? (
         <span className="z-10 relative flex items-center justify-center">
+          <BlenderIcon name="wild_square" className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7">
           <svg
             viewBox="0 0 24 24"
             fill="url(#goldStar)"
@@ -92,6 +94,7 @@ export function BingoCell({
             </defs>
             <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
           </svg>
+          </BlenderIcon>
         </span>
       ) : (
         <span
@@ -186,3 +189,4 @@ export function BingoCell({
     </motion.button>
   );
 }
+

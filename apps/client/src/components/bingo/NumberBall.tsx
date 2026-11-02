@@ -1,3 +1,4 @@
+import { BlenderBallSurface } from "@/components/3d/BlenderBallSurface";
 import { useMemo } from "react";
 import { getLetterForNumber, BALL_COLORS } from "@bingo/shared";
 import { cn } from "@/lib/utils";
@@ -52,22 +53,12 @@ export function NumberBall({
           boxShadow: `0 6px 16px ${color}55, 0 2px 6px rgba(0,0,0,0.4), 0 12px 24px rgba(0,0,0,0.15), inset 0 -3px 6px ${darken(color, 25)}80, inset 0 2px 6px ${lighten(color, 35)}50`,
         }}
       >
-        {/* Specular highlight - brighter white spot */}
-        <div
-          className="absolute rounded-full"
-          style={{
-            width: size === "lg" ? "28px" : size === "md" ? "18px" : "12px",
-            height: size === "lg" ? "14px" : size === "md" ? "9px" : "6px",
-            top: size === "lg" ? "7px" : size === "md" ? "4px" : "2px",
-            left: size === "lg" ? "12px" : size === "md" ? "9px" : "6px",
-            background: "radial-gradient(ellipse, rgba(255,255,255,0.75) 0%, rgba(255,255,255,0.2) 50%, rgba(255,255,255,0) 80%)",
-          }}
-        />
+        <BlenderBallSurface letter={letter} />
 
         {/* Inner white circle */}
         <div
           className={cn(
-            "rounded-full flex flex-col items-center justify-center leading-none",
+            "relative z-10 rounded-full flex flex-col items-center justify-center leading-none",
             innerSizeClasses[size],
           )}
           style={{
@@ -131,3 +122,4 @@ function darken(hex: string, percent: number): string {
   const b = Math.max(0, (num & 255) - Math.round((255 * percent) / 100));
   return `rgb(${r}, ${g}, ${b})`;
 }
+

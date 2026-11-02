@@ -1,3 +1,4 @@
+import { BlenderIcon } from "@/components/3d/BlenderIcon";
 import { useTranslation } from "react-i18next";
 import type { PlayerPowerUp, PowerUpId } from "@bingo/shared";
 import { POWER_UP_MAP } from "@bingo/shared";
@@ -51,7 +52,7 @@ export function PowerUpBar({ powerups, onUse }: PowerUpBarProps) {
                     ],
               )}
             >
-              <span className={cn("text-xl leading-none", !pu.used && "drop-shadow-[0_0_6px_rgba(255,215,0,0.5)]")}>{def.icon}</span>
+              <BlenderIcon name={pu.id} className={cn("w-5 h-5 text-xl leading-none", !pu.used && "drop-shadow-[0_0_6px_rgba(255,215,0,0.5)]")}>{def.icon}</BlenderIcon>
               <span
                 className={cn(
                   "text-[10px] font-semibold leading-tight whitespace-nowrap",
@@ -74,3 +75,4 @@ export function PowerUpBar({ powerups, onUse }: PowerUpBarProps) {
     </div>
   );
 }
+

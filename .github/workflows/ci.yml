@@ -37,6 +37,10 @@ jobs:
       - name: Typecheck
         run: pnpm turbo run typecheck
 
+      - name: Test
+        run: pnpm turbo run test
+
       - name: Lint
         run: pnpm turbo run lint
         continue-on-error: true
+

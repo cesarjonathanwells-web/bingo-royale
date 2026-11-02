@@ -1,3 +1,4 @@
+import { BlenderIcon } from "@/components/3d/BlenderIcon";
 import { useMemo, useState, useEffect } from "react";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
@@ -97,6 +98,7 @@ export function GameFinished({
                 delay: 0.5,
               }}
             >
+              <BlenderIcon name="crown" className="w-16 h-16">
               <svg width="64" height="64" viewBox="0 0 64 64" fill="none" className="drop-shadow-[0_0_20px_rgba(255,215,0,0.6)]">
                 <path
                   d="M32 4L40 20L56 8L48 32H16L8 8L24 20L32 4Z"
@@ -116,6 +118,7 @@ export function GameFinished({
                   </linearGradient>
                 </defs>
               </svg>
+              </BlenderIcon>
             </motion.div>
           )}
 
@@ -249,3 +252,4 @@ export function GameFinished({
     </ScreenShake>
   );
 }
+

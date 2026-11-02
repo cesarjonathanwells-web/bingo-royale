@@ -25,7 +25,7 @@ export function CardTabs({ count, activeIndex, onSelect, dabs }: CardTabsProps) 
             type="button"
             onClick={() => onSelect(i)}
             className={cn(
-              "flex-1 py-2 px-1 sm:px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150",
+              "flex-1 min-w-0 min-h-11 py-2 px-1 sm:px-3 rounded-xl text-xs sm:text-sm font-semibold transition-all duration-150",
               "border select-none cursor-pointer",
               isActive
                 ? "bg-gradient-to-b from-[var(--color-accent-hover)] to-[var(--color-accent)] text-white border-[var(--color-accent)] shadow-md shadow-[var(--color-accent)]/30 active:scale-95"
@@ -53,3 +53,4 @@ export function CardTabs({ count, activeIndex, onSelect, dabs }: CardTabsProps) 
     </div>
   );
 }
+

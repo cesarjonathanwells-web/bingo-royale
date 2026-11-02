@@ -14,9 +14,7 @@ import type {
 import { GAME_EMOJIS } from "@bingo/shared";
 import { BingoCard } from "@/components/bingo/BingoCard";
 import { BingoCard90 } from "@/components/bingo/BingoCard90";
-import { CardTabs } from "@/components/bingo/CardTabs";
 import { PatternDisplay } from "@/components/bingo/PatternDisplay";
-import { MultiCardView } from "@/components/bingo/MultiCardView";
 import { CardCarousel } from "@/components/bingo/CardCarousel";
 import { EmojiToast } from "@/components/room/EmojiToast";
 import { Button } from "@/components/ui/Button";
@@ -29,6 +27,7 @@ import { PlayerDrawer } from "@/components/layout/PlayerDrawer";
 import { CalledNumbersDropdown } from "@/components/layout/CalledNumbersDropdown";
 import { cn } from "@/lib/utils";
 import { getAvatarColor } from "@/lib/avatar";
+import { getCardLayout } from "@/lib/card-layout";
 
 interface EmojiReaction {
   emoji: string;
@@ -83,48 +82,35 @@ export function GameView({
 }: GameViewProps) {
   const { t } = useTranslation("game");
 
-  // Dynamic card grid sizing — measures container and calculates max card width
-  // so all cards fit without scrolling on ANY screen size
   const gridContainerRef = useRef<HTMLDivElement>(null);
-  const [gridMaxWidth, setGridMaxWidth] = useState<number>(600);
+  const [gridLayout, setGridLayout] = useState({ columns: 1, maxWidth: 420 });
 
   useEffect(() => {
-    const el = gridContainerRef.current;
-    if (!el) return;
-
+    const element = gridContainerRef.current;
+    if (!element) return;
     const calculate = () => {
-      const W = el.clientWidth;
-      const H = el.clientHeight;
-      if (W === 0 || H === 0) return;
-
-      const count = myCards.length;
-      if (count <= 1) { setGridMaxWidth(420); return; }
-
-      const gap = 8; // gap-2 = 8px
-      const cols = count <= 2 ? (W > 400 ? 2 : 1) : 2;
-      const rows = count <= 2 ? (cols === 2 ? 1 : count) : Math.ceil(count / 2);
-
-      // Card aspect ratio: content_height ≈ cardWidth + 52 (header overhead for 75-ball)
-      const headerOverhead = 52;
-
-      // Max width from container width
-      const maxFromW = (W - gap * (cols - 1)) / cols;
-      // Max width from container height: rows*(cardW+header)+gaps ≤ H
-      const maxFromH = (H - gap * (rows - 1) - headerOverhead * rows) / rows;
-
-      const cardW = Math.min(maxFromW, maxFromH, 300);
-      const gridW = cardW * cols + gap * (cols - 1);
-
-      setGridMaxWidth(Math.max(gridW, 100));
+      // clientWidth/clientHeight include padding; measure the usable card area.
+      const style = getComputedStyle(element);
+      const width = element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
+      const height = element.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      if (width <= 0 || height <= 0) return;
+      const headerHeight = window.matchMedia("(min-width: 1024px)").matches ? 52
+        : window.matchMedia("(min-width: 640px)").matches ? 42 : 34;
+      const next = getCardLayout({ width, height, count: myCards.length, variant: room.variant, headerHeight });
+      setGridLayout(previous => previous.columns === next.columns && Math.abs(previous.maxWidth - next.maxWidth) < 1
+        ? previous : next);
     };
-
-    const ro = new ResizeObserver(calculate);
-    ro.observe(el);
+    const observer = new ResizeObserver(calculate);
+    observer.observe(element);
     calculate();
-    return () => ro.disconnect();
-  }, [myCards.length]);
+    return () => observer.disconnect();
+  }, [myCards.length, room.variant]);
 
   const [viewAll, setViewAll] = useState(myCards.length > 1);
+  useEffect(() => {
+    gridContainerRef.current?.scrollTo({ top: 0, behavior: "auto" });
+  }, [viewAll]);
+
   const [chatOpen, setChatOpen] = useState(false);
   const [playersOpen, setPlayersOpen] = useState(false);
   const [numbersOpen, setNumbersOpen] = useState(false);
@@ -170,7 +156,7 @@ export function GameView({
   );
 
   return (
-    <div className="fixed inset-0 flex flex-col bg-[var(--color-bg-primary)]">
+    <div className="fixed inset-0 h-[100dvh] flex flex-col min-h-0 bg-[var(--color-bg-primary)]" style={{ paddingTop: "env(safe-area-inset-top)" }}>
       {/* Top bar with room code + controls */}
       <GameTopBar
         gameState={gameState}
@@ -196,9 +182,9 @@ export function GameView({
       />
 
       {/* Main area: on desktop, card left + sidebar right. On mobile, card only */}
-      <div className="flex-1 flex overflow-hidden">
+      <div className="flex-1 min-h-0 flex overflow-hidden">
         {/* Card column */}
-        <div className="flex-1 flex flex-col items-center justify-center overflow-hidden px-2 py-1 relative">
+        <div className="flex-1 min-w-0 min-h-0 flex flex-col items-center overflow-hidden px-2 py-1 relative">
         {/* Paused overlay */}
         {gameState.paused && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--color-bg-primary)]/80 backdrop-blur-sm">
@@ -231,9 +217,10 @@ export function GameView({
         {myCards.length > 1 && (
           <div className="flex items-center justify-center gap-1 py-0.5 shrink-0">
             <button
+              aria-pressed={!viewAll}
               onClick={() => setViewAll(false)}
               className={cn(
-                "px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer",
+                "min-h-11 px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer",
                 !viewAll
                   ? "bg-[var(--color-accent)] text-white"
                   : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
@@ -242,9 +229,10 @@ export function GameView({
               {t("cards.singleView")}
             </button>
             <button
+              aria-pressed={viewAll}
               onClick={() => setViewAll(true)}
               className={cn(
-                "px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer",
+                "min-h-11 px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer",
                 viewAll
                   ? "bg-[var(--color-accent)] text-white"
                   : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
@@ -256,36 +244,36 @@ export function GameView({
         )}
 
         {/* Card display */}
-        <div ref={gridContainerRef} className="flex-1 flex items-center justify-center w-full min-h-0 overflow-hidden p-1">
+        <div ref={gridContainerRef} className="flex-1 w-full min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-none" style={{ WebkitOverflowScrolling: "touch" }}>
           {viewAll && myCards.length > 1 ? (
             <div
-              className={cn(
-                "grid gap-2 w-full h-full overflow-y-auto",
-                "grid-cols-1 sm:grid-cols-2",
-              )}
-              style={{ maxHeight: "100%", maxWidth: `${gridMaxWidth}px` }}
+              className="grid gap-1 w-full mx-auto items-start"
+              style={{ gridTemplateColumns: `repeat(${gridLayout.columns}, minmax(0, 1fr))`, maxWidth: `${gridLayout.maxWidth}px` }}
             >
               {myCards.map((card, ci) => (
-                <div key={ci} className={cn(
-                  "min-h-0 min-w-0 flex items-center justify-center overflow-hidden",
-                  myCards.length === 3 && ci === 2 && "sm:col-span-2 sm:max-w-[50%] sm:mx-auto",
-                )}>
+                <section key={card.id} aria-label={t("cards.card", { n: ci + 1 })}
+                  className="min-w-0 w-full"
+                  style={myCards.length === 3 && ci === 2 && gridLayout.columns === 2
+                    ? { gridColumn: "1 / -1", width: "calc((100% - 0.25rem) / 2)", justifySelf: "center" } : undefined}>
+                  <button type="button" className="w-full min-h-7 mb-0.5 text-xs font-semibold text-[var(--color-text-secondary)] cursor-pointer"
+                    aria-label={t("cards.enlarge", { n: ci + 1 })}
+                    onClick={() => { onSetActiveCard(ci); setViewAll(false); }}>
+                    {t("cards.card", { n: ci + 1 })} <span aria-hidden="true">↗</span>
+                  </button>
                   {room.variant === "75" ? (
                     <BingoCard
                       card={card as BingoCard75}
                       dabs={myDabs[ci] ?? new Set()}
                       onDab={(cellIndex) => onDabMulti(ci, cellIndex)}
-                      className="max-h-full"
                     />
                   ) : (
                     <BingoCard90
                       card={card as BingoCard90Type}
                       dabs={myDabs[ci] ?? new Set()}
                       onDab={(cellIndex) => onDabMulti(ci, cellIndex)}
-                      className="max-h-full"
                     />
                   )}
-                </div>
+                </section>
               ))}
             </div>
           ) : myCards.length > 1 ? (
@@ -298,7 +286,7 @@ export function GameView({
               onIndexChange={onSetActiveCard}
             />
           ) : (
-            <div style={{ maxWidth: `${Math.min(gridMaxWidth, 420)}px` }} className="w-full max-h-full mx-auto">
+            <div style={{ maxWidth: `${Math.min(gridLayout.maxWidth, 420)}px` }} className="w-full mx-auto">
               {myCard && (
                 <>
                   {room.variant === "75" ? (
@@ -306,14 +294,12 @@ export function GameView({
                       card={myCard as BingoCard75}
                       dabs={activeDabs}
                       onDab={onDab}
-                      className="max-h-full"
                     />
                   ) : (
                     <BingoCard90
                       card={myCard as BingoCard90Type}
                       dabs={activeDabs}
                       onDab={onDab}
-                      className="max-h-full"
                     />
                   )}
                 </>
@@ -505,3 +491,4 @@ export function GameView({
     </div>
   );
 }
+

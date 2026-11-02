@@ -129,7 +129,8 @@
     "card": "Cartón {{n}}",
     "selectCount": "¿Cuántos cartones?",
     "singleView": "Uno",
-    "allView": "Todos"
+    "allView": "Todos",
+    "enlarge": "Ampliar cartón {{n}}"
   },
   "reactions": {
     "title": "Reacciones",
@@ -162,3 +163,4 @@
     "variant90": "90 bolas"
   }
 }
+

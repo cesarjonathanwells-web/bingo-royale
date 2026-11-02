@@ -1,3 +1,4 @@
+import { BlenderBallSurface } from "@/components/3d/BlenderBallSurface";
 import { motion } from "framer-motion";
 
 /* ------------------------------------------------------------------ */
@@ -36,7 +37,7 @@ function BingoBall({
     >
       {/* Ball body */}
       <div
-        className="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center"
+        className="relative w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center"
         style={{
           background: `radial-gradient(circle at 32% 28%, ${lighten(color, 50)}, ${color} 50%, ${darken(color, 30)} 100%)`,
           boxShadow: `
@@ -47,17 +48,7 @@ function BingoBall({
           `,
         }}
       >
-        {/* Specular highlight */}
-        <div
-          className="absolute rounded-full"
-          style={{
-            width: "40%",
-            height: "22%",
-            top: "12%",
-            left: "18%",
-            background: "radial-gradient(ellipse, rgba(255,255,255,0.65) 0%, rgba(255,255,255,0.15) 50%, transparent 80%)",
-          }}
-        />
+        <BlenderBallSurface letter={letter} />
 
         {/* White inner circle with letter + number */}
         <div
@@ -141,3 +132,4 @@ function darken(hex: string, percent: number): string {
   const b = Math.max(0, (num & 255) - Math.round((255 * percent) / 100));
   return `rgb(${r}, ${g}, ${b})`;
 }
+
