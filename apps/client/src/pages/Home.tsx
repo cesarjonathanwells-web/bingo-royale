@@ -77,7 +77,7 @@ export function Home() {
   }, [joinRoom, roomCode, t, toast]);
 
   return (
-    <div className="flex-1 flex flex-col items-center justify-center px-4 py-4 sm:py-6 pb-20 sm:pb-24 bg-gradient-game relative overflow-y-auto overflow-x-hidden">
+    <div className="flex-1 flex flex-col items-center justify-center px-4 py-4 sm:py-6 pb-6 sm:pb-10 bg-gradient-game relative overflow-y-auto overflow-x-hidden">
       {/* ── Decorative background orbs ── */}
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div
@@ -325,3 +325,4 @@ export function Home() {
     </div>
   );
 }
+

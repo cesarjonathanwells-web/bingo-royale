@@ -59,7 +59,7 @@ export function BingoCell({
       disabled={disabled || isFree}
       className={cn(
         "relative flex items-center justify-center",
-        "aspect-square w-full rounded-lg font-bold text-xs sm:text-base lg:text-lg",
+        "aspect-square w-full rounded-lg font-bold text-xs @min-[250px]:text-base @min-[350px]:text-lg",
         "select-none",
         "glass-cell cell-depth",
         isFree
@@ -79,11 +79,11 @@ export function BingoCell({
       {/* Number or FREE star icon */}
       {isFree ? (
         <span className="z-10 relative flex items-center justify-center">
-          <BlenderIcon name="wild_square" className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7">
+          <BlenderIcon name="wild_square" className="w-5 h-5 @min-[250px]:w-6 @min-[250px]:h-6 @min-[350px]:w-7 @min-[350px]:h-7">
           <svg
             viewBox="0 0 24 24"
             fill="url(#goldStar)"
-            className="w-5 h-5 sm:w-6 sm:h-6 lg:w-7 lg:h-7 drop-shadow-[0_0_6px_rgba(255,215,0,0.5)]"
+            className="w-5 h-5 @min-[250px]:w-6 @min-[250px]:h-6 @min-[350px]:w-7 @min-[350px]:h-7 drop-shadow-[0_0_6px_rgba(255,215,0,0.5)]"
             aria-hidden="true"
           >
             <defs>

@@ -73,9 +73,9 @@ function RootLayout() {
   const isInGame = room?.state === "in_progress";
 
   return (
-    <div className="flex flex-col min-h-[100dvh]">
+    <div className="app-shell flex flex-col min-h-[100dvh]">
       {!isInGame && <Header />}
-      <main className="flex-1 flex flex-col">
+      <main className={`flex-1 flex flex-col ${isInGame ? "" : "app-main-with-nav"}`}>
         <Suspense
           fallback={
             <div className="flex-1 flex items-center justify-center">
@@ -157,3 +157,4 @@ export default function App() {
     </ToastProvider>
   );
 }
+

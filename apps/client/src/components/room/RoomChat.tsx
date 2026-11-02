@@ -164,7 +164,7 @@ export function RoomChat({ messages, onSend, className }: RoomChatProps) {
           value={input}
           onChange={(e) => setInput(e.target.value)}
           placeholder={t("chat.placeholder")}
-          className="flex-1 bg-[var(--color-bg-primary)] rounded-lg px-3 py-2 text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] outline-none border border-[var(--color-border)] focus:border-[var(--color-accent)]"
+          className="min-w-0 flex-1 bg-[var(--color-bg-primary)] rounded-lg px-3 py-2 text-base sm:text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] outline-none border border-[var(--color-border)] focus:border-[var(--color-accent)]"
           maxLength={200}
         />
         <Button type="submit" size="sm" disabled={!input.trim()}>
@@ -174,3 +174,4 @@ export function RoomChat({ messages, onSend, className }: RoomChatProps) {
     </div>
   );
 }
+

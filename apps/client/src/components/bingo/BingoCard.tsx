@@ -34,7 +34,7 @@ export function BingoCard({
   return (
     <div
       className={cn(
-        "w-full mx-auto",
+        "@container w-full mx-auto",
         "rounded-xl sm:rounded-2xl overflow-hidden",
         "glass-card",
         "shadow-xl shadow-black/30",
@@ -42,13 +42,13 @@ export function BingoCard({
       )}
     >
       {/* Column letters */}
-      <div className="grid grid-cols-5 gap-1 lg:gap-1.5 px-1.5 lg:px-2 pt-1.5 lg:pt-2">
+      <div className="grid grid-cols-5 gap-1 @min-[350px]:gap-1.5 px-1.5 @min-[350px]:px-2 pt-1.5 @min-[350px]:pt-2">
         {LETTERS.map((letter) => {
           const color = BALL_COLORS[letter] ?? "#f59e0b";
           return (
             <div
               key={letter}
-              className="col-header flex items-center justify-center py-1 sm:py-1.5 lg:py-2 rounded font-black text-sm sm:text-base lg:text-lg text-white"
+              className="col-header flex items-center justify-center py-1 @min-[250px]:py-1.5 @min-[350px]:py-2 rounded font-black text-sm @min-[250px]:text-base @min-[350px]:text-lg text-white"
               style={{
                 backgroundColor: color,
               }}
@@ -60,7 +60,7 @@ export function BingoCard({
       </div>
 
       {/* Grid */}
-      <div className="grid grid-cols-5 gap-1 lg:gap-1.5 p-1.5 lg:p-2">
+      <div className="grid grid-cols-5 gap-1 @min-[350px]:gap-1.5 p-1.5 @min-[350px]:p-2">
         {Array.from({ length: 5 }, (_, row) =>
           Array.from({ length: 5 }, (_, col) => {
             const index = getCellIndex(row, col);
@@ -84,3 +84,4 @@ export function BingoCard({
     </div>
   );
 }
+

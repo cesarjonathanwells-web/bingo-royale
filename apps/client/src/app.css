@@ -88,7 +88,7 @@ html { -webkit-tap-highlight-color: transparent; overscroll-behavior: none; }
 
 body {
   margin: 0;
-  padding: env(safe-area-inset-top) env(safe-area-inset-right) env(safe-area-inset-bottom) env(safe-area-inset-left);
+  padding: 0;
   font-family: "Inter", system-ui, -apple-system, sans-serif;
   background: linear-gradient(165deg, var(--color-bg-primary), var(--color-bg-secondary) 40%, var(--color-bg-tertiary));
   background-attachment: fixed;
@@ -241,6 +241,8 @@ body {
    Glass Panels — tinted gradient, no backdrop-filter
    ============================================================ */
 
+/* Keep component defaults below Tailwind focus, error, and state utilities. */
+@layer components {
 .glass {
   background: linear-gradient(135deg, var(--glass-from), var(--glass-to));
   border: 1px solid var(--color-border);
@@ -281,6 +283,8 @@ body {
   border-color: var(--color-border-light);
 }
 
+} /* components */
+
 /* ============================================================
    Depth & Accents
    ============================================================ */
@@ -301,9 +305,27 @@ body {
 
 .scrollbar-none::-webkit-scrollbar { display: none; }
 .scrollbar-none { -ms-overflow-style: none; scrollbar-width: none; }
-.safe-bottom { padding-bottom: env(safe-area-inset-bottom); }
+.safe-bottom { padding-bottom: max(0.5rem, env(safe-area-inset-bottom)); }
 .drawer-overlay { position: fixed; inset: 0; background: rgba(0, 0, 0, 0.5); z-index: 35; }
 .theme-transition, .theme-transition *, .theme-transition *::before, .theme-transition *::after {
   transition: background-color 0.2s ease, border-color 0.2s ease, color 0.1s ease !important;
 }
 [data-radix-popper-content-wrapper] { z-index: 50 !important; }
+
+
+/* The fixed navigation reserves its full button row plus the home-indicator inset. */
+.app-shell {
+  padding-inline: env(safe-area-inset-left) env(safe-area-inset-right);
+}
+.app-main-with-nav { padding-bottom: calc(56px + env(safe-area-inset-bottom)); }
+
+/* Keep final animation states (including dab marks), without repeated motion. */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}

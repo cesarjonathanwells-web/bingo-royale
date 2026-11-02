@@ -27,7 +27,7 @@ export function Header() {
   }, [room]);
 
   return (
-    <header className="sticky top-0 z-30 glass" style={{ borderBottom: '1px solid var(--color-border)' }}>
+    <header className="sticky top-0 z-30 glass" style={{ borderBottom: '1px solid var(--color-border)', paddingTop: 'env(safe-area-inset-top)' }}>
       <div className="flex items-center justify-between px-2 sm:px-4 py-2 sm:py-3 max-w-5xl mx-auto">
         {/* Logo - clickable to go home */}
         <button
@@ -96,3 +96,4 @@ export function Header() {
     </header>
   );
 }
+

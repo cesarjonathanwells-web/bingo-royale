@@ -26,11 +26,11 @@ export function ActionBar({
 
   return (
     <div
-      className="flex items-center justify-between px-2 glass-light"
+      className="flex shrink-0 items-center justify-between gap-1 px-2 glass-light"
       style={{ height: "48px", borderTop: "1px solid var(--color-border)" }}
     >
       {/* Left side: Power-up icons (compact) */}
-      <div className="flex items-center gap-1 overflow-x-auto">
+      <div className="flex min-w-0 items-center gap-1 overflow-x-auto">
         {powerups.map((pu) => {
           const def = POWER_UP_MAP[pu.id];
           if (!def) return null;
@@ -48,7 +48,7 @@ export function ActionBar({
               title={t(`powerups.${pu.id}`)}
               style={{ touchAction: "manipulation" }}
               className={cn(
-                "w-10 h-10 flex items-center justify-center rounded-lg text-lg select-none shrink-0",
+                "w-11 h-11 flex items-center justify-center rounded-lg text-lg select-none shrink-0",
                 "transition-all duration-150",
                 pu.used
                   ? "opacity-30 grayscale cursor-not-allowed"
@@ -71,7 +71,7 @@ export function ActionBar({
         <button
           onClick={onToggleEmoji}
           className={cn(
-            "w-9 h-9 flex items-center justify-center rounded-lg text-lg",
+            "w-11 h-11 flex items-center justify-center rounded-lg text-lg",
             "hover:bg-[var(--color-bg-tertiary)] transition-colors cursor-pointer select-none",
           )}
           aria-label={t("reactions.title")}
@@ -84,7 +84,7 @@ export function ActionBar({
         <button
           onClick={onToggleChat}
           className={cn(
-            "relative w-9 h-9 flex items-center justify-center rounded-lg",
+            "relative w-11 h-11 flex items-center justify-center rounded-lg",
             "transition-colors cursor-pointer select-none",
             chatOpen
               ? "bg-[var(--color-accent)]/20 text-[var(--color-accent)]"
@@ -118,7 +118,7 @@ export function ActionBar({
         <button
           onClick={onTogglePlayers}
           className={cn(
-            "w-9 h-9 flex items-center justify-center rounded-lg",
+            "w-11 h-11 flex items-center justify-center rounded-lg",
             "text-[var(--color-text-secondary)] hover:bg-[var(--color-bg-tertiary)] hover:text-[var(--color-text-primary)]",
             "transition-colors cursor-pointer select-none",
           )}
@@ -146,3 +146,4 @@ export function ActionBar({
     </div>
   );
 }
+

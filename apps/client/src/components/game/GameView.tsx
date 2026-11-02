@@ -156,7 +156,7 @@ export function GameView({
   );
 
   return (
-    <div className="fixed inset-0 h-[100dvh] flex flex-col min-h-0 bg-[var(--color-bg-primary)]" style={{ paddingTop: "env(safe-area-inset-top)" }}>
+    <div className="fixed inset-0 h-[100dvh] flex flex-col min-h-0 bg-[var(--color-bg-primary)]" style={{ paddingTop: "env(safe-area-inset-top)", paddingLeft: "env(safe-area-inset-left)", paddingRight: "env(safe-area-inset-right)" }}>
       {/* Top bar with room code + controls */}
       <GameTopBar
         gameState={gameState}
@@ -406,7 +406,7 @@ export function GameView({
                 type="text"
                 maxLength={200}
                 placeholder={t("chat.placeholder")}
-                className="flex-1 px-3 py-2 rounded-lg bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-accent)]"
+                className="min-w-0 flex-1 px-3 py-2 rounded-lg bg-[var(--color-bg-tertiary)] border border-[var(--color-border)] text-sm text-[var(--color-text-primary)] placeholder:text-[var(--color-text-muted)] outline-none focus:border-[var(--color-accent)]"
               />
               <button
                 type="submit"

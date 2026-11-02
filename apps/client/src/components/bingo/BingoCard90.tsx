@@ -35,7 +35,7 @@ export function BingoCard90({
   return (
     <div
       className={cn(
-        "w-full mx-auto",
+        "@container w-full mx-auto",
         "rounded-xl sm:rounded-2xl overflow-hidden",
         "glass-card",
         "shadow-xl shadow-black/25",
@@ -43,7 +43,7 @@ export function BingoCard90({
       )}
     >
       {/* Grid: 9 columns x 3 rows */}
-      <div className="grid grid-cols-9 gap-0.5 sm:gap-1 lg:gap-1.5 p-1.5 lg:p-2">
+      <div className="grid grid-cols-9 gap-0.5 @min-[250px]:gap-1 @min-[350px]:gap-1.5 p-1.5 @min-[350px]:p-2">
         {Array.from({ length: 3 }, (_, row) =>
           Array.from({ length: 9 }, (_, col) => {
             const index = getCellIndex(row, col);
@@ -61,7 +61,7 @@ export function BingoCard90({
                 disabled={disabled || isBlank}
                 className={cn(
                   "relative flex items-center justify-center min-w-0 min-h-11",
-                  "aspect-square w-full rounded-md font-bold text-xs sm:text-sm lg:text-base",
+                  "aspect-square w-full rounded-md font-bold text-xs @min-[250px]:text-sm @min-[350px]:text-base",
                   "transition-all duration-150 select-none",
                   "cell-depth",
                   isBlank

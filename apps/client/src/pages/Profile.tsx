@@ -66,7 +66,7 @@ export function Profile({ userId }: ProfileProps) {
   const { user, stats, recentGames } = data;
 
   return (
-    <div className="flex-1 px-4 py-8 pb-20 max-w-lg mx-auto w-full animate-page-enter">
+    <div className="flex-1 px-4 py-8 pb-6 max-w-lg mx-auto w-full animate-page-enter">
       {/* Back button */}
       <button
         onClick={() => navigate({ to: "/" })}
@@ -131,3 +131,4 @@ export function Profile({ userId }: ProfileProps) {
     </div>
   );
 }
+

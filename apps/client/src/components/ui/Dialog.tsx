@@ -35,7 +35,7 @@ export function DialogContent({
       <DialogPrimitive.Content
         className={cn(
           "fixed left-1/2 top-1/2 z-50 -translate-x-1/2 -translate-y-1/2",
-          "w-[calc(100%-2rem)] max-w-md max-h-[85vh] overflow-y-auto",
+          "w-[calc(100%-2rem)] max-w-md max-h-[85dvh] overflow-y-auto",
           "rounded-2xl glass-strong",
           "p-4 sm:p-6 shadow-2xl shadow-black/20 animate-slide-down",
           "focus:outline-none",
@@ -74,3 +74,4 @@ export function DialogContent({
     </DialogPrimitive.Portal>
   );
 }
+

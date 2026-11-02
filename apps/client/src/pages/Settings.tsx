@@ -28,7 +28,7 @@ export function Settings() {
   };
 
   return (
-    <div className="flex-1 px-4 py-8 pb-24 max-w-lg mx-auto w-full animate-page-enter">
+    <div className="flex-1 px-4 py-8 pb-10 max-w-lg mx-auto w-full animate-page-enter">
       <h1 className="font-gaming text-2xl text-gold mb-6">
         {t("settings.title")}
       </h1>
@@ -211,3 +211,4 @@ export function Settings() {
     </div>
   );
 }
+
