@@ -207,7 +207,7 @@ def main():
         torus('Medallion_gold_pinstripe', r, .0105, (0, -.73*math.cos(.76)-.004, -.21), gold, True)
         font = bpy.data.fonts.load('/System/Library/Fonts/Supplemental/DIN Alternate Bold.ttf')
         lettering('B', .175, .015, ink, font)
-        lettering('7', .54, -.365, ink, font)
+        lettering('8', .54, -.365, ink, font)
         crown_points = [(-.43,.34),(.43,.34),(.585,.89),(.28,.665),(0,1.035),(-.28,.665),(-.585,.89)]
         profile('Royal_crown', crown_points, -.31, -.155, gold, .028)
         torus('Crown_band', .43, .047, (0, 0, .35), gold)

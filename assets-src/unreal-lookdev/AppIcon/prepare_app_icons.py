@@ -68,6 +68,9 @@ def main():
     mesh = ROOT / 'SourceMeshes' / mesh_manifest['fbx']
     if digest(mesh) != mesh_manifest['sha256']:
         raise RuntimeError('Blender FBX does not match its source manifest')
+    rendered_mesh = status.get('mesh', '')
+    if '_' + mesh_manifest['sha256'][:12] + '_FrontX' not in rendered_mesh:
+        raise RuntimeError('The completed Unreal render used a different Blender source mesh')
 
     masters = ROOT / 'masters'
     masters.mkdir(parents=True, exist_ok=True)
@@ -120,6 +123,7 @@ def main():
                           'sha256': digest(status_path)},
         'source_render': source_qa,
         'blender_mesh': {'path': str(mesh.relative_to(REPO)), 'sha256': digest(mesh),
+                         'rendered_mesh': rendered_mesh,
                          'vertices': mesh_manifest['vertices'],
                          'triangles': mesh_manifest['triangles']},
         'editable_blend': {'path': str((ROOT / 'bingo-royale-app-icon.blend').relative_to(REPO)),

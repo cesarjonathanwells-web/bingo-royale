@@ -1,6 +1,6 @@
 # Bingo Royale app icon
 
-An original cobalt bingo ball, an ivory B/7 medallion, a beveled champagne-gold
+An original cobalt bingo ball, an ivory B/8 medallion, a beveled champagne-gold
 crown, and a midnight enamel plaque. The geometry is built in Blender and the
 delivery pixels are rendered in Unreal Engine's Movie Render Queue. No purchased
 models, external textures, AI image generation, or runtime dependencies are used.
