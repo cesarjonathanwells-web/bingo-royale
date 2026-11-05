@@ -6,11 +6,11 @@ import { cn } from "@/lib/utils";
 
 interface PowerUpBarProps {
   powerups: PlayerPowerUp[];
-  onUse: (id: PowerUpId, targetCellIndex?: number) => void;
+  onUse: (id: PowerUpId) => void;
 }
 
 export function PowerUpBar({ powerups, onUse }: PowerUpBarProps) {
-  const { t } = useTranslation("game");
+  const { t, i18n } = useTranslation("game");
 
   if (powerups.length === 0) return null;
 
@@ -34,7 +34,7 @@ export function PowerUpBar({ powerups, onUse }: PowerUpBarProps) {
                 e.stopPropagation();
                 if (!pu.used) onUse(pu.id);
               }}
-              title={def.description}
+              title={i18n.language.startsWith("es") ? def.descriptionEs : def.description}
               style={{ touchAction: 'manipulation' }}
               className={cn(
                 "flex flex-col items-center gap-0.5 px-3 py-2 rounded-xl",

@@ -8,8 +8,9 @@ import type {
   BingoCard90 as BingoCard90Type,
   PlayerPowerUp,
   PowerUpId,
+  PowerUpEffects,
+  PowerUpUseOptions,
   ChatMessage,
-  Player,
 } from "@bingo/shared";
 import { GAME_EMOJIS } from "@bingo/shared";
 import { BingoCard } from "@/components/bingo/BingoCard";
@@ -27,6 +28,7 @@ import { PlayerDrawer } from "@/components/layout/PlayerDrawer";
 import { CalledNumbersDropdown } from "@/components/layout/CalledNumbersDropdown";
 import { cn } from "@/lib/utils";
 import { getAvatarColor } from "@/lib/avatar";
+import { PowerUpDialog } from "@/components/bingo/PowerUpDialog";
 import { getCardLayout } from "@/lib/card-layout";
 
 interface EmojiReaction {
@@ -52,7 +54,14 @@ interface GameViewProps {
   onClaimBingo: () => void;
   onPauseGame: () => void;
   onResumeGame: () => void;
-  onUsePowerUp: (id: PowerUpId) => void;
+  onUsePowerUp: (id: PowerUpId, options?: PowerUpUseOptions) => void;
+  powerUpEffects?: PowerUpEffects;
+  powerUpCalledCount?: number;
+  pendingPowerUp?: PowerUpId | null;
+  callerChoices?: number[];
+  powerUpError?: string | null;
+  powerupsDisabled?: boolean;
+  onClearPowerUpPrompt?: () => void;
   onSendChat: (text: string) => void;
   onSendReaction: (emoji: string) => void;
   onLeave: () => void;
@@ -70,12 +79,18 @@ export function GameView({
   reactions,
   isHost,
   onSetActiveCard,
-  onDab,
   onDabMulti,
   onClaimBingo,
   onPauseGame,
   onResumeGame,
   onUsePowerUp,
+  powerUpEffects = { wildCells: [], blockedCells: [], shieldUntilCall: 0 },
+  powerUpCalledCount = gameState.calledNumbers.length,
+  pendingPowerUp = null,
+  callerChoices = [],
+  powerUpError = null,
+  powerupsDisabled = false,
+  onClearPowerUpPrompt,
   onSendChat,
   onSendReaction,
   onLeave,
@@ -140,12 +155,39 @@ export function GameView({
       ? (myDabs[activeCardIndex] ?? myDabs[0] ?? new Set<number>())
       : new Set<number>();
 
-  const handleUsePowerUp = useCallback(
-    (powerupId: PowerUpId) => {
-      onUsePowerUp(powerupId);
-    },
-    [onUsePowerUp],
-  );
+  const [selectedPowerUp, setSelectedPowerUp] = useState<PowerUpId | null>(null);
+  const [wildTargetCard, setWildTargetCard] = useState<number | null>(null);
+  const powerupsUnavailable = powerupsDisabled || gameState.paused || myCards.length === 0;
+  const closePowerUp = useCallback(() => { setSelectedPowerUp(null); onClearPowerUpPrompt?.(); }, [onClearPowerUpPrompt]);
+  useEffect(() => {
+    if (selectedPowerUp && myPowerUps.some(powerup => powerup.id === selectedPowerUp && powerup.used)) closePowerUp();
+  }, [myPowerUps, selectedPowerUp, closePowerUp]);
+  useEffect(() => {
+    if (powerupsUnavailable) { setWildTargetCard(null); closePowerUp(); }
+  }, [powerupsUnavailable, closePowerUp]);
+  const blockedCells = myCards.map((_, ci) => new Set(powerUpEffects.blockedCells.filter(cell => cell.cardIndex === ci && cell.expiresAtCall >= powerUpCalledCount).map(cell => cell.cellIndex)));
+  const wildCells = myCards.map((_, ci) => new Set(powerUpEffects.wildCells.filter(cell => cell.cardIndex === ci).map(cell => cell.cellIndex)));
+  const targetableCells = wildTargetCard === null ? undefined : myCards.map((card, ci) => {
+    const cells = new Set<number>();
+    if (ci !== wildTargetCard) return cells;
+    const columns = room.variant === "75" ? 5 : 9;
+    card.grid.forEach((column, col) => column.forEach((value, row) => {
+      const index = row * columns + col;
+      if (value && !myDabs[ci]?.has(index) && !blockedCells[ci].has(index)) cells.add(index);
+    }));
+    return cells;
+  });
+  const handleCardPress = (cardIndex: number, cellIndex: number) => {
+    if (wildTargetCard !== null) {
+      if (powerupsUnavailable || pendingPowerUp || !targetableCells?.[cardIndex].has(cellIndex)) return;
+      onUsePowerUp("wild_square", { cardIndex, targetCellIndex: cellIndex });
+      setWildTargetCard(null);
+    } else onDabMulti(cardIndex, cellIndex);
+  };
+  const selectCard = (index: number) => { onSetActiveCard(index); if (wildTargetCard !== null) setWildTargetCard(index); };
+  const shieldActive = powerUpEffects.shieldUntilCall > 0 && powerUpEffects.shieldUntilCall >= powerUpCalledCount;
+  const activeBlocks = powerUpEffects.blockedCells.filter(cell => cell.expiresAtCall >= powerUpCalledCount);
+  const callsLabel = (until: number) => until === powerUpCalledCount ? t("powerups.untilNextCall") : t("powerups.callsRemaining", { count: until - powerUpCalledCount });
 
   const handleEmojiSend = useCallback(
     (emoji: string) => {
@@ -209,9 +251,21 @@ export function GameView({
             <span className="text-[10px] text-[var(--color-text-muted)]">
               {t("game.activePattern")}:
             </span>
-            <PatternDisplay patternIds={room.patterns} compact />
+            <PatternDisplay patternIds={room.patterns} customPatterns={room.customPatterns} compact />
           </div>
         )}
+
+        {/* Active power-up effects stay visible above the cards. */}
+        {(shieldActive || powerUpEffects.doubleDaub || activeBlocks.length > 0) && <div role="status" className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs px-2 py-1 shrink-0 text-[var(--color-text-secondary)]">
+          {shieldActive && <span>🛡️ {t("powerups.shield")}: {callsLabel(powerUpEffects.shieldUntilCall)}</span>}
+          {powerUpEffects.doubleDaub && <span>✌️ {t("powerups.doubleReady", { n: powerUpEffects.doubleDaub.cardIndex + 1 })}</span>}
+          {activeBlocks.map(cell => <span key={`${cell.cardIndex}-${cell.cellIndex}`}>🔒 {t("powerups.inkOnCard", { n: cell.cardIndex + 1 })}: {callsLabel(cell.expiresAtCall)}</span>)}
+        </div>}
+        {wildTargetCard !== null && <div role="status" className="w-full flex items-center gap-2 rounded-lg border border-amber-400/50 bg-amber-500/10 px-3 py-2 text-xs text-amber-200 shrink-0">
+          <span className="flex-1">{t("powerups.tapSquare", { n: wildTargetCard + 1 })}</span>
+          <button type="button" className="min-h-11 px-3 underline" onClick={() => setWildTargetCard(null)}>{t("powerups.cancel")}</button>
+        </div>}
+        {powerUpError && !selectedPowerUp && <p role="alert" className="text-xs text-red-300 py-1 shrink-0">{t(`powerups.errors.${powerUpError}`, { defaultValue: t("powerups.errors.failed") })}</p>}
 
         {/* View toggle */}
         {myCards.length > 1 && (
@@ -257,20 +311,28 @@ export function GameView({
                     ? { gridColumn: "1 / -1", width: "calc((100% - 0.25rem) / 2)", justifySelf: "center" } : undefined}>
                   <button type="button" className="w-full min-h-7 mb-0.5 text-xs font-semibold text-[var(--color-text-secondary)] cursor-pointer"
                     aria-label={t("cards.enlarge", { n: ci + 1 })}
-                    onClick={() => { onSetActiveCard(ci); setViewAll(false); }}>
+                    onClick={() => { selectCard(ci); setViewAll(false); }}>
                     {t("cards.card", { n: ci + 1 })} <span aria-hidden="true">↗</span>
                   </button>
                   {room.variant === "75" ? (
                     <BingoCard
                       card={card as BingoCard75}
                       dabs={myDabs[ci] ?? new Set()}
-                      onDab={(cellIndex) => onDabMulti(ci, cellIndex)}
+                      onDab={(cellIndex) => handleCardPress(ci, cellIndex)}
+                      blockedCells={blockedCells[ci]}
+                      wildCells={wildCells[ci]}
+                      targetableCells={targetableCells?.[ci]}
+                      disabled={powerupsUnavailable}
                     />
                   ) : (
                     <BingoCard90
                       card={card as BingoCard90Type}
                       dabs={myDabs[ci] ?? new Set()}
-                      onDab={(cellIndex) => onDabMulti(ci, cellIndex)}
+                      onDab={(cellIndex) => handleCardPress(ci, cellIndex)}
+                      blockedCells={blockedCells[ci]}
+                      wildCells={wildCells[ci]}
+                      targetableCells={targetableCells?.[ci]}
+                      disabled={powerupsUnavailable}
                     />
                   )}
                 </section>
@@ -281,9 +343,13 @@ export function GameView({
               cards={myCards}
               dabs={myDabs}
               variant={room.variant}
-              onDab={onDabMulti}
+              onDab={handleCardPress}
+              blockedCells={blockedCells}
+              wildCells={wildCells}
+              targetableCells={targetableCells}
+              disabled={powerupsUnavailable}
               activeIndex={activeCardIndex}
-              onIndexChange={onSetActiveCard}
+              onIndexChange={selectCard}
             />
           ) : (
             <div style={{ maxWidth: `${Math.min(gridLayout.maxWidth, 420)}px` }} className="w-full mx-auto">
@@ -293,13 +359,21 @@ export function GameView({
                     <BingoCard
                       card={myCard as BingoCard75}
                       dabs={activeDabs}
-                      onDab={onDab}
+                      onDab={(cellIndex) => handleCardPress(activeCardIndex, cellIndex)}
+                      blockedCells={blockedCells[activeCardIndex]}
+                      wildCells={wildCells[activeCardIndex]}
+                      targetableCells={targetableCells?.[activeCardIndex]}
+                      disabled={powerupsUnavailable}
                     />
                   ) : (
                     <BingoCard90
                       card={myCard as BingoCard90Type}
                       dabs={activeDabs}
-                      onDab={onDab}
+                      onDab={(cellIndex) => handleCardPress(activeCardIndex, cellIndex)}
+                      blockedCells={blockedCells[activeCardIndex]}
+                      wildCells={wildCells[activeCardIndex]}
+                      targetableCells={targetableCells?.[activeCardIndex]}
+                      disabled={powerupsUnavailable}
                     />
                   )}
                 </>
@@ -422,7 +496,9 @@ export function GameView({
       {/* Action bar */}
       <ActionBar
         powerups={myPowerUps}
-        onUsePowerUp={handleUsePowerUp}
+        onUsePowerUp={(id) => { onClearPowerUpPrompt?.(); setWildTargetCard(null); setSelectedPowerUp(id); }}
+        disabled={powerupsUnavailable || pendingPowerUp !== null || wildTargetCard !== null}
+        pendingPowerUp={pendingPowerUp}
         onToggleChat={() => setChatOpen(!chatOpen)}
         onToggleEmoji={() => setEmojiOpen(!emojiOpen)}
         onTogglePlayers={() => setPlayersOpen(true)}
@@ -431,7 +507,8 @@ export function GameView({
       />
 
       {/* BINGO button (in-flow, not fixed) */}
-      <GameBottomBar onClaim={onClaimBingo} />
+      <GameBottomBar onClaim={onClaimBingo} disabled={powerupsUnavailable || wildTargetCard !== null} />
+      <PowerUpDialog powerupId={selectedPowerUp} cardCount={myCards.length} activeCardIndex={activeCardIndex} pending={pendingPowerUp !== null} disabled={powerupsUnavailable} choices={callerChoices} error={powerUpError} onUse={onUsePowerUp} onClose={closePowerUp} onTarget={cardIndex => { selectCard(cardIndex); setViewAll(false); setWildTargetCard(cardIndex); closePowerUp(); }} />
 
       {/* Emoji picker overlay */}
       {emojiOpen && (

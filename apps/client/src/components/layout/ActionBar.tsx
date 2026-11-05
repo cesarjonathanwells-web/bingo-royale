@@ -11,6 +11,8 @@ interface ActionBarProps {
   onTogglePlayers: () => void;
   unreadChat: number;
   chatOpen: boolean;
+  disabled?: boolean;
+  pendingPowerUp?: PowerUpId | null;
 }
 
 export function ActionBar({
@@ -21,6 +23,8 @@ export function ActionBar({
   onTogglePlayers,
   unreadChat,
   chatOpen,
+  disabled = false,
+  pendingPowerUp = null,
 }: ActionBarProps) {
   const { t } = useTranslation("game");
 
@@ -39,18 +43,20 @@ export function ActionBar({
             <button
               key={pu.id}
               type="button"
-              disabled={pu.used}
+              disabled={pu.used || disabled}
               onClick={(e) => {
                 e.preventDefault();
                 e.stopPropagation();
-                if (!pu.used) onUsePowerUp(pu.id);
+                if (!pu.used && !disabled) onUsePowerUp(pu.id);
               }}
               title={t(`powerups.${pu.id}`)}
+              aria-label={`${t(`powerups.${pu.id}`)}${pu.used ? `: ${t("powerups.used")}` : ""}`}
+              aria-busy={pendingPowerUp === pu.id}
               style={{ touchAction: "manipulation" }}
               className={cn(
                 "w-11 h-11 flex items-center justify-center rounded-lg text-lg select-none shrink-0",
                 "transition-all duration-150",
-                pu.used
+                pu.used || disabled
                   ? "opacity-30 grayscale cursor-not-allowed"
                   : [
                       "glass-btn",
@@ -59,7 +65,7 @@ export function ActionBar({
                     ],
               )}
             >
-              {def.icon}
+              {pendingPowerUp === pu.id ? <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" /> : def.icon}
             </button>
           );
         })}

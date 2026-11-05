@@ -85,3 +85,24 @@ Production builds generate a versioned `/sw.js` automatically. It precaches the 
 Updates wait until all existing app tabs/windows close; there is no forced reload during a game. Settings shows when an update is waiting. Production serves HTML, the manifest, and the worker with `Cache-Control: no-cache`; hashed build assets are immutable. Direct links such as `/room/ABC123` use the Express 5 SPA fallback, while missing API endpoints and assets remain 404s.
 
 PWA registration runs only in production builds on HTTPS (or localhost for testing). Client tests cover worker cache boundaries, offline navigation, and icon dimensions; server tests cover deep links and caching headers. Run `pnpm --filter @bingo/client test` and `pnpm --filter @bingo/server test`. Browser QA should include install guidance, offline/reconnect, and a waiting service-worker update without a page reload.
+
+## Power-ups
+
+Each player receives two different, single-use power-ups per round. Tap a power-up to read its effect. Card-specific powers use the selected card; Wild Square also asks you to tap the number to mark. All eight work with both 75-ball and 90-ball cards.
+
+| Power-up | Effect |
+| --- | --- |
+| Double Daub | On the next draw, mark up to two available numbered cells on the selected card. A matching drawn number takes priority; bonus marks may include uncalled numbers. |
+| Number Peek | Privately reveal up to three upcoming numbers. Caller’s Choice can change their order afterward. |
+| Wild Square | Choose an unmarked, unblocked numbered cell and mark it even if it has not been called. |
+| Shield | Protect all your cards against Scramble and Ink Blot through the next two draws. Existing ink is not removed. |
+| Scramble | Change eligible numbers on a random opponent’s card. Called numbers, marks, wildcards, blocked cells, column ranges, and valid ticket layouts are preserved. |
+| Caller’s Choice | Preview up to three upcoming numbers and choose which is drawn next. Previewing or cancelling does not consume the power-up; submitting a valid selection does. Stale options refresh. |
+| Ink Blot | Prevent a random unmarked numbered cell on an opponent’s card from being marked through the next two draws. |
+| Turbo Stamp | Immediately mark every called, unblocked number on the selected card. |
+
+Shield and ink are active immediately and through the next two draws, then disappear on the third. A shielded attack is spent and blocked. Invalid requests, unavailable targets, and effects with nothing to change do not spend a power-up. Spectators and paused games cannot activate powers.
+
+Effects, changed cards, and power-up inventory are stored on the server. Only the card owner receives the authoritative `game:powerup_state` snapshot. Wild and bonus marks are explicitly authorized by the server for win validation; clients cannot create their own. Caller draws, marks, claims, and power-up mutations share a per-room queue in the current single-server deployment. Multiple app replicas would require a distributed queue or room affinity.
+
+Power-up regression tests use fake sockets and the real game services without opening a network port. They run with the existing server and client test commands.

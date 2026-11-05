@@ -11,7 +11,7 @@ import { RoomLobby } from "@/components/room/RoomLobby";
 import { GameView } from "@/components/game/GameView";
 import { GameFinished } from "@/components/game/GameFinished";
 import { getSocket } from "@/socket";
-import type { PowerUpId } from "@bingo/shared";
+import type { PowerUpId, PowerUpUseOptions } from "@bingo/shared";
 import { POWER_UP_MAP } from "@bingo/shared";
 
 interface RoomPageProps {
@@ -29,6 +29,13 @@ export function Room({ code }: RoomPageProps) {
   const chatMessages = useRoomStore((s) => s.chatMessages);
   const myPowerUps = useRoomStore((s) => s.myPowerUps);
   const peekedNumbers = useRoomStore((s) => s.peekedNumbers);
+  const powerUpEffects = useRoomStore((s) => s.powerUpEffects);
+  const powerUpCalledCount = useRoomStore((s) => s.powerUpCalledCount);
+  const pendingPowerUp = useRoomStore((s) => s.pendingPowerUp);
+  const callerChoices = useRoomStore((s) => s.callerChoices);
+  const powerUpError = useRoomStore((s) => s.powerUpError);
+  const socketReady = useRoomStore((s) => s.socketReady);
+  const clearPowerUpPrompt = useRoomStore((s) => s.clearPowerUpPrompt);
   const dabCell = useRoomStore((s) => s.dabCell);
   const claimBingo = useRoomStore((s) => s.claimBingo);
   const pauseGame = useRoomStore((s) => s.pauseGame);
@@ -160,10 +167,19 @@ export function Room({ code }: RoomPageProps) {
       }
     };
 
+    const handleBlocked = (data: { powerupId: string; byPlayer: string }) => toast(t("powerups.shieldBlocked", { powerup: t(`powerups.${data.powerupId}`), name: data.byPlayer }), "success");
+    const handleScrambled = (data: { byPlayer: string; cardIndex: number }) => toast(t("powerups.scrambledCard", { name: data.byPlayer, n: data.cardIndex + 1 }), "info");
+    const handleInk = (data: { byPlayer: string; cardIndex: number }) => toast(t("powerups.inkedCard", { name: data.byPlayer, n: data.cardIndex + 1 }), "info");
     socket.on("game:powerup_used", handlePowerUpUsed);
+    socket.on("game:powerup_blocked", handleBlocked);
+    socket.on("game:scrambled", handleScrambled);
+    socket.on("game:ink_blot", handleInk);
 
     return () => {
       socket.off("game:powerup_used", handlePowerUpUsed);
+      socket.off("game:powerup_blocked", handleBlocked);
+      socket.off("game:scrambled", handleScrambled);
+      socket.off("game:ink_blot", handleInk);
     };
   }, [toast, t]);
 
@@ -175,42 +191,14 @@ export function Room({ code }: RoomPageProps) {
     [dabCell, play],
   );
 
-  // For multi-card view: dab on a specific card by index
-  const handleDabMulti = useCallback(
-    (cardIndex: number, cellIndex: number) => {
-      const state = useRoomStore.getState();
-      const cardDabs = state.myDabs[cardIndex];
-      if (!cardDabs || cardDabs.has(cellIndex)) return;
+  const handleDabMulti = useCallback((cardIndex: number, cellIndex: number) => {
+    play("cellDabbed");
+    dabCell(cellIndex, cardIndex);
+  }, [play, dabCell]);
 
-      // Only allow dabbing numbers that have been called
-      const card = state.myCards[cardIndex];
-      if (card && state.gameState && state.room) {
-        const cols = state.room.variant === "75" ? 5 : 9;
-        const col = cellIndex % cols;
-        const row = Math.floor(cellIndex / cols);
-        const value = card.grid[col]?.[row] ?? null;
-        if (value !== null && !state.gameState.calledNumbers.includes(value)) return;
-      }
-
-      play("cellDabbed");
-      const newCardDabs = new Set(cardDabs);
-      newCardDabs.add(cellIndex);
-      const newDabs = [...state.myDabs];
-      newDabs[cardIndex] = newCardDabs;
-      useRoomStore.setState({ myDabs: newDabs });
-
-      const socket = getSocket();
-      socket.emit("game:dab", { cellIndex, cardIndex });
-    },
-    [play],
-  );
-
-  const handleUsePowerUp = useCallback(
-    (powerupId: PowerUpId) => {
-      usePowerUp(powerupId);
-    },
-    [usePowerUp],
-  );
+  const handleUsePowerUp = useCallback((powerupId: PowerUpId, options?: PowerUpUseOptions) => {
+    usePowerUp(powerupId, options);
+  }, [usePowerUp]);
 
   // ---- State-based rendering ----
 
@@ -292,6 +280,13 @@ export function Room({ code }: RoomPageProps) {
             activeCardIndex={activeCardIndex}
             myPowerUps={myPowerUps}
             peekedNumbers={peekedNumbers}
+            powerUpEffects={powerUpEffects}
+            powerUpCalledCount={powerUpCalledCount}
+            pendingPowerUp={pendingPowerUp}
+            callerChoices={callerChoices}
+            powerUpError={powerUpError}
+            powerupsDisabled={!socketReady}
+            onClearPowerUpPrompt={clearPowerUpPrompt}
             chatMessages={chatMessages}
             reactions={reactions}
             isHost={isHost}

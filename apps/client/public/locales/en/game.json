@@ -122,7 +122,44 @@
     "turbo_stamp": "Turbo Stamp",
     "used": "Used",
     "activated": "{{name}} used {{powerup}}!",
-    "comingSoon": "Coming soon!"
+    "chooseCard": "Choose a card",
+    "chooseNumber": "Choose the number to call next. Choices refresh if another number is drawn.",
+    "pickSquare": "Pick a square",
+    "showChoices": "Show three choices",
+    "use": "Use power-up",
+    "cancel": "Cancel",
+    "tapSquare": "Tap a highlighted number on Card {{n}} to place your wildcard.",
+    "callsRemaining_one": "{{count}} call remaining",
+    "callsRemaining_other": "{{count}} calls remaining",
+    "untilNextCall": "until the next call",
+    "doubleReady": "Double Daub ready for Card {{n}} on the next call",
+    "inkOnCard": "Ink on Card {{n}}",
+    "blockedCell": "blocked by ink",
+    "wildCell": "wildcard mark",
+    "markedCell": "marked",
+    "blankCell": "blank",
+    "shieldBlocked": "Your shield blocked {{powerup}} from {{name}}.",
+    "scrambledCard": "{{name}} scrambled Card {{n}}.",
+    "inkedCard": "{{name}} blocked a square on Card {{n}}.",
+    "errors": {
+      "failed": "The power-up could not be used. Your unused power-up is still available.",
+      "timeout": "The server has not confirmed this yet. Reconnect before retrying.",
+      "disconnected": "Reconnect to use power-ups.",
+      "game_not_running": "Power-ups can only be used during a game.",
+      "spectator": "Spectators cannot use power-ups.",
+      "no_cards": "No active cards found.",
+      "invalid_request": "That power-up request was invalid. Try again.",
+      "invalid_powerup": "This power-up is unavailable.",
+      "game_paused": "Resume the game before using power-ups.",
+      "unavailable": "That power-up has already been used or is unavailable.",
+      "invalid_card": "Choose an available card.",
+      "no_numbers": "No numbers remain for this power-up.",
+      "invalid_target": "Choose an unmarked, unblocked number on your card.",
+      "no_targets": "No eligible squares are available. Your power-up has not been used.",
+      "already_active": "Double Daub is already waiting for the next call.",
+      "stale_choice": "The next numbers changed. Choose one of the updated options.",
+      "no_opponents": "An opponent must be playing to use this power-up."
+    }
   },
   "cards": {
     "count": "Number of Cards",
@@ -163,4 +200,3 @@
     "variant90": "90-Ball"
   }
 }
-

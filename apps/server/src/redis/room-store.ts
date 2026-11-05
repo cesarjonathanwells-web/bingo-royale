@@ -2,7 +2,7 @@
 // Bingo Royale - Room Store (Redis-backed with in-memory fallback)
 // ============================================================
 
-import type { Room, Player, BingoCard, PlayerPowerUp } from '@bingo/shared';
+import type { Room, Player, BingoCard, PlayerPowerUp, PowerUpEffects } from '@bingo/shared';
 import { getRedis } from './index.js';
 
 const ROOM_TTL = 7200; // 2 hours in seconds
@@ -140,6 +140,10 @@ function powerupsKey(code: string, playerId: string): string {
   return `${KEY_PREFIX}${code}:powerups:${playerId}`;
 }
 
+function effectsKey(code: string, playerId: string): string {
+  return `${KEY_PREFIX}${code}:effects:${playerId}`;
+}
+
 // --------------- Create Room ---------------
 
 export async function createRoom(room: Room): Promise<void> {
@@ -218,7 +222,7 @@ export async function removePlayer(
   await safeSet(playersKey(code), data, ROOM_TTL);
 
   // Also clean up card and dabs for this player
-  await safeDel(cardKey(code, playerId), dabsKey(code, playerId));
+  await safeDel(cardKey(code, playerId), dabsKey(code, playerId), powerupsKey(code, playerId), effectsKey(code, playerId));
 }
 
 export async function getPlayers(code: string): Promise<Player[]> {
@@ -361,6 +365,19 @@ export async function getPowerUps(
   return JSON.parse(data) as PlayerPowerUp[];
 }
 
+export function emptyPowerUpEffects(): PowerUpEffects {
+  return { wildCells: [], blockedCells: [], shieldUntilCall: 0 };
+}
+
+export async function getPowerUpEffects(code: string, playerId: string): Promise<PowerUpEffects> {
+  const data = await safeGet(effectsKey(code, playerId));
+  return data ? JSON.parse(data) as PowerUpEffects : emptyPowerUpEffects();
+}
+
+export async function setPowerUpEffects(code: string, playerId: string, effects: PowerUpEffects): Promise<void> {
+  await safeSet(effectsKey(code, playerId), JSON.stringify(effects), ROOM_TTL);
+}
+
 // --------------- TTL Management ---------------
 
 export async function extendTTL(code: string): Promise<void> {
@@ -369,3 +386,4 @@ export async function extendTTL(code: string): Promise<void> {
     await safeExpire(key, ROOM_TTL);
   }
 }
+

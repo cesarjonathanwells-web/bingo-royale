@@ -170,3 +170,50 @@ export interface PlayerPowerUp {
   id: PowerUpId;
   used: boolean;
 }
+
+/** A server-authorized mark may complete a pattern before its number is called. */
+export interface WildCell {
+  cardIndex: number;
+  cellIndex: number;
+  grantedAtCall: number;
+}
+
+export interface BlockedCell {
+  cardIndex: number;
+  cellIndex: number;
+  /** Active through this call; removed when the following number is drawn. */
+  expiresAtCall: number;
+}
+
+export interface PowerUpEffects {
+  wildCells: WildCell[];
+  blockedCells: BlockedCell[];
+  /** Zero means inactive; otherwise protects through this call. */
+  shieldUntilCall: number;
+  doubleDaub?: { cardIndex: number; activateAtCall: number };
+}
+
+/** Private authoritative state, sent only to the player who owns these cards. */
+export interface PowerUpState {
+  roomCode: string;
+  cards: BingoCard[];
+  dabs: number[][];
+  powerups: PlayerPowerUp[];
+  effects: PowerUpEffects;
+  calledCount: number;
+}
+
+export interface PowerUpUseOptions {
+  cardIndex?: number;
+  targetCellIndex?: number;
+  selectedNumber?: number;
+}
+
+export interface PowerUpUseResult {
+  success: boolean;
+  error?: string;
+  errorCode?: string;
+  /** Caller’s Choice previews do not consume the power-up. */
+  choices?: number[];
+}
+

@@ -9,6 +9,9 @@ interface BingoCard90Props {
   onDab: (cellIndex: number) => void;
   disabled?: boolean;
   className?: string;
+  blockedCells?: Set<number>;
+  wildCells?: Set<number>;
+  targetableCells?: Set<number>;
 }
 
 export function BingoCard90({
@@ -17,6 +20,9 @@ export function BingoCard90({
   onDab,
   disabled = false,
   className,
+  blockedCells,
+  wildCells,
+  targetableCells,
 }: BingoCard90Props) {
   const { t } = useTranslation("game");
 
@@ -50,15 +56,19 @@ export function BingoCard90({
             const value = getCellValue(row, col);
             const isBlank = value === 0;
             const isDabbed = !isBlank && dabs.has(index);
+            const isBlocked = blockedCells?.has(index) ?? false;
+            const isWild = wildCells?.has(index) ?? false;
+            const isTargetable = targetableCells?.has(index) ?? false;
+            const cellDisabled = disabled || isBlank || isBlocked || (targetableCells !== undefined && !isTargetable);
 
             return (
               <button
                 key={index}
                 type="button"
                 onClick={() => {
-                  if (!disabled && !isBlank) onDab(index);
+                  if (!cellDisabled) onDab(index);
                 }}
-                disabled={disabled || isBlank}
+                disabled={cellDisabled}
                 className={cn(
                   "relative flex items-center justify-center min-w-0 min-h-11",
                   "aspect-square w-full rounded-md font-bold text-xs @min-[250px]:text-sm @min-[350px]:text-base",
@@ -68,9 +78,14 @@ export function BingoCard90({
                     ? "bg-[var(--color-bg-primary)]/30 cursor-default border-transparent"
                     : "glass-cell text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] active:scale-[0.92] cursor-pointer",
                   disabled && !isBlank && "opacity-60 cursor-not-allowed",
+                  isBlocked && "!border-purple-400/80 !bg-purple-950/70 cursor-not-allowed",
+                  isTargetable && "ring-2 ring-amber-300/80 !border-amber-200",
+                  isWild && "ring-1 ring-amber-300/70",
                 )}
-                aria-label={isBlank ? "blank" : `${value} ${isDabbed ? "dabbed" : ""}`}
+                aria-label={isBlank ? t("powerups.blankCell") : `${value} ${isBlocked ? t("powerups.blockedCell") : isWild ? t("powerups.wildCell") : isDabbed ? t("powerups.markedCell") : ""}`}
               >
+                {isBlocked && <span className="absolute inset-0 z-30 flex items-center justify-center rounded-md bg-purple-950/70 text-xl" aria-hidden="true">🔒</span>}
+                {isWild && <span className="absolute top-0 right-0 z-30 text-[10px] leading-none text-amber-200" aria-hidden="true">★</span>}
                 {!isBlank && (
                   <>
                     <span className={cn("z-10 relative font-extrabold", isDabbed && "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]")}>

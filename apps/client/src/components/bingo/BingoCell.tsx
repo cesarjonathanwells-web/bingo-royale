@@ -12,6 +12,9 @@ interface BingoCellProps {
   dabbed: boolean;
   onDab: (index: number) => void;
   disabled?: boolean;
+  blocked?: boolean;
+  wild?: boolean;
+  targetable?: boolean;
 }
 
 // Ink splat SVG paths for randomized dab shapes
@@ -28,6 +31,9 @@ export function BingoCell({
   dabbed,
   onDab,
   disabled = false,
+  blocked = false,
+  wild = false,
+  targetable = false,
 }: BingoCellProps) {
   const { t } = useTranslation("game");
   const isFree = index === FREE_SPACE_INDEX;
@@ -48,15 +54,15 @@ export function BingoCell({
   }, [dabbed]);
 
   const handleClick = useCallback(() => {
-    if (disabled || isFree) return;
+    if (disabled || blocked || isFree) return;
     onDab(index);
-  }, [disabled, isFree, index, onDab]);
+  }, [disabled, blocked, isFree, index, onDab]);
 
   return (
     <motion.button
       type="button"
       onClick={handleClick}
-      disabled={disabled || isFree}
+      disabled={disabled || blocked || isFree}
       className={cn(
         "relative flex items-center justify-center",
         "aspect-square w-full rounded-lg font-bold text-xs @min-[250px]:text-base @min-[350px]:text-lg",
@@ -66,14 +72,17 @@ export function BingoCell({
           ? "border border-[var(--color-gold)]/30 cursor-default"
           : "text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] cursor-pointer",
         disabled && !isFree && "opacity-60 cursor-not-allowed",
+        blocked && "!border-purple-400/80 !bg-purple-950/70 cursor-not-allowed",
+        targetable && "ring-2 ring-amber-300/80 !border-amber-200",
+        wild && "ring-1 ring-amber-300/70",
       )}
       style={isFree ? { background: 'linear-gradient(135deg, rgba(255,215,0,0.15), rgba(245,158,11,0.1))', boxShadow: '0 0 12px rgba(255,215,0,0.15)' } : undefined}
-      whileTap={!disabled && !isFree ? { scale: 0.88 } : undefined}
+      whileTap={!disabled && !blocked && !isFree ? { scale: 0.88 } : undefined}
       transition={{ type: "spring", stiffness: 500, damping: 30 }}
       aria-label={
         isFree
           ? t("game.free")
-          : `${letter ?? ""}${value ?? ""} ${dabbed ? "dabbed" : ""}`
+          : `${letter ?? ""}${value ?? ""} ${blocked ? t("powerups.blockedCell") : wild ? t("powerups.wildCell") : dabbed ? t("powerups.markedCell") : ""}`
       }
     >
       {/* Number or FREE star icon */}
@@ -106,6 +115,9 @@ export function BingoCell({
           {value ?? ""}
         </span>
       )}
+
+      {blocked && <span className="absolute inset-0 z-30 flex items-center justify-center rounded-lg bg-purple-950/70 text-xl" aria-hidden="true">🔒</span>}
+      {wild && <span className="absolute top-0 right-0 z-30 text-[10px] leading-none text-amber-200" aria-hidden="true">★</span>}
 
       {/* Dab overlay - ink splat shape */}
       <AnimatePresence>
