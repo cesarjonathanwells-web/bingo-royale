@@ -1,0 +1,96 @@
+{
+  "name": "SM_BingoRoyaleAppIcon",
+  "fbx": "SM_BingoRoyaleAppIcon.fbx",
+  "front_axis": "+X",
+  "material_slots": [
+    "BRI_Indigo_frame",
+    "BRI_Champagne_gold",
+    "BRI_Midnight_enamel",
+    "BRI_Cobalt_resin",
+    "BRI_Ivory_number_face",
+    "BRI_Midnight_ink",
+    "BRI_Sapphire_gem"
+  ],
+  "materials": {
+    "BRI_Cobalt_resin": {
+      "base_color": [
+        0.006995410187265387,
+        0.09989872824711389,
+        0.7835377915261935
+      ],
+      "metallic": 0,
+      "roughness": 0.19,
+      "coat": 0.48,
+      "coat_roughness": 0.12
+    },
+    "BRI_Ivory_number_face": {
+      "base_color": [
+        1.0,
+        0.938685728457888,
+        0.799102738014409
+      ],
+      "metallic": 0,
+      "roughness": 0.28,
+      "coat": 0.25,
+      "coat_roughness": 0.15
+    },
+    "BRI_Midnight_ink": {
+      "base_color": [
+        0.005181516702338386,
+        0.017641954488384078,
+        0.06847816984440017
+      ],
+      "metallic": 0,
+      "roughness": 0.33,
+      "coat": 0.15,
+      "coat_roughness": 0.15
+    },
+    "BRI_Champagne_gold": {
+      "base_color": [
+        0.9301108583754237,
+        0.5711248294648731,
+        0.10702310297826761
+      ],
+      "metallic": 1,
+      "roughness": 0.24,
+      "coat": 0,
+      "coat_roughness": 0.15
+    },
+    "BRI_Midnight_enamel": {
+      "base_color": [
+        0.005181516702338386,
+        0.010329823029626936,
+        0.04518620438567554
+      ],
+      "metallic": 0,
+      "roughness": 0.3,
+      "coat": 0.38,
+      "coat_roughness": 0.15
+    },
+    "BRI_Indigo_frame": {
+      "base_color": [
+        0.019382360956935723,
+        0.042311410620809675,
+        0.1714411007328226
+      ],
+      "metallic": 0.45,
+      "roughness": 0.27,
+      "coat": 0.3,
+      "coat_roughness": 0.15
+    },
+    "BRI_Sapphire_gem": {
+      "base_color": [
+        0.010960094006488246,
+        0.09758734714186246,
+        0.6239603916750761
+      ],
+      "metallic": 0.12,
+      "roughness": 0.13,
+      "coat": 0.55,
+      "coat_roughness": 0.15
+    }
+  },
+  "vertices": 55274,
+  "triangles": 108051,
+  "sha256": "c7fa2061b5df98a38c457a6ac7576cc182db5110706a085d33df7483acb0636e"
+}
