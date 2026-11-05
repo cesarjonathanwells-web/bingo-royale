@@ -14,7 +14,7 @@ export function CardTabs({ count, activeIndex, onSelect, dabs }: CardTabsProps) 
   if (count <= 1) return null;
 
   return (
-    <div className="flex items-center justify-center gap-1 sm:gap-2 w-full max-w-[calc(100%-0.5rem)] sm:max-w-[400px] mx-auto">
+    <div className="flex items-center justify-center gap-1 sm:gap-2 w-full mx-auto">
       {Array.from({ length: count }, (_, i) => {
         const isActive = i === activeIndex;
         const dabCount = dabs[i]?.size ?? 0;

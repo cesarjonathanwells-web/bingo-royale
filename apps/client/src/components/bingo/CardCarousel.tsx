@@ -23,6 +23,8 @@ interface CardCarouselProps {
   currentNumber?: number | null;
   calledNumbers?: ReadonlySet<number>;
   progress?: CardProgress[];
+  /** Width fitted to the available board area by the parent layout. */
+  cardMaxWidth?: number;
 }
 
 export function CardCarousel({
@@ -39,6 +41,7 @@ export function CardCarousel({
   currentNumber,
   calledNumbers,
   progress,
+  cardMaxWidth,
 }: CardCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -89,15 +92,15 @@ export function CardCarousel({
   }, [activeIndex]);
 
   return (
-    <div className="w-full">
-      <div className="sticky top-0 z-10 pb-2 bg-[var(--color-bg-primary)]">
+    <div className="flex min-w-0 w-full flex-col">
+      <div className="game-carousel-tabs sticky top-0 z-10 shrink-0 pb-1 bg-[var(--color-bg-primary)]">
         <CardTabs count={cards.length} activeIndex={activeIndex} onSelect={scrollToCard} dabs={dabs} />
       </div>
 
       {/* Scrollable card container */}
       <div
         ref={scrollRef}
-        className="flex overflow-x-auto snap-x snap-mandatory scrollbar-none"
+        className="flex min-w-0 w-full overflow-x-auto snap-x snap-mandatory scrollbar-none"
         onScroll={handleScroll}
         onTouchStart={() => { touchingRef.current = true; }}
         onTouchEnd={() => { touchingRef.current = false; handleScroll(); }}
@@ -108,8 +111,8 @@ export function CardCarousel({
         }}
       >
         {cards.map((card, i) => (
-          <div key={card.id} inert={i !== activeIndex} aria-hidden={i !== activeIndex} className="snap-center flex-shrink-0 min-w-0 w-full px-2 flex items-start justify-center">
-            <div className="w-full max-w-[calc(100vw-1rem)] sm:max-w-[380px] lg:max-w-[420px]">
+          <div key={card.id} inert={i !== activeIndex} aria-hidden={i !== activeIndex} className="snap-center flex-shrink-0 min-w-0 w-full flex items-start justify-center">
+            <div className="min-w-0 w-full" style={cardMaxWidth !== undefined && Number.isFinite(cardMaxWidth) ? { maxWidth: Math.max(0, cardMaxWidth) } : undefined}>
               {variant === "75" ? (
                 <BingoCard
                   card={card as BingoCard75}

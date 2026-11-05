@@ -15,17 +15,13 @@ export function GameBottomBar({ onClaim, disabled = false, ready = false }: Game
 
   return (
     <div
-      className="shrink-0 px-2 pt-1 pb-2"
-      style={{
-        paddingBottom: "max(0.5rem, env(safe-area-inset-bottom))",
-        background: "linear-gradient(to top, rgba(5,5,17,0.9), transparent)",
-      }}
+      className="game-claim-bar shrink-0 px-2 pt-1 pb-2"
     >
       <motion.button
         onClick={onClaim}
         disabled={disabled}
         className={cn(
-          "w-full py-3.5 rounded-xl",
+          "game-claim-button w-full py-3.5 rounded-xl",
           "font-gaming text-2xl tracking-[0.2em] text-white uppercase",
           "bg-gradient-to-r from-amber-500 via-yellow-400 to-amber-500",
           "shadow-lg shadow-amber-500/25",

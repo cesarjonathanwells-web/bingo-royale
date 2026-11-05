@@ -45,7 +45,7 @@ export function BingoCard90({
   };
 
   return (
-    <BoardSurface className={className} completed={Boolean(winningCells?.size)} nearWin={Boolean(nearWinCells?.size)}>
+    <BoardSurface className={cn("bingo-board--90", className)} completed={Boolean(winningCells?.size)} nearWin={Boolean(nearWinCells?.size)}>
       {/* Grid: 9 columns x 3 rows */}
       <div className="grid grid-cols-9 gap-0.5 @min-[250px]:gap-1 @min-[350px]:gap-1.5 p-1.5 @min-[350px]:p-2">
         {Array.from({ length: 3 }, (_, row) =>

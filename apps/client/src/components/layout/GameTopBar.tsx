@@ -27,8 +27,8 @@ export function GameTopBar({
   }, [roomCode]);
 
   return (
-    <div className="sticky top-0 z-30 glass" style={{ borderBottom: '1px solid var(--color-border)' }}>
-      <div className="flex items-center justify-between px-2 py-1.5 h-12">
+    <div className="game-top-bar sticky top-0 z-30 glass" style={{ borderBottom: '1px solid var(--color-border)' }}>
+      <div className="game-top-bar__inner flex items-center justify-between px-2 h-12">
         {/* Left: Called count */}
         <span className="text-xs font-semibold text-[var(--color-text-secondary)]">
           {t("game.calledOf", {
@@ -43,7 +43,7 @@ export function GameTopBar({
           <button
             onClick={handleCopyCode}
             className={cn(
-              "px-3 py-1.5 rounded-lg text-[11px] font-mono font-bold",
+              "min-h-11 px-3 rounded-lg text-[11px] font-mono font-bold",
               "bg-[var(--color-bg-tertiary)] text-[var(--color-accent)]",
               "hover:bg-[var(--color-bg-tertiary)]/80 transition-colors cursor-pointer select-none",
             )}
@@ -56,7 +56,7 @@ export function GameTopBar({
           <button
             onClick={onLeave}
             className={cn(
-              "w-9 h-9 flex items-center justify-center rounded-lg",
+              "w-11 h-11 flex items-center justify-center rounded-lg",
               "text-red-400 hover:text-red-300",
               "hover:bg-red-500/10 transition-colors cursor-pointer",
             )}
@@ -84,7 +84,7 @@ export function GameTopBar({
           <button
             onClick={onMenuPress}
             className={cn(
-              "w-9 h-9 flex items-center justify-center rounded-lg",
+              "w-11 h-11 flex items-center justify-center rounded-lg",
               "text-[var(--color-text-secondary)] hover:text-[var(--color-text-primary)]",
               "hover:bg-[var(--color-bg-tertiary)] transition-colors cursor-pointer",
             )}
@@ -111,3 +111,4 @@ export function GameTopBar({
     </div>
   );
 }
+
