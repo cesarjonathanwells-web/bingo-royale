@@ -1,4 +1,4 @@
-import { useCallback, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 
@@ -26,19 +26,53 @@ type SoundName =
 
 // --------------- Web Audio API sound synthesis ---------------
 
+const dabNoiseBuffers = new WeakMap<AudioContext, AudioBuffer>();
+
 function createDabSound(ctx: AudioContext) {
-  // Short percussive "pop" - 200Hz sine wave, 0.08s, exponential decay
+  // A soft rubber-dauber body, followed by a tiny breath of ink on paper.
+  // Both voices finish within 95 ms and remain quieter than the caller chime.
+  const start = ctx.currentTime;
   const osc = ctx.createOscillator();
   const gain = ctx.createGain();
   osc.type = "sine";
-  osc.frequency.setValueAtTime(200, ctx.currentTime);
-  osc.frequency.exponentialRampToValueAtTime(100, ctx.currentTime + 0.08);
-  gain.gain.setValueAtTime(0.4, ctx.currentTime);
-  gain.gain.exponentialRampToValueAtTime(0.001, ctx.currentTime + 0.08);
+  osc.frequency.setValueAtTime(230, start);
+  osc.frequency.exponentialRampToValueAtTime(85, start + 0.075);
+  gain.gain.setValueAtTime(0.001, start);
+  gain.gain.linearRampToValueAtTime(0.24, start + 0.003);
+  gain.gain.exponentialRampToValueAtTime(0.001, start + 0.09);
   osc.connect(gain);
   gain.connect(ctx.destination);
-  osc.start(ctx.currentTime);
-  osc.stop(ctx.currentTime + 0.08);
+  osc.onended = () => { osc.disconnect(); gain.disconnect(); };
+  osc.start(start);
+  osc.stop(start + 0.095);
+
+  let buffer = dabNoiseBuffers.get(ctx);
+  if (!buffer) {
+    buffer = ctx.createBuffer(1, Math.ceil(ctx.sampleRate * 0.05), ctx.sampleRate);
+    const samples = buffer.getChannelData(0);
+    let seed = 731;
+    for (let i = 0; i < samples.length; i++) {
+      seed = (Math.imul(seed, 1664525) + 1013904223) | 0;
+      samples[i] = seed / 2147483648;
+    }
+    dabNoiseBuffers.set(ctx, buffer);
+  }
+  const ink = ctx.createBufferSource();
+  const filter = ctx.createBiquadFilter();
+  const inkGain = ctx.createGain();
+  ink.buffer = buffer;
+  filter.type = "lowpass";
+  filter.frequency.setValueAtTime(1800, start);
+  filter.Q.setValueAtTime(0.6, start);
+  inkGain.gain.setValueAtTime(0.001, start);
+  inkGain.gain.linearRampToValueAtTime(0.045, start + 0.002);
+  inkGain.gain.exponentialRampToValueAtTime(0.001, start + 0.045);
+  ink.connect(filter);
+  filter.connect(inkGain);
+  inkGain.connect(ctx.destination);
+  ink.onended = () => { ink.disconnect(); filter.disconnect(); inkGain.disconnect(); };
+  ink.start(start);
+  ink.stop(start + 0.05);
 }
 
 function createNumberCalledSound(ctx: AudioContext) {
@@ -134,6 +168,23 @@ export function useSound() {
     return ctxRef.current;
   }, []);
 
+  // Server-confirmed stamps arrive after the pointer event. Unlock the shared
+  // context during a real gesture first, including when auto-daub is enabled.
+  useEffect(() => {
+    if (muted) return;
+    const unlock = () => {
+      try { getContext(); } catch { /* Web Audio is optional. */ }
+      window.removeEventListener("pointerdown", unlock, true);
+      window.removeEventListener("keydown", unlock, true);
+    };
+    window.addEventListener("pointerdown", unlock, { capture: true, once: true });
+    window.addEventListener("keydown", unlock, { capture: true, once: true });
+    return () => {
+      window.removeEventListener("pointerdown", unlock, true);
+      window.removeEventListener("keydown", unlock, true);
+    };
+  }, [muted, getContext]);
+
   const play = useCallback(
     (name: SoundName) => {
       if (muted) return;
@@ -152,3 +203,4 @@ export function useSound() {
 
   return { play, muted, toggleMute };
 }
+

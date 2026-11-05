@@ -2,9 +2,9 @@ import { useCallback } from "react";
 import type { BingoCard75 } from "@bingo/shared";
 import { LETTERS, BALL_COLORS, FREE_SPACE_INDEX } from "@bingo/shared";
 import { BingoCell } from "./BingoCell";
-import { cn } from "@/lib/utils";
+import { BoardSurface, type BoardFeedbackProps } from "./BoardSurface";
 
-interface BingoCardProps {
+interface BingoCardProps extends BoardFeedbackProps {
   card: BingoCard75;
   dabs: Set<number>;
   onDab: (cellIndex: number) => void;
@@ -24,6 +24,10 @@ export function BingoCard({
   blockedCells,
   wildCells,
   targetableCells,
+  currentNumber,
+  calledNumbers,
+  winningCells,
+  nearWinCells,
 }: BingoCardProps) {
 
   const getCellValue = useCallback(
@@ -38,23 +42,17 @@ export function BingoCard({
   };
 
   return (
-    <div
-      className={cn(
-        "@container w-full mx-auto",
-        "rounded-xl sm:rounded-2xl overflow-hidden",
-        "glass-card",
-        "shadow-xl shadow-black/30",
-        className,
-      )}
-    >
+    <BoardSurface className={className} completed={Boolean(winningCells?.size)} nearWin={Boolean(nearWinCells?.size)}>
       {/* Column letters */}
       <div className="grid grid-cols-5 gap-1 @min-[350px]:gap-1.5 px-1.5 @min-[350px]:px-2 pt-1.5 @min-[350px]:pt-2">
-        {LETTERS.map((letter) => {
+        {LETTERS.map((letter, column) => {
           const color = BALL_COLORS[letter] ?? "#f59e0b";
+          const current = currentNumber != null && Math.floor((currentNumber - 1) / 15) === column;
           return (
             <div
-              key={letter}
-              className="col-header flex items-center justify-center py-1 @min-[250px]:py-1.5 @min-[350px]:py-2 rounded font-black text-sm @min-[250px]:text-base @min-[350px]:text-lg text-white"
+              key={`${letter}-${current ? currentNumber : "idle"}`}
+              data-current={current || undefined}
+              className="bingo-column-header col-header flex items-center justify-center py-1 @min-[250px]:py-1.5 @min-[350px]:py-2 rounded font-black text-sm @min-[250px]:text-base @min-[350px]:text-lg text-white"
               style={{
                 backgroundColor: color,
               }}
@@ -85,12 +83,16 @@ export function BingoCard({
                 blocked={blockedCells?.has(index)}
                 wild={wildCells?.has(index)}
                 targetable={targetableCells?.has(index)}
+                current={value != null && value === currentNumber}
+                called={value != null && calledNumbers?.has(value)}
+                winning={winningCells?.has(index)}
+                nearWin={nearWinCells?.has(index)}
               />
             );
           }),
         )}
       </div>
-    </div>
+    </BoardSurface>
   );
 }
 

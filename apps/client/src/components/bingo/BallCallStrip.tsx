@@ -1,6 +1,7 @@
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import type { GameState, BingoVariant } from "@bingo/shared";
 import { BallCall3D } from "@/components/3d/BallCall3D";
 import { NumberBall } from "./NumberBall";
@@ -23,7 +24,7 @@ export function BallCallStrip({
   onPress,
 }: BallCallStripProps) {
   const { t } = useTranslation("game");
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = usePrefersReducedMotion();
   const is75 = variant === "75";
 
   const { currentNumber, previousThree } = useMemo(() => {

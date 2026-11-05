@@ -7,6 +7,7 @@ import type {
 import { BingoCard } from "./BingoCard";
 import { BingoCard90 } from "./BingoCard90";
 import { CardTabs } from "./CardTabs";
+import type { CardProgress } from "@/lib/board-progress";
 
 interface CardCarouselProps {
   cards: BingoCardType[];
@@ -19,6 +20,9 @@ interface CardCarouselProps {
   wildCells?: Set<number>[];
   targetableCells?: Set<number>[];
   disabled?: boolean;
+  currentNumber?: number | null;
+  calledNumbers?: ReadonlySet<number>;
+  progress?: CardProgress[];
 }
 
 export function CardCarousel({
@@ -32,6 +36,9 @@ export function CardCarousel({
   wildCells,
   targetableCells,
   disabled,
+  currentNumber,
+  calledNumbers,
+  progress,
 }: CardCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -112,6 +119,10 @@ export function CardCarousel({
                   wildCells={wildCells?.[i]}
                   targetableCells={targetableCells?.[i]}
                   disabled={disabled}
+                  currentNumber={currentNumber}
+                  calledNumbers={calledNumbers}
+                  winningCells={progress?.[i]?.winningCells}
+                  nearWinCells={progress?.[i]?.nearWinCells}
                 />
               ) : (
                 <BingoCard90
@@ -122,6 +133,10 @@ export function CardCarousel({
                   wildCells={wildCells?.[i]}
                   targetableCells={targetableCells?.[i]}
                   disabled={disabled}
+                  currentNumber={currentNumber}
+                  calledNumbers={calledNumbers}
+                  winningCells={progress?.[i]?.winningCells}
+                  nearWinCells={progress?.[i]?.nearWinCells}
                 />
               )}
             </div>

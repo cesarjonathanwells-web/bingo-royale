@@ -71,7 +71,12 @@
     "tapHistory": "Toca para ver historial",
     "showAll": "Ver todos los números",
     "copyCode": "¡Código copiado!",
-    "menu": "Menú"
+    "menu": "Menú",
+    "oneAway": "¡Solo falta un número!",
+    "patternMarked": "Patrón marcado · revisa BINGO",
+    "markCalled_one": "{{count}} número cantado por marcar",
+    "markCalled_other": "{{count}} números cantados por marcar",
+    "followCalls": "Sigue las llamadas · toca para marcar"
   },
   "patterns": {
     "top_row": "Fila superior",

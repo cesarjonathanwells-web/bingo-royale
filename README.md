@@ -76,6 +76,14 @@ Resin uses metallic 0 with subtle roughness variation. Material Attributes contr
 
 Home, current-call, and history balls share one neutral shadow treatment. Only the current call receives a restrained accent halo; CSS shading remains an image-error fallback. Home floor shadows stay anchored as the balls float. Power-up controls use the authored artwork at 24px and dialogs at 28px, with emoji loading/error fallbacks. Decorative ball motion respects reduced-motion preferences. With the client dev server running, `/blender-review.html` retains its existing URL and displays the actual components, power-up bar, and dialog for local visual review without connecting to multiplayer.
 
+## Board interaction
+
+Both 75-ball and 90-ball boards share a short ink-stamp impact, six droplets, a fading ring, and a small number settle on newly confirmed marks. Seeded ink shapes stay consistent across renders. Existing marks, restored cards, and card switches do not replay the stamp. The daub sound follows confirmed marks, including auto-daub and power-ups, with one quiet pop per batch; invalid taps stay silent and the existing mute setting applies.
+
+Called but unmarked numbers have a colored border and corner cue. A new call briefly accents its matching cell and 75-ball column. The closest enabled pattern receives a gold cue when one mark remains; newly completed patterns get a short light sweep, followed by a static outline. Progress uses confirmed marks and excludes active ink blocks. Claim eligibility and expiration remain server-authoritative.
+
+All new effects respect the live `prefers-reduced-motion` setting. Reduced motion keeps the ink, called-number cues, and completed-pattern borders while removing splashes and movement. Run `node scripts/build-board-review.mjs` to create an offline interactive review at `/private/tmp/bingo-board-experience-20261105/review.html`, or open `/board-experience-review.html` on the client dev server. The fixture uses real board components and covers both variants, four cards, light/dark themes, blocked cells, and wildcard targeting.
+
 ## Mobile multi-card layout
 
 Multi-card play uses the same column count for sizing and rendering, with minimum readable card widths. Short screens scroll the card area while keeping the call strip and BINGO control available. Cards are labeled and can be enlarged individually; the single-card selector keeps marks and the selected card when the viewport resizes. Nine-column 90-ball tickets no longer force overflowing 48px-wide cells.

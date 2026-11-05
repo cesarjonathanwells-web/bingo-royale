@@ -1,6 +1,7 @@
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { BingoBallBody } from "./BingoBallBody";
 import { useMemo } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence } from "framer-motion";
 import { getLetterForNumber, BALL_COLORS } from "@bingo/shared";
 
 /* ------------------------------------------------------------------ */
@@ -14,7 +15,7 @@ interface BallCall3DProps {
 }
 
 export function BallCall3D({ number, is75 = true, className }: BallCall3DProps) {
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = usePrefersReducedMotion();
   const { letter, color } = useMemo(() => {
     if (!number) return { letter: "", color: "#f59e0b" };
     if (!is75 || number > 75) return { letter: "", color: "#f59e0b" };

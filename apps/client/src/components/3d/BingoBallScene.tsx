@@ -1,5 +1,6 @@
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { BingoBallBody } from "./BingoBallBody";
-import { motion, useReducedMotion } from "framer-motion";
+import { motion } from "framer-motion";
 
 /* ------------------------------------------------------------------ */
 /*  CSS 3D-look bingo balls — no WebGL, always faces forward           */
@@ -24,7 +25,7 @@ function BingoBall({
   number: number;
   index: number;
 }) {
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = usePrefersReducedMotion();
   const floatTransition = {
     duration: 2.5 + index * 0.3,
     repeat: Infinity,
@@ -76,7 +77,7 @@ function BingoBall({
 }
 
 export function BingoBallScene() {
-  const reducedMotion = useReducedMotion();
+  const reducedMotion = usePrefersReducedMotion();
   return (
     <div className="flex justify-center items-center gap-3 sm:gap-5 lg:gap-8 py-2 sm:py-4">
       {BALLS.map((ball, i) => (

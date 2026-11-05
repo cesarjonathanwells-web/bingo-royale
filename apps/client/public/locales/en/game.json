@@ -71,7 +71,12 @@
     "tapHistory": "Tap for history",
     "showAll": "Show all numbers",
     "copyCode": "Code copied!",
-    "menu": "Menu"
+    "menu": "Menu",
+    "oneAway": "One number away",
+    "patternMarked": "Pattern marked · check BINGO!",
+    "markCalled_one": "{{count}} called number to mark",
+    "markCalled_other": "{{count}} called numbers to mark",
+    "followCalls": "Follow the calls · tap to daub"
   },
   "patterns": {
     "top_row": "Top Row",
