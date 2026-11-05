@@ -1,0 +1,275 @@
+{
+  "engine": "5.8.4-58902052+++UE5+Release-5.8",
+  "renderer": "Unreal Movie Render Queue / deferred / software Lumen",
+  "resolution": 1024,
+  "spatial_samples": 32,
+  "exposure_bias": -5.0,
+  "assets": {
+    "b": {
+      "source_sha256": "151be6d0477e94be97c373a3ecc798b1a24db62dcc0eacd3f5a41e56f3d9402d",
+      "path": "apps/client/public/images/unreal-balls/b.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        7,
+        7,
+        249,
+        249
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 56190,
+      "sha256": "114993c3852ba27a0dd61682ac8327c346b789b4b7bc08fd1c3ec590c8565bfb"
+    },
+    "i": {
+      "source_sha256": "3e4b88e0011fcc21a4cf0b37416a1e6cc799ed104fe409caae74a34adeb368bf",
+      "path": "apps/client/public/images/unreal-balls/i.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        7,
+        7,
+        249,
+        249
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 57215,
+      "sha256": "c583afbffd4d35c9538be19d122e91e8a24305cad1827d6486a70ad58db6120a"
+    },
+    "n": {
+      "source_sha256": "3f70bd1f51338d39ef83fefe9bd0367eb9f269d954b790cdb19742708c00044b",
+      "path": "apps/client/public/images/unreal-balls/n.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        7,
+        7,
+        249,
+        249
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 55317,
+      "sha256": "da45e0894e85824b7138a7a2ee9efa1728a406dcff65c06e1033194e1f780af7"
+    },
+    "g": {
+      "source_sha256": "638cd87eab3612d630d49526574946299bf64dc804cdfc19faef55fe8e9353a9",
+      "path": "apps/client/public/images/unreal-balls/g.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        7,
+        7,
+        249,
+        249
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 55558,
+      "sha256": "bfc14bd23b6bd9bc3b4e6fba55b7af0b318f96b286be81c138b423b9f54c5143"
+    },
+    "o": {
+      "source_sha256": "6997c901107abe67e17e27e3f1035d48e8bff52faeaa912480c182710c4e1845",
+      "path": "apps/client/public/images/unreal-balls/o.png",
+      "size": [
+        256,
+        256
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        7,
+        7,
+        249,
+        249
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 55796,
+      "sha256": "816794f376fef6045f5b9203b6ec5d281fb607757e9afcc62abcfd4047d960e8"
+    },
+    "wild_square": {
+      "source_sha256": "1c2557ee94ef524ecef3d10552344c9000a23eb312873511644f47af9557ce8f",
+      "path": "apps/client/public/images/unreal-icons/wild_square.png",
+      "size": [
+        192,
+        192
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        13,
+        17,
+        179,
+        175
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 23409,
+      "sha256": "4e12582842d13322751777a26e04a4f6cb7d4b52d33da67ccfb2ab63ab5febd5"
+    },
+    "shield": {
+      "source_sha256": "3f20c89513978d623f4283c16c444cf524e951b871cca1d8dbb095ea2664904f",
+      "path": "apps/client/public/images/unreal-icons/shield.png",
+      "size": [
+        192,
+        192
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        30,
+        13,
+        162,
+        179
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 29271,
+      "sha256": "a54645c64fd257ef02a3402153c72d099081e545208841b83147608a39c508cb"
+    },
+    "turbo_stamp": {
+      "source_sha256": "bbd35210e2f8539f58df73ae7eca6d4502dc70d5a0f38dac67544eaeba8d191b",
+      "path": "apps/client/public/images/unreal-icons/turbo_stamp.png",
+      "size": [
+        192,
+        192
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        36,
+        13,
+        156,
+        179
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 18723,
+      "sha256": "0ce14ecaaea28546eeb36776c1ab3f72b3637009392d1a31b94c8d6ec44d3cd1"
+    },
+    "ink_blot": {
+      "source_sha256": "037075db671b0bb675876c1bbad6acafc960a8c81310c2062c2d7c6124afb399",
+      "path": "apps/client/public/images/unreal-icons/ink_blot.png",
+      "size": [
+        192,
+        192
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        12,
+        20,
+        179,
+        171
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 22173,
+      "sha256": "14e76455e0ed9f820d31563bc23d9ab652d7cd4ad1558c3ca107cd3ac81cb16b"
+    },
+    "number_peek": {
+      "source_sha256": "655d973f88ee5ebef965a47473f8564ba553299522afca56d7baabcf1b5efe11",
+      "path": "apps/client/public/images/unreal-icons/number_peek.png",
+      "size": [
+        192,
+        192
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        12,
+        47,
+        179,
+        144
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 21355,
+      "sha256": "138b3f3c7285c8322ee6637e49efec8690871630ed877399639529f0e561cf85"
+    },
+    "scramble": {
+      "source_sha256": "e1c644b5a5596a8311906a2aefe651a9ff9e1e4cecc94511158176738d88651b",
+      "path": "apps/client/public/images/unreal-icons/scramble.png",
+      "size": [
+        192,
+        192
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        16,
+        13,
+        176,
+        179
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 36482,
+      "sha256": "ad98c3798e08794e0b1bb5d1447ea64ebe4648646f4c319016350750a4cc5861"
+    },
+    "callers_choice": {
+      "source_sha256": "34f44f1fc795e31b8f35ba46b37894a85d13f1ef927a2ed14d184ea43422ea08",
+      "path": "apps/client/public/images/unreal-icons/callers_choice.png",
+      "size": [
+        192,
+        192
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        13,
+        13,
+        179,
+        179
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 42346,
+      "sha256": "17696891f6931c67f2f10d1909a9455e308daac47d94e45a6e4f561063f3735d"
+    },
+    "double_daub": {
+      "source_sha256": "d5c87ea55c4a7b3a3bd1cf2e749759ac7f8b3f93f70ca212b970478d013779a5",
+      "path": "apps/client/public/images/unreal-icons/double_daub.png",
+      "size": [
+        192,
+        192
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        52,
+        13,
+        140,
+        179
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 20123,
+      "sha256": "0b74d74c37943681f2422842a06dde90301b3e1fbb19613e1aba5bdbb26ad4e1"
+    },
+    "crown": {
+      "source_sha256": "8f2b51a163b97c2a22b9a87d0428ba08deac842ba4ddd33b153eb941ed6ce9c4",
+      "path": "apps/client/public/images/unreal-icons/crown.png",
+      "size": [
+        192,
+        192
+      ],
+      "mode": "RGBA8",
+      "alpha_bounds": [
+        13,
+        21,
+        179,
+        171
+      ],
+      "transparent_border": true,
+      "antialiased_edges": true,
+      "bytes": 31240,
+      "sha256": "9dddf8909cb0e987c9eb50aef7aacd2bd062cb31803397197e97dfe9758ecd89"
+    }
+  }
+}

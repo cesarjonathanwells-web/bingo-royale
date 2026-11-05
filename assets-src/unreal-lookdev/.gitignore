@@ -1,0 +1,10 @@
+Binaries/
+DerivedDataCache/
+Intermediate/
+Saved/
+Content/BingoLookdev/
+renders/
+__pycache__/
+Config/DefaultInput.ini
+*.sln
+*.xcworkspace/
