@@ -35,6 +35,9 @@
     "generic": "Something went wrong. Please try again.",
     "invalidRoom": "Room not found.",
     "roomFull": "This room is full.",
+    "invalidCode": "Enter the six-character room code.",
+    "roomTimeout": "The room did not respond. Check your connection and try again.",
+    "connection": "Could not connect to the game. Check your connection and try again.",
     "nameTooShort": "Name must be at least 2 characters."
   },
   "actions": {
@@ -42,6 +45,7 @@
     "copied": "Copied!",
     "close": "Close",
     "back": "Back",
+    "retry": "Try again",
     "loading": "Loading..."
   },
   "language": {

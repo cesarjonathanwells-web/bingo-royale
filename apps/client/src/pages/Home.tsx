@@ -33,7 +33,7 @@ export function Home() {
   const { t, i18n } = useTranslation();
   const { user, isAuthenticated, isLoading, loginAsGuest, logout } =
     useAuthStore();
-  const { createRoom, joinRoom, isConnecting } = useRoomStore();
+  const { createRoom, joinRoom, isConnecting, error } = useRoomStore();
   const { toast } = useToast();
 
   const [guestName, setGuestName] = useState("");
@@ -64,17 +64,15 @@ export function Home() {
 
   const handleCreateRoom = useCallback(() => {
     createRoom(variant);
-    setShowCreate(false);
   }, [createRoom, variant]);
 
   const handleJoinRoom = useCallback(() => {
-    const code = roomCode.trim().replace(/-/g, "").toUpperCase();
-    if (code.length < 6 || !/^[A-Z0-9]+$/.test(code)) {
-      toast(t("errors.invalidRoom"), "error");
+    const code = roomCode.replace(/[\s-]/g, "").toUpperCase();
+    if (!/^[A-Z0-9]{6}$/.test(code)) {
+      toast(t("errors.invalidCode"), "error");
       return;
     }
     joinRoom(code);
-    setShowJoin(false);
   }, [joinRoom, roomCode, t, toast]);
 
   return (
@@ -264,6 +262,11 @@ export function Home() {
           </StaggerContainer>
         )}
         </div>{/* end max-w-md auth wrapper */}
+        {error && !showJoin && !showCreate && (
+          <p role="alert" className="max-w-md text-center text-sm text-[var(--color-error)]">
+            {t(error, { defaultValue: error })}
+          </p>
+        )}
         <InstallApp compact />
       </PageTransition>
 
@@ -294,6 +297,7 @@ export function Home() {
             >
               {t("home.createRoom", { ns: "game" })}
             </Button>
+            {error && <p role="alert" className="text-sm text-[var(--color-error)]">{t(error, { defaultValue: error })}</p>}
           </div>
         </DialogContent>
       </Dialog>
@@ -301,27 +305,28 @@ export function Home() {
       {/* ── Join Room Dialog ── */}
       <Dialog open={showJoin} onOpenChange={setShowJoin}>
         <DialogContent title={t("home.joinRoomTitle", { ns: "game" })}>
-          <div className="space-y-4 mt-4">
+          <form className="space-y-4 mt-4" onSubmit={(event) => { event.preventDefault(); handleJoinRoom(); }}>
             <Input
               label={t("home.enterRoomCode", { ns: "game" })}
               placeholder={t("home.roomCodePlaceholder", { ns: "game" })}
               value={roomCode}
               onChange={(e) =>
-                setRoomCode(e.target.value.toUpperCase().slice(0, 7))
+                setRoomCode(e.target.value.toUpperCase().replace(/[\s-]/g, "").slice(0, 6))
               }
-              maxLength={7}
+              maxLength={32}
               className="font-mono text-center text-lg tracking-widest uppercase"
             />
             <Button
               size="lg"
-              onClick={handleJoinRoom}
+              type="submit"
               loading={isConnecting}
-              disabled={roomCode.replace(/-/g, "").length < 6}
+              disabled={!/^[A-Z0-9]{6}$/.test(roomCode)}
               className="w-full"
             >
               {t("home.joinRoom", { ns: "game" })}
             </Button>
-          </div>
+            {error && <p role="alert" className="text-sm text-[var(--color-error)]">{t(error, { defaultValue: error })}</p>}
+          </form>
         </DialogContent>
       </Dialog>
     </div>

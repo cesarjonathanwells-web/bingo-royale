@@ -35,6 +35,9 @@
     "generic": "Algo salió mal. Inténtalo de nuevo.",
     "invalidRoom": "Sala no encontrada.",
     "roomFull": "Esta sala está llena.",
+    "invalidCode": "Introduce el código de sala de seis caracteres.",
+    "roomTimeout": "La sala no respondió. Comprueba tu conexión e inténtalo de nuevo.",
+    "connection": "No se pudo conectar al juego. Comprueba tu conexión e inténtalo de nuevo.",
     "nameTooShort": "El nombre debe tener al menos 2 caracteres."
   },
   "actions": {
@@ -42,6 +45,7 @@
     "copied": "¡Copiado!",
     "close": "Cerrar",
     "back": "Volver",
+    "retry": "Intentar de nuevo",
     "loading": "Cargando..."
   },
   "language": {

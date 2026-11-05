@@ -137,6 +137,90 @@ let _peekTimeoutId: ReturnType<typeof setTimeout> | null = null;
 let _powerUpTimeoutId: ReturnType<typeof setTimeout> | null = null;
 let _powerUpRequest = 0;
 const _pendingDabs = new Set<string>();
+let _roomRequest = 0;
+let _roomTimeoutId: ReturnType<typeof setTimeout> | null = null;
+let _roomCode: string | null = null;
+let _roomConnect: { socket: ReturnType<typeof getSocket>; handler: () => void } | null = null;
+
+function clearRoomRequest(): void {
+  _roomRequest++;
+  if (_roomTimeoutId !== null) clearTimeout(_roomTimeoutId);
+  _roomTimeoutId = null;
+  if (_roomConnect) _roomConnect.socket.off("connect", _roomConnect.handler);
+  _roomConnect = null;
+  _roomCode = null;
+}
+
+function roomError(error?: string): string {
+  if (error === "Room not found") return "errors.invalidRoom";
+  if (error === "Room is full") return "errors.roomFull";
+  if (error?.startsWith("Invalid room code") || error === "Room code is required") return "errors.invalidCode";
+  return error || "errors.generic";
+}
+
+type RoomSetter = (partial: Partial<RoomState> | ((state: RoomState) => Partial<RoomState>)) => void;
+
+function acceptRoom(room: Room, set: RoomSetter, get: () => RoomState): void {
+  if (!room || typeof room.code !== "string") return;
+  // Only the requested room or the current room can update this client.
+  if (get().isConnecting && _roomCode && room.code !== _roomCode) return;
+  if (!get().isConnecting && get().room?.code !== room.code) return;
+  clearRoomRequest();
+  if (room.state === "lobby") {
+    clearPowerUpRequest();
+    _pendingDabs.clear();
+    if (_peekTimeoutId !== null) clearTimeout(_peekTimeoutId);
+    _peekTimeoutId = null;
+  }
+  set({
+    room, isConnecting: false, error: null,
+    ...(room.state === "lobby" ? {
+      gameState: null, myCards: [], myDabs: [], activeCardIndex: 0,
+      myPowerUps: [], peekedNumbers: [],
+      powerUpEffects: { wildCells: [], blockedCells: [], shieldUntilCall: 0 },
+      powerUpCalledCount: 0, pendingPowerUp: null, callerChoices: [], powerUpError: null,
+    } : {}),
+  });
+}
+
+function requestRoom(event: "room:create" | "room:join", data: { variant?: BingoVariant; code?: string }, set: RoomSetter, get: () => RoomState): void {
+  if (get().isConnecting) return;
+  clearRoomRequest();
+  const request = _roomRequest;
+  _roomCode = data.code ?? null;
+  set({ isConnecting: true, error: null });
+  const fail = (error: string) => {
+    if (request !== _roomRequest) return;
+    clearRoomRequest();
+    set({ isConnecting: false, error });
+  };
+  _roomTimeoutId = setTimeout(() => fail("errors.roomTimeout"), 10000);
+  try {
+    const socket = getSocket();
+    const send = () => {
+      if (request !== _roomRequest) return;
+      if (_roomConnect) socket.off("connect", _roomConnect.handler);
+      _roomConnect = null;
+      socket.emit(event, data, (result: { success: boolean; room?: Room | null; error?: string }) => {
+        if (request !== _roomRequest) return;
+        if (!result?.success || !result.room) {
+          fail(roomError(result?.error));
+          return;
+        }
+        acceptRoom(result.room, set, get);
+      });
+    };
+    // Do not buffer a join that could unexpectedly run after a timeout or Exit.
+    // Wait for the connection within the same bounded request instead.
+    if (socket.connected === false) {
+      _roomConnect = { socket, handler: send };
+      socket.on("connect", send);
+      socket.connect();
+    } else send();
+  } catch {
+    fail("errors.connection");
+  }
+}
 
 function clearPowerUpRequest(): void {
   _powerUpRequest++;
@@ -174,18 +258,20 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
   ...initialState,
 
   createRoom: (variant) => {
-    set({ isConnecting: true, error: null });
-    const socket = getSocket();
-    socket.emit("room:create", { variant });
+    requestRoom("room:create", { variant }, set, get);
   },
 
   joinRoom: (code) => {
-    set({ isConnecting: true, error: null });
-    const socket = getSocket();
-    socket.emit("room:join", { code: code.toUpperCase().replace(/-/g, "") });
+    const normalized = code.toUpperCase().replace(/[\s-]/g, "");
+    if (!/^[A-Z0-9]{6}$/.test(normalized)) {
+      if (!get().isConnecting) set({ isConnecting: false, error: "errors.invalidCode" });
+      return;
+    }
+    requestRoom("room:join", { code: normalized }, set, get);
   },
 
   leaveRoom: () => {
+    clearRoomRequest();
     clearPowerUpRequest();
     _pendingDabs.clear();
     if (_peekTimeoutId !== null) clearTimeout(_peekTimeoutId);
@@ -333,39 +419,7 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     // ---- Room lifecycle listeners ----
 
     // Server emits room:state on create, join, settings update, and new round
-    socket.on("room:state", (room: Room) => {
-      // A response already in flight can arrive after Exit resets local state.
-      // Accept initial room data only while a create/join request is pending.
-      if (!get().room && !get().isConnecting) return;
-      if (room.state === "lobby") {
-        clearPowerUpRequest();
-        _pendingDabs.clear();
-        if (_peekTimeoutId !== null) clearTimeout(_peekTimeoutId);
-        _peekTimeoutId = null;
-      }
-      set((state) => ({
-        room,
-        isConnecting: false,
-        error: null,
-        // If transitioning to lobby (new round), clear game state
-        ...(room.state === "lobby"
-          ? {
-              gameState: null,
-              myCards: [],
-              myDabs: [],
-              activeCardIndex: 0,
-              myPowerUps: [],
-              peekedNumbers: [],
-              powerUpEffects: { wildCells: [], blockedCells: [], shieldUntilCall: 0 },
-              powerUpCalledCount: 0,
-              pendingPowerUp: null,
-              callerChoices: [],
-              powerUpError: null,
-              chatMessages: state.chatMessages, // Preserve chat
-            }
-          : {}),
-      }));
-    });
+    socket.on("room:state", (room: Room) => acceptRoom(room, set, get));
 
     socket.on("room:card_count_updated", (data: { playerId: string; count: number }) => {
       set((state) => ({
@@ -644,15 +698,22 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     });
 
     socket.on("disconnect", () => {
+      clearRoomRequest();
       _pendingDabs.clear();
       clearPowerUpRequest();
-      set({ pendingPowerUp: null, callerChoices: [], socketReady: false });
+      set({ pendingPowerUp: null, callerChoices: [], socketReady: false, isConnecting: false });
+    });
+
+    socket.on("connect_error", () => {
+      clearRoomRequest();
+      set({ isConnecting: false, socketReady: false, error: "errors.connection" });
     });
 
     // ---- Error listener ----
 
     socket.on("error", (data: { message: string }) => {
-      set({ error: data.message, isConnecting: false });
+      clearRoomRequest();
+      set({ error: roomError(data?.message), isConnecting: false });
     });
   },
 
@@ -681,6 +742,7 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       "chat:reaction",
       "error",
       "disconnect",
+      "connect_error",
     ];
     for (const event of events) {
       socket.off(event);
@@ -688,6 +750,7 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
   },
 
   reset: () => {
+    clearRoomRequest();
     clearPowerUpRequest();
     _pendingDabs.clear();
     if (_peekTimeoutId !== null) {

@@ -11,6 +11,7 @@ import { RoomLobby } from "@/components/room/RoomLobby";
 import { GameView } from "@/components/game/GameView";
 import { GameFinished } from "@/components/game/GameFinished";
 import { getSocket } from "@/socket";
+import { Button } from "@/components/ui/Button";
 import type { PowerUpId, PowerUpUseOptions } from "@bingo/shared";
 import { POWER_UP_MAP } from "@bingo/shared";
 
@@ -35,6 +36,8 @@ export function Room({ code }: RoomPageProps) {
   const callerChoices = useRoomStore((s) => s.callerChoices);
   const powerUpError = useRoomStore((s) => s.powerUpError);
   const socketReady = useRoomStore((s) => s.socketReady);
+  const error = useRoomStore((s) => s.error);
+  const isConnecting = useRoomStore((s) => s.isConnecting);
   const clearPowerUpPrompt = useRoomStore((s) => s.clearPowerUpPrompt);
   const dabCell = useRoomStore((s) => s.dabCell);
   const claimBingo = useRoomStore((s) => s.claimBingo);
@@ -247,12 +250,20 @@ export function Room({ code }: RoomPageProps) {
         exit={{ opacity: 0 }}
       >
         <div className="text-center space-y-3">
-          <div className="flex justify-center">
-            <div className="w-10 h-10 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" />
-          </div>
-          <p className="text-sm text-[var(--color-text-secondary)]">
-            {t("actions.loading", { ns: "common" })}
-          </p>
+          {error && !isConnecting ? (
+            <>
+              <p role="alert" className="max-w-sm px-4 text-sm text-[var(--color-error)]">{t(error, { ns: "common", defaultValue: error })}</p>
+              <div className="flex justify-center gap-3">
+                <Button onClick={() => joinRoom(code)}>{t("actions.retry", { ns: "common" })}</Button>
+                <Button variant="secondary" onClick={handleLeave}>{t("actions.back", { ns: "common" })}</Button>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className="flex justify-center"><div className="w-10 h-10 border-2 border-[var(--color-accent)] border-t-transparent rounded-full animate-spin" /></div>
+              <p className="text-sm text-[var(--color-text-secondary)]">{t("actions.loading", { ns: "common" })}</p>
+            </>
+          )}
         </div>
       </motion.div>
     );

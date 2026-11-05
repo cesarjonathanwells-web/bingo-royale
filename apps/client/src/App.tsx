@@ -20,6 +20,7 @@ import { Settings } from "@/pages/Settings";
 import { useSocket } from "@/hooks/useSocket";
 import { useThemeEffect } from "@/hooks/useTheme";
 import { useRoomStore } from "@/stores/room-store";
+import { useAuthStore } from "@/stores/auth-store";
 
 // ============================================================
 // Route definitions
@@ -119,6 +120,7 @@ function HomeWrapper() {
 function RoomWrapper() {
   const { code } = useParams({ from: "/room/$code" });
   const room = useRoomStore((s) => s.room);
+  const isAuthenticated = useAuthStore((s) => s.isAuthenticated);
   const navigate = useNavigate();
   const hasJoined = useRef(false);
 
@@ -128,17 +130,12 @@ function RoomWrapper() {
     } else if (hasJoined.current) {
       // Room was set then cleared = we left. Navigate home immediately.
       navigate({ to: "/" });
-    } else {
-      // Never had a room - this is a direct URL navigation.
-      // Give time for the join to complete.
-      const timeout = setTimeout(() => {
-        if (!useRoomStore.getState().room) {
-          navigate({ to: "/" });
-        }
-      }, 3000);
-      return () => clearTimeout(timeout);
+    } else if (!isAuthenticated) {
+      navigate({ to: "/" });
     }
-  }, [room, navigate]);
+    // Direct links use the room request's timeout and retry UI. A fixed route
+    // timer would redirect players before a slow connection can finish joining.
+  }, [room, isAuthenticated, navigate]);
 
   return <Room code={code} />;
 }

@@ -37,7 +37,7 @@ export function useSocket(): void {
         // If we were in a room, attempt to rejoin
         const room = useRoomStore.getState().room;
         if (room) {
-          socket.emit("room:join", { code: room.code });
+          useRoomStore.getState().joinRoom(room.code);
         }
       };
 
@@ -48,7 +48,7 @@ export function useSocket(): void {
             socketReady: false,
             pendingPowerUp: null,
             callerChoices: [],
-            error: "Connection lost. Reconnecting...",
+            error: "errors.connection",
           });
         }
       };

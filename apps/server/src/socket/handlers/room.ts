@@ -49,6 +49,17 @@ function generateRoomCode(): string {
   return code;
 }
 
+function normalizeRoomCode(value: unknown): string {
+  return typeof value === 'string' ? value.replace(/[\s-]/g, '').toUpperCase() : '';
+}
+
+function rejectRoomRequest(socket: AuthenticatedSocket, callback: unknown, error: string): void {
+  if (typeof callback === 'function') callback({ success: false, error });
+  // Older clients do not supply acknowledgements. They still need a terminal
+  // error event to leave their joining state instead of waiting indefinitely.
+  else socket.emit('error', { message: error });
+}
+
 /** Validate that a value is a well-formed custom WinPattern. */
 function isValidCustomPattern(p: unknown): p is WinPattern {
   if (!p || typeof p !== 'object') return false;
@@ -74,11 +85,11 @@ export function registerRoomHandlers(
   const on = (event: string, handler: (...args: any[]) => Promise<void>) => {
     socket.on(event, (...args: any[]) => {
       const currentCode = socket.data.roomCode;
-      const code = event === 'room:join' && typeof args[0]?.code === 'string' ? args[0].code : currentCode ?? socket.id;
+      const code = event === 'room:join' ? normalizeRoomCode(args[0]?.code) || currentCode || socket.id : currentCode ?? socket.id;
       return withRoomLock(code, () => {
         if (socket.data.roomCode !== currentCode) {
           const callback = args.find((argument) => typeof argument === 'function');
-          if (callback) callback({ success: false, error: 'Room changed' });
+          rejectRoomRequest(socket, callback, 'Room changed');
           return Promise.resolve();
         }
         return handler(...args);
@@ -166,24 +177,24 @@ export function registerRoomHandlers(
 
   on('room:join', async (data, callback) => {
     try {
-      const code = data?.code as string;
-      if (!code) {
+      const code = normalizeRoomCode(data?.code);
+      if (!data?.code || (typeof data.code === 'string' && !code)) {
         const msg = 'Room code is required';
-        if (typeof callback === 'function') callback({ success: false, error: msg });
+        rejectRoomRequest(socket, callback, msg);
         return;
       }
 
       // Validate code is a string, exactly 6 characters, alphanumeric
-      if (typeof code !== 'string' || code.length !== 6 || !/^[A-Za-z0-9]{6}$/.test(code)) {
+      if (code.length !== 6 || !/^[A-Z0-9]{6}$/.test(code)) {
         const msg = 'Invalid room code: must be 6 alphanumeric characters';
-        if (typeof callback === 'function') callback({ success: false, error: msg });
+        rejectRoomRequest(socket, callback, msg);
         return;
       }
 
       const room = await roomStore.getRoom(code);
       if (!room) {
         const msg = 'Room not found';
-        if (typeof callback === 'function') callback({ success: false, error: msg });
+        rejectRoomRequest(socket, callback, msg);
         return;
       }
 
@@ -219,7 +230,7 @@ export function registerRoomHandlers(
         const activePlayers = room.players.filter((p) => !p.isSpectator);
         if (activePlayers.length >= room.playerLimit) {
           const msg = 'Room is full';
-          if (typeof callback === 'function') callback({ success: false, error: msg });
+          rejectRoomRequest(socket, callback, msg);
           return;
         }
       }
@@ -253,10 +264,7 @@ export function registerRoomHandlers(
       console.error('[Room] Error joining room:', err);
       const errorMsg =
         err instanceof Error ? err.message : 'Failed to join room';
-      if (typeof callback === 'function') {
-        callback({ success: false, error: errorMsg });
-      }
-      socket.emit('error', { message: errorMsg });
+      rejectRoomRequest(socket, callback, errorMsg);
     }
   });
 
