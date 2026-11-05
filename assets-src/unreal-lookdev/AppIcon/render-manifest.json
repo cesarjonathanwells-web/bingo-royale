@@ -11,7 +11,7 @@
     "completed_jobs": [
       "bingo-royale-icon"
     ],
-    "sha256": "64c746807d40deeda681713f4e2ee5b3f0f1e41d4b7b7d63ccf41289e0b36278"
+    "sha256": "54176cb3b0795d28d3f89cea9a7e99c484d07d919ffa5c80331c88542d64b3eb"
   },
   "source_render": {
     "path": "assets-src/unreal-lookdev/AppIcon/renders/bingo-royale-icon.0000.png",
@@ -21,18 +21,19 @@
     ],
     "mode": "RGBA8",
     "opaque": true,
-    "bytes": 4389582,
-    "sha256": "2559893c04a8217eb71d9b3efe8484f0584d66d7acb90d17a8f6c34a34dc8c71"
+    "bytes": 4402030,
+    "sha256": "a2f3f6a67ddd5ebee1fafb601a47ee31642b552170bf85e0923a94acdd157546"
   },
   "blender_mesh": {
     "path": "assets-src/unreal-lookdev/AppIcon/SourceMeshes/SM_BingoRoyaleAppIcon.fbx",
-    "sha256": "c7fa2061b5df98a38c457a6ac7576cc182db5110706a085d33df7483acb0636e",
-    "vertices": 55274,
-    "triangles": 108051
+    "sha256": "fcdfc29781df79921e05e1ed31615570ed14bb1efed02aa2129a7a614b22c88e",
+    "rendered_mesh": "/Game/BingoAppIcon/Meshes/SM_BingoRoyaleAppIcon_fcdfc29781df_FrontX.SM_BingoRoyaleAppIcon_fcdfc29781df_FrontX",
+    "vertices": 78683,
+    "triangles": 151006
   },
   "editable_blend": {
     "path": "assets-src/unreal-lookdev/AppIcon/bingo-royale-app-icon.blend",
-    "sha256": "dfa3edd9612a74ffde135b52c16d6d35f58abe9d7312f8a9169842c3ac39ce03"
+    "sha256": "c823ba6e0cb740fd97c569654a252f94928c9e0f64f76e9df95102969b7646c5"
   },
   "master": {
     "path": "assets-src/unreal-lookdev/AppIcon/masters/bingo-royale-icon-2048.png",
@@ -42,8 +43,8 @@
     ],
     "mode": "RGBA8",
     "opaque": true,
-    "bytes": 4389582,
-    "sha256": "2559893c04a8217eb71d9b3efe8484f0584d66d7acb90d17a8f6c34a34dc8c71"
+    "bytes": 4402030,
+    "sha256": "a2f3f6a67ddd5ebee1fafb601a47ee31642b552170bf85e0923a94acdd157546"
   },
   "resampler": "/usr/bin/sips; resampling and uniform navy padding only",
   "assets": {
@@ -55,8 +56,8 @@
       ],
       "mode": "RGBA8",
       "opaque": true,
-      "bytes": 48337,
-      "sha256": "91a7bb3d0aade772f899b32ae25270dd3df83a9673954863455181ff18c25797"
+      "bytes": 49037,
+      "sha256": "b8a35461e2df68422ac4849d78bf983c1f1fe69b27ba1825de459c277ab8e0d5"
     },
     "app_512": {
       "path": "apps/client/public/icons/icon-512.png",
@@ -66,8 +67,8 @@
       ],
       "mode": "RGBA8",
       "opaque": true,
-      "bytes": 320261,
-      "sha256": "ef57dd0a2c98b5170cdc043684cfc15477df9cda189d6234dfc713785bf222c5"
+      "bytes": 322814,
+      "sha256": "3e9767fefedbc83a6408c8f0acd661581fbb427829e9035c940fa8350c734775"
     },
     "apple_touch": {
       "path": "apps/client/public/apple-touch-icon.png",
@@ -77,8 +78,8 @@
       ],
       "mode": "RGBA8",
       "opaque": true,
-      "bytes": 42888,
-      "sha256": "74de04a24266dc4c2f6204d6dac91495b2a099d3501b555f8b613502c00e7512"
+      "bytes": 43497,
+      "sha256": "062dc2b4da227d1e0c5ba79152cb11d2263403aa82dab1afee4146339dcc1268"
     },
     "favicon_32": {
       "path": "apps/client/public/icons/favicon-32.png",
@@ -88,8 +89,8 @@
       ],
       "mode": "RGBA8",
       "opaque": true,
-      "bytes": 2464,
-      "sha256": "f4b2d1e1a59758e593ce6e46f9e81dacebc5fe4e91e6442a6d716ac60963ca42"
+      "bytes": 2473,
+      "sha256": "2bc7e1c392058aab854f1746ff531ac6e31ee793e94e7ef3532117475638b073"
     },
     "favicon_64": {
       "path": "apps/client/public/icons/favicon-64.png",
@@ -99,8 +100,8 @@
       ],
       "mode": "RGBA8",
       "opaque": true,
-      "bytes": 7448,
-      "sha256": "43ce21d7b6a61480e6c2d0e8f45d59897ddbd0103483a741e1d9dc48c3eb6269"
+      "bytes": 7595,
+      "sha256": "ff8e8f8dbeb111e031c6e3c57572faa59f21f9a44f5cc24bc33e8fb41cd3f97d"
     },
     "download_1024": {
       "path": "apps/client/public/icons/bingo-royale-icon-1024.png",
@@ -110,8 +111,8 @@
       ],
       "mode": "RGBA8",
       "opaque": true,
-      "bytes": 1231373,
-      "sha256": "59692e7660b39416ab51c0362431966dbe0d8671dd0925a2b7b359fbe7ad8bc6"
+      "bytes": 1238220,
+      "sha256": "acbd9a03d2a6a31019a56bb10175da8ba54e665bede9edeb30d8370961af7494"
     },
     "maskable_512": {
       "path": "apps/client/public/icons/maskable-512.png",
@@ -121,8 +122,8 @@
       ],
       "mode": "RGBA8",
       "opaque": true,
-      "bytes": 266201,
-      "sha256": "254e74492f85daa077bbb9960162a34dbb16516306cbd4a3fa07c7693513dedb",
+      "bytes": 268213,
+      "sha256": "0b36791b28ccc6c77caa06c6af58ddf812f4feff31b320a83f6349921abd9a75",
       "padding_px_per_side": 26,
       "padding_color": "#00010f",
       "safe_zone": {

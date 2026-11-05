@@ -96,7 +96,7 @@ Use `/mobile-cards-review.html` on the client dev server to review four local ca
 
 Bingo Royale can be installed from the **Install app** button on Home or Settings. Supported Chromium browsers use their native install prompt; iPhone/iPad users get Safari's Share → Add to Home Screen instructions. The manifest launches the app at `/` in a standalone window, supports both orientations, and includes 192px/512px icons, a maskable icon, and an Apple touch icon.
 
-The crowned blue B7 app icon is modeled in Blender and lit and rendered in Unreal Engine. Its 2048px master, install icons, and browser favicons share the same original artwork. Rebuildable geometry, Unreal studio settings, and export instructions are in `assets-src/unreal-lookdev/AppIcon/`; `render-manifest.json` records engine/version, render quality, and asset hashes.
+The crowned blue B8 app icon is modeled in Blender and lit and rendered in Unreal Engine. Its 2048px master, install icons, and browser favicons share the same original artwork. Rebuildable geometry, Unreal studio settings, and export instructions are in `assets-src/unreal-lookdev/AppIcon/`; `render-manifest.json` records engine/version, render quality, and asset hashes.
 
 Production builds generate a versioned `/sw.js` automatically. It precaches the built JavaScript/CSS, Unreal-rendered PNGs, install icons, and a small English/Spanish offline page. HTML navigation stays network-first; API/authentication responses, Socket.IO traffic, and voice recordings are never cached by the worker. Live multiplayer requires an internet connection. Offline launches show reconnect/retry controls instead of stale room state.
 
