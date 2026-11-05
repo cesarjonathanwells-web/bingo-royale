@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect } from "react";
+import { useCallback, useState, useRef, useEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   Room,
@@ -12,7 +12,7 @@ import type {
   PowerUpUseOptions,
   ChatMessage,
 } from "@bingo/shared";
-import { GAME_EMOJIS } from "@bingo/shared";
+import { GAME_EMOJIS, FREE_SPACE_INDEX } from "@bingo/shared";
 import { BingoCard } from "@/components/bingo/BingoCard";
 import { BingoCard90 } from "@/components/bingo/BingoCard90";
 import { PatternDisplay } from "@/components/bingo/PatternDisplay";
@@ -30,6 +30,7 @@ import { cn } from "@/lib/utils";
 import { getAvatarColor } from "@/lib/avatar";
 import { PowerUpDialog } from "@/components/bingo/PowerUpDialog";
 import { getCardLayout } from "@/lib/card-layout";
+import { getCardProgress } from "@/lib/board-progress";
 
 interface EmojiReaction {
   emoji: string;
@@ -167,6 +168,44 @@ export function GameView({
   }, [powerupsUnavailable, closePowerUp]);
   const blockedCells = myCards.map((_, ci) => new Set(powerUpEffects.blockedCells.filter(cell => cell.cardIndex === ci && cell.expiresAtCall >= powerUpCalledCount).map(cell => cell.cellIndex)));
   const wildCells = myCards.map((_, ci) => new Set(powerUpEffects.wildCells.filter(cell => cell.cardIndex === ci).map(cell => cell.cellIndex)));
+  const calledNumbers = useMemo(() => new Set(gameState.calledNumbers), [gameState.calledNumbers]);
+  const previousCallCount = Math.max(0, gameState.calledNumbers.length - 1);
+  const previousCalledNumbers = useMemo(() => new Set(gameState.calledNumbers.slice(0, -1)), [gameState.calledNumbers]);
+  // Only confirmed, eligible marks drive visual progress. Claim validation and
+  // timing still belong to the server, including wildcard and ink rules.
+  const cardProgress = myCards.map((card, ci) => {
+    const columns = room.variant === "75" ? 5 : 9;
+    const eligibleMarks = new Set(Array.from(myDabs[ci] ?? []).filter(index => {
+      if (room.variant === "75" && index === FREE_SPACE_INDEX) return true;
+      const value = card.grid[index % columns]?.[Math.floor(index / columns)];
+      return !blockedCells[ci].has(index) && (wildCells[ci].has(index) || (value != null && calledNumbers.has(value)));
+    }));
+    // A previously available pattern has missed its claim window. Let the
+    // next enabled pattern/stage surface instead of leaving a stale claim cue.
+    const eligibleBeforeCurrent = new Set<number>();
+    card.grid.forEach((column, col) => column.forEach((value, row) => {
+      const index = row * columns + col;
+      if (room.variant === "75" && index === FREE_SPACE_INDEX) { eligibleBeforeCurrent.add(index); return; }
+      if (!value) return;
+      const previouslyBlocked = powerUpEffects.blockedCells.some(cell => cell.cardIndex === ci && cell.cellIndex === index
+        && cell.expiresAtCall >= previousCallCount && cell.expiresAtCall - 2 <= previousCallCount);
+      if (previouslyBlocked) return;
+      const previousWild = powerUpEffects.wildCells.some(cell => cell.cardIndex === ci && cell.cellIndex === index
+        && cell.grantedAtCall <= previousCallCount);
+      if (previousWild || previousCalledNumbers.has(value)) eligibleBeforeCurrent.add(index);
+    }));
+    return getCardProgress(card, eligibleMarks, room.patterns, room.customPatterns, eligibleBeforeCurrent);
+  });
+  const bestProgressIndex = cardProgress.reduce((best, progress, index) =>
+    best < 0 || progress.remaining < cardProgress[best].remaining ? index : best, -1);
+  const bestProgress = cardProgress[bestProgressIndex];
+  const patternMarked = Boolean(bestProgress?.completed);
+  const oneAway = bestProgress?.remaining === 1;
+  const unmarkedCalls = myCards.reduce((total, card, ci) => total + card.grid.reduce((sum, column, col) =>
+    sum + column.filter((value, row) => {
+      const index = row * card.grid.length + col;
+      return value != null && value > 0 && calledNumbers.has(value) && !myDabs[ci]?.has(index) && !blockedCells[ci].has(index);
+    }).length, 0), 0);
   const targetableCells = wildTargetCard === null ? undefined : myCards.map((card, ci) => {
     const cells = new Set<number>();
     if (ci !== wildTargetCard) return cells;
@@ -255,6 +294,14 @@ export function GameView({
           </div>
         )}
 
+        {myCards.length > 0 && <div className="board-progress shrink-0" data-state={patternMarked ? "complete" : oneAway ? "near" : "playing"}
+          role="status" aria-live={patternMarked || oneAway ? "polite" : "off"}>
+          <span className="board-progress__dot" aria-hidden="true" />
+          <span>{patternMarked ? t("game.patternMarked") : oneAway ? t("game.oneAway") : unmarkedCalls > 0
+            ? t("game.markCalled", { count: unmarkedCalls }) : t("game.followCalls")}</span>
+          {(patternMarked || oneAway) && myCards.length > 1 && <span className="opacity-70">· {t("cards.card", { n: bestProgressIndex + 1 })}</span>}
+        </div>}
+
         {/* Active power-up effects stay visible above the cards. */}
         {(shieldActive || powerUpEffects.doubleDaub || activeBlocks.length > 0) && <div role="status" className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs px-2 py-1 shrink-0 text-[var(--color-text-secondary)]">
           {shieldActive && <span>🛡️ {t("powerups.shield")}: {callsLabel(powerUpEffects.shieldUntilCall)}</span>}
@@ -323,6 +370,10 @@ export function GameView({
                       wildCells={wildCells[ci]}
                       targetableCells={targetableCells?.[ci]}
                       disabled={powerupsUnavailable}
+                      currentNumber={gameState.currentNumber}
+                      calledNumbers={calledNumbers}
+                      winningCells={cardProgress[ci]?.winningCells}
+                      nearWinCells={cardProgress[ci]?.nearWinCells}
                     />
                   ) : (
                     <BingoCard90
@@ -333,6 +384,10 @@ export function GameView({
                       wildCells={wildCells[ci]}
                       targetableCells={targetableCells?.[ci]}
                       disabled={powerupsUnavailable}
+                      currentNumber={gameState.currentNumber}
+                      calledNumbers={calledNumbers}
+                      winningCells={cardProgress[ci]?.winningCells}
+                      nearWinCells={cardProgress[ci]?.nearWinCells}
                     />
                   )}
                 </section>
@@ -350,6 +405,9 @@ export function GameView({
               disabled={powerupsUnavailable}
               activeIndex={activeCardIndex}
               onIndexChange={selectCard}
+              currentNumber={gameState.currentNumber}
+              calledNumbers={calledNumbers}
+              progress={cardProgress}
             />
           ) : (
             <div style={{ maxWidth: `${Math.min(gridLayout.maxWidth, 420)}px` }} className="w-full mx-auto">
@@ -364,6 +422,10 @@ export function GameView({
                       wildCells={wildCells[activeCardIndex]}
                       targetableCells={targetableCells?.[activeCardIndex]}
                       disabled={powerupsUnavailable}
+                      currentNumber={gameState.currentNumber}
+                      calledNumbers={calledNumbers}
+                      winningCells={cardProgress[activeCardIndex]?.winningCells}
+                      nearWinCells={cardProgress[activeCardIndex]?.nearWinCells}
                     />
                   ) : (
                     <BingoCard90
@@ -374,6 +436,10 @@ export function GameView({
                       wildCells={wildCells[activeCardIndex]}
                       targetableCells={targetableCells?.[activeCardIndex]}
                       disabled={powerupsUnavailable}
+                      currentNumber={gameState.currentNumber}
+                      calledNumbers={calledNumbers}
+                      winningCells={cardProgress[activeCardIndex]?.winningCells}
+                      nearWinCells={cardProgress[activeCardIndex]?.nearWinCells}
                     />
                   )}
                 </>
@@ -507,7 +573,7 @@ export function GameView({
       />
 
       {/* BINGO button (in-flow, not fixed) */}
-      <GameBottomBar onClaim={onClaimBingo} disabled={powerupsUnavailable || wildTargetCard !== null} />
+      <GameBottomBar onClaim={onClaimBingo} disabled={powerupsUnavailable || wildTargetCard !== null} ready={patternMarked} />
       <PowerUpDialog powerupId={selectedPowerUp} cardCount={myCards.length} activeCardIndex={activeCardIndex} pending={pendingPowerUp !== null} disabled={powerupsUnavailable} choices={callerChoices} error={powerUpError} onUse={onUsePowerUp} onClose={closePowerUp} onTarget={cardIndex => { selectCard(cardIndex); setViewAll(false); setWildTargetCard(cardIndex); closePowerUp(); }} />
 
       {/* Emoji picker overlay */}

@@ -1,9 +1,11 @@
-import { useCallback } from "react";
+import { useCallback, type CSSProperties } from "react";
 import { useTranslation } from "react-i18next";
 import type { BingoCard90 as BingoCard90Type } from "@bingo/shared";
 import { cn } from "@/lib/utils";
+import { DaubMark } from "./DaubMark";
+import { BoardSurface, type BoardFeedbackProps } from "./BoardSurface";
 
-interface BingoCard90Props {
+interface BingoCard90Props extends BoardFeedbackProps {
   card: BingoCard90Type;
   dabs: Set<number>;
   onDab: (cellIndex: number) => void;
@@ -23,6 +25,10 @@ export function BingoCard90({
   blockedCells,
   wildCells,
   targetableCells,
+  currentNumber,
+  calledNumbers,
+  winningCells,
+  nearWinCells,
 }: BingoCard90Props) {
   const { t } = useTranslation("game");
 
@@ -39,15 +45,7 @@ export function BingoCard90({
   };
 
   return (
-    <div
-      className={cn(
-        "@container w-full mx-auto",
-        "rounded-xl sm:rounded-2xl overflow-hidden",
-        "glass-card",
-        "shadow-xl shadow-black/25",
-        className,
-      )}
-    >
+    <BoardSurface className={className} completed={Boolean(winningCells?.size)} nearWin={Boolean(nearWinCells?.size)}>
       {/* Grid: 9 columns x 3 rows */}
       <div className="grid grid-cols-9 gap-0.5 @min-[250px]:gap-1 @min-[350px]:gap-1.5 p-1.5 @min-[350px]:p-2">
         {Array.from({ length: 3 }, (_, row) =>
@@ -59,6 +57,8 @@ export function BingoCard90({
             const isBlocked = blockedCells?.has(index) ?? false;
             const isWild = wildCells?.has(index) ?? false;
             const isTargetable = targetableCells?.has(index) ?? false;
+            const isCurrent = !isBlank && value === currentNumber;
+            const isCalled = !isBlank && Boolean(calledNumbers?.has(value));
             const cellDisabled = disabled || isBlank || isBlocked || (targetableCells !== undefined && !isTargetable);
 
             return (
@@ -76,30 +76,31 @@ export function BingoCard90({
                   "cell-depth",
                   isBlank
                     ? "bg-[var(--color-bg-primary)]/30 cursor-default border-transparent"
-                    : "glass-cell text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] active:scale-[0.92] cursor-pointer",
+                    : "bingo-cell glass-cell text-[var(--color-text-primary)] hover:bg-[var(--color-cell-hover)] hover:border-[var(--color-border-light)] motion-safe:active:scale-[0.95] cursor-pointer",
+                  isDabbed && "bingo-cell--marked",
+                  isCalled && !isDabbed && "bingo-cell--called",
+                  isCurrent && "bingo-cell--current",
+                  winningCells?.has(index) && "bingo-cell--winning",
+                  nearWinCells?.has(index) && !isDabbed && "bingo-cell--near-win",
                   disabled && !isBlank && "opacity-60 cursor-not-allowed",
                   isBlocked && "!border-purple-400/80 !bg-purple-950/70 cursor-not-allowed",
                   isTargetable && "ring-2 ring-amber-300/80 !border-amber-200",
                   isWild && "ring-1 ring-amber-300/70",
                 )}
-                aria-label={isBlank ? t("powerups.blankCell") : `${value} ${isBlocked ? t("powerups.blockedCell") : isWild ? t("powerups.wildCell") : isDabbed ? t("powerups.markedCell") : ""}`}
+                style={{ "--cell-ink": "var(--color-dab)" } as CSSProperties}
+                aria-pressed={isBlank ? undefined : isDabbed}
+                aria-current={isCurrent ? "true" : undefined}
+                aria-label={isBlank ? t("powerups.blankCell") : `${value} ${isBlocked ? t("powerups.blockedCell") : isWild ? t("powerups.wildCell") : isDabbed ? t("powerups.markedCell") : isCurrent ? t("game.currentNumber") : isCalled ? t("game.calledNumbers") : ""}`.trim()}
               >
                 {isBlocked && <span className="absolute inset-0 z-30 flex items-center justify-center rounded-md bg-purple-950/70 text-xl" aria-hidden="true">🔒</span>}
                 {isWild && <span className="absolute top-0 right-0 z-30 text-[10px] leading-none text-amber-200" aria-hidden="true">★</span>}
                 {!isBlank && (
                   <>
-                    <span className={cn("z-10 relative font-extrabold", isDabbed && "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]")}>
+                    <DaubMark marked={isDabbed} color="var(--color-dab)" seed={`${card.id}:${index}:${value}`} />
+                    <span className={cn("bingo-cell__number z-10 relative font-extrabold tabular-nums", isDabbed && "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.3)]")}>
                       {value}
                     </span>
-                    {isDabbed && (
-                      <div
-                        className="absolute inset-[3px] rounded-full animate-dab dab-stamp"
-                        style={{
-                          backgroundColor: "var(--color-dab)",
-                          opacity: 0.75,
-                        }}
-                      />
-                    )}
+                    {isCalled && !isDabbed && !isBlocked && <span className="bingo-cell__call-cue" aria-hidden="true" />}
                   </>
                 )}
               </button>
@@ -107,7 +108,7 @@ export function BingoCard90({
           }),
         )}
       </div>
-    </div>
+    </BoardSurface>
   );
 }
 

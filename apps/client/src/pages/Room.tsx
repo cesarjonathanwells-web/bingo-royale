@@ -54,6 +54,12 @@ export function Room({ code }: RoomPageProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const joinAttempted = useRef(false);
+  const dabSnapshot = useRef<{
+    key: string;
+    marks: Set<number>[];
+    active: boolean;
+  } | null>(null);
+  const lastDabSoundAt = useRef(-Infinity);
 
   const isHost = user?.id === room?.hostId;
 
@@ -102,6 +108,34 @@ export function Room({ code }: RoomPageProps) {
       preloadCalls(variant as "75" | "90");
     }
   }, [room?.state, room?.variant, preloadCalls]);
+
+  // Confirmed ink, including auto-daub and power-ups, gets one sound per batch.
+  // Rebaseline on new cards/rounds or while inactive so reconnect snapshots and
+  // already-marked cards never replay a whole board's worth of stamp sounds.
+  useEffect(() => {
+    const key = JSON.stringify([room?.code, gameState?.startedAt,
+      myCards.map(card => [card.id, card.grid])]);
+    const active = room?.state === "in_progress" && Boolean(gameState)
+      && !gameState?.paused && socketReady;
+    const previous = dabSnapshot.current;
+    const marks = myCards.map((_, index) => new Set(myDabs[index] ?? []));
+    dabSnapshot.current = { key, marks, active };
+    if (!previous || previous.key !== key) {
+      lastDabSoundAt.current = -Infinity;
+      return;
+    }
+    if (!active || !previous.active || !myCards.length) return;
+    const hasNewMark = marks.some((cardMarks, cardIndex) =>
+      [...cardMarks].some(index => !previous.marks[cardIndex]?.has(index)),
+    );
+    const now = performance.now();
+    // Several auto-daub acknowledgements can arrive in adjacent socket batches.
+    if (hasNewMark && now - lastDabSoundAt.current >= 90) {
+      lastDabSoundAt.current = now;
+      play("cellDabbed");
+    }
+  }, [room?.code, room?.state, gameState?.startedAt, gameState?.paused,
+    socketReady, myCards, myDabs, play]);
 
   // Listen for sound-triggering events
   useEffect(() => {
@@ -185,16 +219,14 @@ export function Room({ code }: RoomPageProps) {
 
   const handleDab = useCallback(
     (cellIndex: number) => {
-      play("cellDabbed");
       dabCell(cellIndex);
     },
-    [dabCell, play],
+    [dabCell],
   );
 
   const handleDabMulti = useCallback((cardIndex: number, cellIndex: number) => {
-    play("cellDabbed");
     dabCell(cellIndex, cardIndex);
-  }, [play, dabCell]);
+  }, [dabCell]);
 
   const handleUsePowerUp = useCallback((powerupId: PowerUpId, options?: PowerUpUseOptions) => {
     usePowerUp(powerupId, options);

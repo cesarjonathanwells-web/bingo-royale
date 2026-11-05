@@ -1,3 +1,4 @@
+import { usePrefersReducedMotion } from "@/hooks/usePrefersReducedMotion";
 import { useTranslation } from "react-i18next";
 import { motion } from "framer-motion";
 import { cn } from "@/lib/utils";
@@ -5,10 +6,12 @@ import { cn } from "@/lib/utils";
 interface GameBottomBarProps {
   onClaim: () => void;
   disabled?: boolean;
+  ready?: boolean;
 }
 
-export function GameBottomBar({ onClaim, disabled = false }: GameBottomBarProps) {
+export function GameBottomBar({ onClaim, disabled = false, ready = false }: GameBottomBarProps) {
   const { t } = useTranslation("game");
+  const reduceMotion = usePrefersReducedMotion();
 
   return (
     <div
@@ -29,27 +32,21 @@ export function GameBottomBar({ onClaim, disabled = false }: GameBottomBarProps)
           "select-none cursor-pointer",
           "border border-yellow-300/40",
           "disabled:opacity-50 disabled:cursor-not-allowed",
+          ready && !disabled && "board-claim-ready",
         )}
         style={{
           textShadow: "0 0 15px rgba(255, 215, 0, 0.7), 0 0 40px rgba(255, 215, 0, 0.3), 0 2px 4px rgba(0,0,0,0.4)",
         }}
-        whileHover={!disabled ? {
+        aria-description={ready ? t("game.patternMarked") : undefined}
+        whileHover={!disabled && !reduceMotion ? {
           scale: 1.02,
           boxShadow: "0 0 30px rgba(255,215,0,0.4), 0 0 60px rgba(255,215,0,0.15), 0 8px 25px rgba(245,158,11,0.3)",
         } : undefined}
-        whileTap={!disabled ? { scale: 0.96 } : undefined}
-        animate={!disabled ? {
-          boxShadow: [
-            "0 4px 15px rgba(245,158,11,0.25)",
-            "0 4px 25px rgba(255,215,0,0.35), 0 0 40px rgba(255,215,0,0.1)",
-            "0 4px 15px rgba(245,158,11,0.25)",
-          ],
-        } : undefined}
+        whileTap={!disabled && !reduceMotion ? { scale: 0.96 } : undefined}
         transition={{
           type: "spring",
           stiffness: 400,
           damping: 25,
-          boxShadow: { duration: 2, repeat: Infinity, ease: "easeInOut" },
         }}
       >
         {t("game.bingo")}
@@ -57,3 +54,4 @@ export function GameBottomBar({ onClaim, disabled = false }: GameBottomBarProps)
     </div>
   );
 }
+
