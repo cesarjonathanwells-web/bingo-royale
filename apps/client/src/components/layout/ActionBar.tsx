@@ -2,6 +2,7 @@ import { useTranslation } from "react-i18next";
 import type { PlayerPowerUp, PowerUpId } from "@bingo/shared";
 import { POWER_UP_MAP } from "@bingo/shared";
 import { cn } from "@/lib/utils";
+import { BlenderIcon } from "@/components/3d/BlenderIcon";
 
 interface ActionBarProps {
   powerups: PlayerPowerUp[];
@@ -65,7 +66,9 @@ export function ActionBar({
                     ],
               )}
             >
-              {pendingPowerUp === pu.id ? <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin" /> : def.icon}
+              {pendingPowerUp === pu.id
+                ? <span className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin motion-reduce:animate-none" aria-hidden="true" />
+                : <BlenderIcon name={pu.id} className="w-6 h-6 text-xl leading-none">{def.icon}</BlenderIcon>}
             </button>
           );
         })}

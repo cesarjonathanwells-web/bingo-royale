@@ -9,8 +9,10 @@ interface BlenderIconProps {
 
 /** Enhances the existing icon while retaining it as a loading/error fallback. */
 export function BlenderIcon({ name, className, children }: BlenderIconProps) {
-  const [ready, setReady] = useState(false);
-  const [failed, setFailed] = useState(false);
+  const [readyName, setReadyName] = useState<string | null>(null);
+  const [failedName, setFailedName] = useState<string | null>(null);
+  const ready = readyName === name;
+  const failed = failedName === name;
   return (
     <span className={cn("relative inline-flex items-center justify-center shrink-0", className)} aria-hidden="true">
       <span className="inline-flex items-center justify-center" style={{ visibility: ready && !failed ? "hidden" : "visible" }}>{children}</span>
@@ -22,8 +24,8 @@ export function BlenderIcon({ name, className, children }: BlenderIconProps) {
         height={192}
         className="absolute inset-0 w-full h-full object-contain pointer-events-none"
         style={{ opacity: ready ? 1 : 0 }}
-        onLoad={() => setReady(true)}
-        onError={() => setFailed(true)}
+        onLoad={() => setReadyName(name)}
+        onError={() => setFailedName(name)}
       />}
     </span>
   );

@@ -1,5 +1,5 @@
-import { BlenderBallSurface } from "@/components/3d/BlenderBallSurface";
-import { motion } from "framer-motion";
+import { BingoBallBody } from "./BingoBallBody";
+import { motion, useReducedMotion } from "framer-motion";
 
 /* ------------------------------------------------------------------ */
 /*  CSS 3D-look bingo balls — no WebGL, always faces forward           */
@@ -24,32 +24,18 @@ function BingoBall({
   number: number;
   index: number;
 }) {
+  const reducedMotion = useReducedMotion();
+  const floatTransition = {
+    duration: 2.5 + index * 0.3,
+    repeat: Infinity,
+    ease: "easeInOut" as const,
+    delay: index * 0.2,
+  };
   return (
-    <motion.div
-      className="relative select-none"
-      animate={{ y: [0, -8, 0] }}
-      transition={{
-        duration: 2.5 + index * 0.3,
-        repeat: Infinity,
-        ease: "easeInOut",
-        delay: index * 0.2,
-      }}
-    >
+    <div className="relative select-none">
       {/* Ball body */}
-      <div
-        className="relative w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24 rounded-full flex items-center justify-center"
-        style={{
-          background: `radial-gradient(circle at 32% 28%, ${lighten(color, 50)}, ${color} 50%, ${darken(color, 30)} 100%)`,
-          boxShadow: `
-            0 6px 20px ${color}55,
-            0 2px 8px rgba(0,0,0,0.4),
-            inset 0 -4px 8px ${darken(color, 25)}80,
-            inset 0 3px 8px ${lighten(color, 30)}50
-          `,
-        }}
-      >
-        <BlenderBallSurface letter={letter} />
-
+      <motion.div animate={reducedMotion ? { y: 0 } : { y: [0, -8, 0] }} transition={reducedMotion ? { duration: 0 } : floatTransition}>
+      <BingoBallBody letter={letter} color={color} className="w-14 h-14 sm:w-20 sm:h-20 lg:w-24 lg:h-24">
         {/* White inner circle with letter + number */}
         <div
           className="w-9 h-9 sm:w-13 sm:h-13 lg:w-16 lg:h-16 rounded-full flex flex-col items-center justify-center z-10"
@@ -71,30 +57,34 @@ function BingoBall({
             {number}
           </span>
         </div>
-      </div>
+      </BingoBallBody>
+      </motion.div>
 
       {/* Drop shadow */}
-      <div
+      <motion.div
         className="mx-auto rounded-full mt-1"
+        animate={reducedMotion ? { scaleX: 1, opacity: 0.25 } : { scaleX: [1, 1.15, 1], opacity: [0.25, 0.14, 0.25] }}
+        transition={reducedMotion ? { duration: 0 } : floatTransition}
         style={{
           width: "60%",
           height: "clamp(3px, 0.5vw, 6px)",
-          background: "radial-gradient(ellipse, rgba(0,0,0,0.25) 0%, rgba(0,0,0,0.06) 50%, transparent 75%)",
+          background: "radial-gradient(ellipse, rgba(0,0,0,1) 0%, rgba(0,0,0,0.24) 50%, transparent 75%)",
         }}
       />
-    </motion.div>
+    </div>
   );
 }
 
 export function BingoBallScene() {
+  const reducedMotion = useReducedMotion();
   return (
     <div className="flex justify-center items-center gap-3 sm:gap-5 lg:gap-8 py-2 sm:py-4">
       {BALLS.map((ball, i) => (
         <motion.div
           key={ball.number}
-          initial={{ scale: 0, opacity: 0 }}
+          initial={reducedMotion ? false : { scale: 0, opacity: 0 }}
           animate={{ scale: 1, opacity: 1 }}
-          transition={{
+          transition={reducedMotion ? { duration: 0 } : {
             type: "spring",
             stiffness: 300,
             damping: 20,
@@ -112,24 +102,3 @@ export function BingoBallScene() {
     </div>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/*  Color helpers                                                      */
-/* ------------------------------------------------------------------ */
-
-function lighten(hex: string, percent: number): string {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.min(255, ((num >> 16) & 255) + Math.round((255 * percent) / 100));
-  const g = Math.min(255, ((num >> 8) & 255) + Math.round((255 * percent) / 100));
-  const b = Math.min(255, (num & 255) + Math.round((255 * percent) / 100));
-  return `rgb(${r}, ${g}, ${b})`;
-}
-
-function darken(hex: string, percent: number): string {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.max(0, ((num >> 16) & 255) - Math.round((255 * percent) / 100));
-  const g = Math.max(0, ((num >> 8) & 255) - Math.round((255 * percent) / 100));
-  const b = Math.max(0, (num & 255) - Math.round((255 * percent) / 100));
-  return `rgb(${r}, ${g}, ${b})`;
-}
-

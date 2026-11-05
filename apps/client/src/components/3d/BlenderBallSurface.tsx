@@ -2,10 +2,11 @@ import { useState } from "react";
 
 interface BlenderBallSurfaceProps {
   letter: string;
+  onReadyChange?: (ready: boolean) => void;
 }
 
 /** Polished Blender artwork over the existing CSS ball; labels remain live HTML. */
-export function BlenderBallSurface({ letter }: BlenderBallSurfaceProps) {
+export function BlenderBallSurface({ letter, onReadyChange }: BlenderBallSurfaceProps) {
   const [failed, setFailed] = useState(false);
   const paletteKey = "BINGO".includes(letter) && letter.length === 1 ? letter : "O";
   if (failed) return null;
@@ -19,7 +20,8 @@ export function BlenderBallSurface({ letter }: BlenderBallSurfaceProps) {
       width={256}
       height={256}
       className="absolute inset-0 w-full h-full rounded-full pointer-events-none"
-      onError={() => setFailed(true)}
+      onLoad={() => onReadyChange?.(true)}
+      onError={() => { setFailed(true); onReadyChange?.(false); }}
     />
   );
 }
