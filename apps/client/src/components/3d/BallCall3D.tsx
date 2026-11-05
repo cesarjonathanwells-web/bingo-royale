@@ -1,6 +1,6 @@
-import { BlenderBallSurface } from "@/components/3d/BlenderBallSurface";
+import { BingoBallBody } from "./BingoBallBody";
 import { useMemo } from "react";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { getLetterForNumber, BALL_COLORS } from "@bingo/shared";
 
 /* ------------------------------------------------------------------ */
@@ -14,6 +14,7 @@ interface BallCall3DProps {
 }
 
 export function BallCall3D({ number, is75 = true, className }: BallCall3DProps) {
+  const reducedMotion = useReducedMotion();
   const { letter, color } = useMemo(() => {
     if (!number) return { letter: "", color: "#f59e0b" };
     if (!is75 || number > 75) return { letter: "", color: "#f59e0b" };
@@ -29,30 +30,17 @@ export function BallCall3D({ number, is75 = true, className }: BallCall3DProps) 
         <motion.div
           key={number}
           className="flex items-center justify-center"
-          initial={{ y: -40, scale: 0.3, opacity: 0 }}
+          initial={reducedMotion ? false : { y: -40, scale: 0.3, opacity: 0 }}
           animate={{ y: 0, scale: 1, opacity: 1 }}
-          exit={{ scale: 0.5, opacity: 0 }}
-          transition={{
+          exit={reducedMotion ? { opacity: 0 } : { scale: 0.5, opacity: 0 }}
+          transition={reducedMotion ? { duration: 0 } : {
             type: "spring",
             stiffness: 500,
             damping: 25,
             mass: 0.8,
           }}
         >
-          <div
-            className="w-12 h-12 sm:w-14 sm:h-14 rounded-full flex items-center justify-center relative"
-            style={{
-              background: `radial-gradient(circle at 32% 28%, ${lighten(color, 50)}, ${color} 50%, ${darken(color, 30)} 100%)`,
-              boxShadow: `
-                0 4px 15px ${color}66,
-                0 0 25px ${color}33,
-                inset 0 -3px 6px ${darken(color, 25)}80,
-                inset 0 2px 6px ${lighten(color, 35)}50
-              `,
-            }}
-          >
-            <BlenderBallSurface letter={letter} />
-
+          <BingoBallBody letter={letter} color={color} active className="w-12 h-12 sm:w-14 sm:h-14">
             {/* Inner white circle */}
             <div
               className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex flex-col items-center justify-center z-10"
@@ -76,30 +64,9 @@ export function BallCall3D({ number, is75 = true, className }: BallCall3DProps) 
                 {number}
               </span>
             </div>
-          </div>
+          </BingoBallBody>
         </motion.div>
       </AnimatePresence>
     </div>
   );
 }
-
-/* ------------------------------------------------------------------ */
-/*  Color helpers                                                      */
-/* ------------------------------------------------------------------ */
-
-function lighten(hex: string, percent: number): string {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.min(255, ((num >> 16) & 255) + Math.round((255 * percent) / 100));
-  const g = Math.min(255, ((num >> 8) & 255) + Math.round((255 * percent) / 100));
-  const b = Math.min(255, (num & 255) + Math.round((255 * percent) / 100));
-  return `rgb(${r}, ${g}, ${b})`;
-}
-
-function darken(hex: string, percent: number): string {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.max(0, ((num >> 16) & 255) - Math.round((255 * percent) / 100));
-  const g = Math.max(0, ((num >> 8) & 255) - Math.round((255 * percent) / 100));
-  const b = Math.max(0, (num & 255) - Math.round((255 * percent) / 100));
-  return `rgb(${r}, ${g}, ${b})`;
-}
-

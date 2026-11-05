@@ -3,6 +3,7 @@ import { useTranslation } from "react-i18next";
 import { POWER_UP_MAP, type PowerUpId, type PowerUpUseOptions } from "@bingo/shared";
 import { Dialog, DialogContent } from "@/components/ui/Dialog";
 import { Button } from "@/components/ui/Button";
+import { BlenderIcon } from "@/components/3d/BlenderIcon";
 
 interface PowerUpDialogProps {
   powerupId: PowerUpId | null;
@@ -26,7 +27,7 @@ export function PowerUpDialog({ powerupId, cardCount, activeCardIndex, pending, 
   const choosesCard = ["wild_square", "turbo_stamp", "double_daub"].includes(powerupId);
   return (
     <Dialog open onOpenChange={open => { if (!open) onClose(); }}>
-      <DialogContent title={`${def.icon} ${t(`powerups.${powerupId}`)}`} description={i18n.language.startsWith("es") ? def.descriptionEs : def.description}>
+      <DialogContent title={<span className="flex items-center gap-2 pr-8"><BlenderIcon name={powerupId} className="w-7 h-7 text-2xl leading-none">{def.icon}</BlenderIcon><span>{t(`powerups.${powerupId}`)}</span></span>} description={i18n.language.startsWith("es") ? def.descriptionEs : def.description}>
         {error && <p role="alert" className="text-sm text-red-300 mb-3">{t(`powerups.errors.${error}`, { defaultValue: t("powerups.errors.failed") })}</p>}
         {choosesCard && cardCount > 1 && (
           <fieldset className="mb-4">

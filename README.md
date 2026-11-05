@@ -70,6 +70,10 @@ The existing interface uses Blender-rendered ball surfaces, eight power-up icons
 
 Editable sources and rebuild scripts are in `assets-src/blender-balls/`. Run `build.py` and `icons.py` from Blender to regenerate the artwork. With the client dev server running, `/blender-review.html` displays the actual enhanced components for local review; this page is separate from the production app entry and does not connect to multiplayer.
 
+The studio look uses deterministic Cycles CPU renders (64 samples, denoising, seed 21), transparent RGBA PNGs, and the same AgX / None / exposure 0 / gamma 1 color pipeline for balls and icons. The upper-left key is 350 W at 5000 K; cool fill is 40 W at 7000 K; the soft rim is 60 W at 6500 K. Icons add a broad 150 W frontal reflection card to keep gold readable at small sizes. Resin uses metallic 0 and procedural roughness 0.27–0.33, with a 0.28 clear coat on the balls; gold uses metallic 1 and roughness 0.25. These values are calibrated to the source scripts' studio dimensions.
+
+Home, current-call, and history balls share one neutral shadow treatment. Only the current call receives a restrained accent halo; CSS shading remains an image-error fallback. Home floor shadows stay anchored as the balls float. Power-up controls use the authored artwork at 24px and dialogs at 28px, with emoji loading/error fallbacks. Decorative ball motion respects reduced-motion preferences. The review page includes the actual power-up bar and dialog for checking both native-size artwork and accessible control labels.
+
 ## Mobile multi-card layout
 
 Multi-card play uses the same column count for sizing and rendering, with minimum readable card widths. Short screens scroll the card area while keeping the call strip and BINGO control available. Cards are labeled and can be enlarged individually; the single-card selector keeps marks and the selected card when the viewport resizes. Nine-column 90-ball tickets no longer force overflowing 48px-wide cells.

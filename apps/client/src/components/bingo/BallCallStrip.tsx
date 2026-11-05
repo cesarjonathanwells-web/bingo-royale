@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { useTranslation } from "react-i18next";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import type { GameState, BingoVariant } from "@bingo/shared";
 import { BallCall3D } from "@/components/3d/BallCall3D";
 import { NumberBall } from "./NumberBall";
@@ -23,6 +23,7 @@ export function BallCallStrip({
   onPress,
 }: BallCallStripProps) {
   const { t } = useTranslation("game");
+  const reducedMotion = useReducedMotion();
   const is75 = variant === "75";
 
   const { currentNumber, previousThree } = useMemo(() => {
@@ -54,10 +55,10 @@ export function BallCallStrip({
                 return (
                   <motion.div
                     key={n}
-                    initial={{ scale: 0, opacity: 0, x: 30 }}
+                    initial={reducedMotion ? false : { scale: 0, opacity: 0, x: 30 }}
                     animate={{ scale: 1, opacity, x: 0 }}
-                    exit={{ scale: 0, opacity: 0, x: -20 }}
-                    transition={{ type: "spring", stiffness: 500, damping: 30 }}
+                    exit={reducedMotion ? { opacity: 0 } : { scale: 0, opacity: 0, x: -20 }}
+                    transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 30 }}
                   >
                     <NumberBall number={n} is75={is75} size="sm" />
                   </motion.div>
@@ -92,3 +93,4 @@ export function BallCallStrip({
     </button>
   );
 }
+

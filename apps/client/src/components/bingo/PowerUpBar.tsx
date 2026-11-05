@@ -47,12 +47,11 @@ export function PowerUpBar({ powerups, onUse }: PowerUpBarProps) {
                       "border-[var(--color-gold)]/30",
                       "hover:bg-[var(--color-gold)]/10 hover:border-[var(--color-gold)]/60",
                       "active:scale-95",
-                      "shadow-[0_0_12px_rgba(255,215,0,0.15)]",
                       "focus-visible:ring-2 focus-visible:ring-[var(--color-gold)]/40 focus-visible:outline-none",
                     ],
               )}
             >
-              <BlenderIcon name={pu.id} className={cn("w-5 h-5 text-xl leading-none", !pu.used && "drop-shadow-[0_0_6px_rgba(255,215,0,0.5)]")}>{def.icon}</BlenderIcon>
+              <BlenderIcon name={pu.id} className="w-6 h-6 text-xl leading-none">{def.icon}</BlenderIcon>
               <span
                 className={cn(
                   "text-[10px] font-semibold leading-tight whitespace-nowrap",

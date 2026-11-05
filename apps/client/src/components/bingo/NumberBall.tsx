@@ -1,4 +1,4 @@
-import { BlenderBallSurface } from "@/components/3d/BlenderBallSurface";
+import { BingoBallBody } from "@/components/3d/BingoBallBody";
 import { useMemo } from "react";
 import { getLetterForNumber, BALL_COLORS } from "@bingo/shared";
 import { cn } from "@/lib/utils";
@@ -43,18 +43,7 @@ export function NumberBall({
 
   return (
     <div className={cn("relative select-none shrink-0", animate && "animate-ball-entrance", className)}>
-      <div
-        className={cn(
-          "relative rounded-full flex items-center justify-center font-extrabold",
-          sizeClasses[size],
-        )}
-        style={{
-          background: `radial-gradient(circle at 28% 22%, ${lighten(color, 60)}, ${lighten(color, 25)} 25%, ${color} 55%, ${darken(color, 30)} 80%, ${darken(color, 45)} 100%)`,
-          boxShadow: `0 6px 16px ${color}55, 0 2px 6px rgba(0,0,0,0.4), 0 12px 24px rgba(0,0,0,0.15), inset 0 -3px 6px ${darken(color, 25)}80, inset 0 2px 6px ${lighten(color, 35)}50`,
-        }}
-      >
-        <BlenderBallSurface letter={letter} />
-
+      <BingoBallBody letter={letter} color={color} className={cn("font-extrabold", sizeClasses[size])}>
         {/* Inner white circle */}
         <div
           className={cn(
@@ -92,7 +81,7 @@ export function NumberBall({
             {number}
           </span>
         </div>
-      </div>
+      </BingoBallBody>
       {/* Drop shadow ellipse below ball */}
       <div
         className="mx-auto rounded-full"
@@ -106,20 +95,3 @@ export function NumberBall({
     </div>
   );
 }
-
-function lighten(hex: string, percent: number): string {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.min(255, ((num >> 16) & 255) + Math.round((255 * percent) / 100));
-  const g = Math.min(255, ((num >> 8) & 255) + Math.round((255 * percent) / 100));
-  const b = Math.min(255, (num & 255) + Math.round((255 * percent) / 100));
-  return `rgb(${r}, ${g}, ${b})`;
-}
-
-function darken(hex: string, percent: number): string {
-  const num = parseInt(hex.replace("#", ""), 16);
-  const r = Math.max(0, ((num >> 16) & 255) - Math.round((255 * percent) / 100));
-  const g = Math.max(0, ((num >> 8) & 255) - Math.round((255 * percent) / 100));
-  const b = Math.max(0, (num & 255) - Math.round((255 * percent) / 100));
-  return `rgb(${r}, ${g}, ${b})`;
-}
-

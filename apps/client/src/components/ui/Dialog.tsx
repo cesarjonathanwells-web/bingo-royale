@@ -19,7 +19,7 @@ export function Dialog({ open, onOpenChange, children }: DialogProps) {
 interface DialogContentProps {
   children: ReactNode;
   className?: string;
-  title: string;
+  title: ReactNode;
   description?: string;
 }
 
