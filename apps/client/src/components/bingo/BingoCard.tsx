@@ -3,6 +3,7 @@ import type { BingoCard75 } from "@bingo/shared";
 import { LETTERS, BALL_COLORS, FREE_SPACE_INDEX } from "@bingo/shared";
 import { BingoCell } from "./BingoCell";
 import { BoardSurface, type BoardFeedbackProps } from "./BoardSurface";
+import { cn } from "@/lib/utils";
 
 interface BingoCardProps extends BoardFeedbackProps {
   card: BingoCard75;
@@ -42,7 +43,7 @@ export function BingoCard({
   };
 
   return (
-    <BoardSurface className={className} completed={Boolean(winningCells?.size)} nearWin={Boolean(nearWinCells?.size)}>
+    <BoardSurface className={cn("bingo-board--75", className)} completed={Boolean(winningCells?.size)} nearWin={Boolean(nearWinCells?.size)}>
       {/* Column letters */}
       <div className="grid grid-cols-5 gap-1 @min-[350px]:gap-1.5 px-1.5 @min-[350px]:px-2 pt-1.5 @min-[350px]:pt-2">
         {LETTERS.map((letter, column) => {

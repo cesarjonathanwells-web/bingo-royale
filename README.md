@@ -86,7 +86,9 @@ All new effects respect the live `prefers-reduced-motion` setting. Reduced motio
 
 ## Mobile multi-card layout
 
-Multi-card play uses the same column count for sizing and rendering, with minimum readable card widths. Short screens scroll the card area while keeping the call strip and BINGO control available. Cards are labeled and can be enlarged individually; the single-card selector keeps marks and the selected card when the viewport resizes. Nine-column 90-ball tickets no longer force overflowing 48px-wide cells.
+The board chooses one to four columns from the usable width and height, giving wide screens larger cards instead of forcing every game into two columns. Single-card view measures one card independently and grows beyond the old 420px limit. Numbers, column letters, and the free-space icon scale with the card. Short screens scroll the card area at readable sizes while keeping the call strip and BINGO control available.
+
+Pattern, progress, view selection, and host pause controls share a compact toolbar. Wide screens and landscape phones combine the header and calls, and use one action/BINGO footer row. The player/chat sidebar docks only on sufficiently wide, tall screens; other sizes use the existing drawers. Card selection moves into the toolbar where that saves a row, while portrait phones retain full-size tabs. Safe-area spacing and 44px control targets remain in place.
 
 Use `/mobile-cards-review.html` on the client dev server to review four local cards at small portrait, tall portrait, and landscape sizes for either variant. This fixture uses the actual game components without a multiplayer connection. Run `pnpm --filter @bingo/client test` for the layout regression tests.
 

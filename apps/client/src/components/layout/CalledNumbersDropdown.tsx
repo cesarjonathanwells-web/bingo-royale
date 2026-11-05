@@ -46,13 +46,13 @@ export function CalledNumbersDropdown({
       {/* Dropdown panel */}
       <div
         className={cn(
-          "absolute left-0 right-0 z-35 mx-2",
+          "game-called-history absolute left-0 right-0 z-35 mx-2",
           "glass",
           "rounded-xl",
           "animate-slide-down",
           "max-h-[60vh] overflow-y-auto",
         )}
-        style={{ top: "48px", zIndex: 35 }}
+        style={{ top: "var(--game-history-top, 48px)", zIndex: 35 }}
       >
         <div className="p-3">
           {/* Recent balls (last 10) */}
@@ -85,7 +85,7 @@ export function CalledNumbersDropdown({
           {/* Show all toggle */}
           <button
             onClick={() => setShowAll(!showAll)}
-            className="w-full text-center text-xs text-[var(--color-accent)] hover:underline py-1 cursor-pointer"
+            className="w-full min-h-11 text-center text-xs text-[var(--color-accent)] hover:underline py-1 cursor-pointer"
           >
             {showAll
               ? t("actions.close", { ns: "common" })
@@ -175,3 +175,4 @@ function Board90({ calledSet }: { calledSet: Set<number> }) {
     </div>
   );
 }
+

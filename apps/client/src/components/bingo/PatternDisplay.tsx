@@ -47,9 +47,9 @@ export function PatternDisplay({
   if (compact && patterns.length > 0) {
     const first = patterns[0]!;
     return (
-      <div className={cn("flex items-center gap-2", className)}>
-        {first.cells.length > 0 && <MiniGrid cells={first.cells} />}
-        <span className="text-sm font-medium text-[var(--color-text-secondary)]">
+      <div className={cn("pattern-compact flex min-w-0 items-center gap-2", className)}>
+        {first.cells.length > 0 && <MiniGrid cells={first.cells} compact />}
+        <span className="truncate text-xs sm:text-sm font-medium text-[var(--color-text-secondary)]" title={first.name}>
           {first.name}
           {patterns.length > 1 && ` +${patterns.length - 1}`}
         </span>
@@ -80,16 +80,17 @@ export function PatternDisplay({
   );
 }
 
-function MiniGrid({ cells }: { cells: number[] }) {
+function MiniGrid({ cells, compact = false }: { cells: number[]; compact?: boolean }) {
   const cellSet = useMemo(() => new Set(cells), [cells]);
 
   return (
-    <div className="grid grid-cols-5 gap-[2px] w-[50px]">
+    <div className={cn("grid grid-cols-5 shrink-0", compact ? "gap-px w-6" : "gap-[2px] w-[50px]")}>
       {Array.from({ length: 25 }, (_, i) => (
         <div
           key={i}
           className={cn(
-            "w-[8px] h-[8px] rounded-[2px] transition-colors",
+            "aspect-square rounded-[1px] transition-colors",
+            !compact && "w-[8px] h-[8px]",
             cellSet.has(i)
               ? "bg-[var(--color-accent)] shadow-[0_0_3px_var(--color-accent)]"
               : "bg-[var(--color-bg-tertiary)]/60",
@@ -99,3 +100,4 @@ function MiniGrid({ cells }: { cells: number[] }) {
     </div>
   );
 }
+

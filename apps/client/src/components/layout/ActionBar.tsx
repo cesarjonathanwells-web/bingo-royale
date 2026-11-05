@@ -31,7 +31,7 @@ export function ActionBar({
 
   return (
     <div
-      className="flex shrink-0 items-center justify-between gap-1 px-2 glass-light"
+      className="game-action-bar flex shrink-0 items-center justify-between gap-1 px-2 glass-light"
       style={{ height: "48px", borderTop: "1px solid var(--color-border)" }}
     >
       {/* Left side: Power-up icons (compact) */}

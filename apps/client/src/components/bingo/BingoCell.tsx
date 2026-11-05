@@ -71,7 +71,7 @@ export function BingoCell({
       {!isFree && <DaubMark marked={dabbed} color={columnColor} seed={`${letter}-${value}-${index}`} />}
       {isFree ? (
         <span className="z-10 relative flex items-center justify-center">
-          <BlenderIcon name="wild_square" className="w-5 h-5 @min-[250px]:w-6 @min-[250px]:h-6 @min-[350px]:w-7 @min-[350px]:h-7">
+          <BlenderIcon name="wild_square" className="bingo-free-icon w-5 h-5 @min-[250px]:w-6 @min-[250px]:h-6 @min-[350px]:w-7 @min-[350px]:h-7">
             <svg viewBox="0 0 24 24" fill="#e8b75e" className="w-full h-full" aria-hidden="true">
               <path d="M12 2l3.09 6.26L22 9.27l-5 4.87L18.18 21 12 17.27 5.82 21 7 14.14l-5-4.87 6.91-1.01L12 2z" />
             </svg>

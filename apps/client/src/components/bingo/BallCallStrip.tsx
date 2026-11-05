@@ -41,7 +41,7 @@ export function BallCallStrip({
     <button
       onClick={onPress}
       className={cn(
-        "w-full flex items-center justify-center gap-3 px-3 py-1.5",
+        "game-call-strip w-full flex items-center justify-center gap-3 px-3 py-1.5",
         "bg-[var(--color-bg-secondary)]/60 border-b border-[var(--color-border)]/40",
         "cursor-pointer select-none hover:bg-[var(--color-bg-secondary)]/80 transition-colors",
       )}

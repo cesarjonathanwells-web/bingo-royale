@@ -1,4 +1,4 @@
-import { useCallback, useState, useRef, useEffect, useMemo } from "react";
+import { useCallback, useState, useRef, useEffect, useLayoutEffect, useMemo } from "react";
 import { useTranslation } from "react-i18next";
 import type {
   Room,
@@ -31,6 +31,7 @@ import { getAvatarColor } from "@/lib/avatar";
 import { PowerUpDialog } from "@/components/bingo/PowerUpDialog";
 import { getCardLayout } from "@/lib/card-layout";
 import { getCardProgress } from "@/lib/board-progress";
+import "./game-layout.css";
 
 interface EmojiReaction {
   emoji: string;
@@ -100,29 +101,30 @@ export function GameView({
 
   const gridContainerRef = useRef<HTMLDivElement>(null);
   const [gridLayout, setGridLayout] = useState({ columns: 1, maxWidth: 420 });
+  const [viewAll, setViewAll] = useState(myCards.length > 1);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const element = gridContainerRef.current;
     if (!element) return;
     const calculate = () => {
       // clientWidth/clientHeight include padding; measure the usable card area.
       const style = getComputedStyle(element);
       const width = element.clientWidth - parseFloat(style.paddingLeft) - parseFloat(style.paddingRight);
-      const height = element.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom);
+      const tabHeight = element.querySelector<HTMLElement>(".game-carousel-tabs")?.getBoundingClientRect().height ?? 0;
+      const height = element.clientHeight - parseFloat(style.paddingTop) - parseFloat(style.paddingBottom) - tabHeight;
       if (width <= 0 || height <= 0) return;
-      const headerHeight = window.matchMedia("(min-width: 1024px)").matches ? 52
-        : window.matchMedia("(min-width: 640px)").matches ? 42 : 34;
-      const next = getCardLayout({ width, height, count: myCards.length, variant: room.variant, headerHeight });
+      const next = getCardLayout({ width, height, count: viewAll ? myCards.length : 1, variant: room.variant });
       setGridLayout(previous => previous.columns === next.columns && Math.abs(previous.maxWidth - next.maxWidth) < 1
         ? previous : next);
     };
     const observer = new ResizeObserver(calculate);
     observer.observe(element);
+    const tabs = element.querySelector(".game-carousel-tabs");
+    if (tabs) observer.observe(tabs);
     calculate();
     return () => observer.disconnect();
-  }, [myCards.length, room.variant]);
+  }, [myCards.length, room.variant, viewAll]);
 
-  const [viewAll, setViewAll] = useState(myCards.length > 1);
   useEffect(() => {
     gridContainerRef.current?.scrollTo({ top: 0, behavior: "auto" });
   }, [viewAll]);
@@ -237,35 +239,37 @@ export function GameView({
   );
 
   return (
-    <div className="fixed inset-0 h-[100dvh] flex flex-col min-h-0 bg-[var(--color-bg-primary)]" style={{ paddingTop: "env(safe-area-inset-top)", paddingLeft: "env(safe-area-inset-left)", paddingRight: "env(safe-area-inset-right)" }}>
-      {/* Top bar with room code + controls */}
-      <GameTopBar
-        gameState={gameState}
-        variant={room.variant}
-        roomCode={room.code}
-        onMenuPress={() => setPlayersOpen(true)}
-        onLeave={onLeave}
-      />
+    <div className="game-shell fixed inset-0 h-[100dvh] flex flex-col min-h-0 bg-[var(--color-bg-primary)]" data-variant={room.variant} style={{ paddingTop: "env(safe-area-inset-top)", paddingLeft: "env(safe-area-inset-left)", paddingRight: "env(safe-area-inset-right)" }}>
+      <header className="game-header">
+        {/* Top bar with room code + controls */}
+        <GameTopBar
+          gameState={gameState}
+          variant={room.variant}
+          roomCode={room.code}
+          onMenuPress={() => setPlayersOpen(true)}
+          onLeave={onLeave}
+        />
 
-      {/* Ball call strip: current ball (25% larger) + last 3 called */}
-      <BallCallStrip
-        gameState={gameState}
-        variant={room.variant}
-        onPress={() => setNumbersOpen(!numbersOpen)}
-      />
+        {/* Ball call strip: current ball (25% larger) + last 3 called */}
+        <BallCallStrip
+          gameState={gameState}
+          variant={room.variant}
+          onPress={() => setNumbersOpen(!numbersOpen)}
+        />
+        {/* Called numbers dropdown */}
+        <CalledNumbersDropdown
+          open={numbersOpen}
+          onClose={() => setNumbersOpen(false)}
+          gameState={gameState}
+          variant={room.variant}
+        />
 
-      {/* Called numbers dropdown */}
-      <CalledNumbersDropdown
-        open={numbersOpen}
-        onClose={() => setNumbersOpen(false)}
-        gameState={gameState}
-        variant={room.variant}
-      />
+      </header>
 
       {/* Main area: on desktop, card left + sidebar right. On mobile, card only */}
-      <div className="flex-1 min-h-0 flex overflow-hidden">
+      <div className="game-main flex-1 min-h-0 flex overflow-hidden">
         {/* Card column */}
-        <div className="flex-1 min-w-0 min-h-0 flex flex-col items-center overflow-hidden px-2 py-1 relative">
+        <div className="game-board-column flex-1 min-w-0 min-h-0 flex flex-col items-center overflow-hidden relative">
         {/* Paused overlay */}
         {gameState.paused && (
           <div className="absolute inset-0 z-20 flex flex-col items-center justify-center bg-[var(--color-bg-primary)]/80 backdrop-blur-sm">
@@ -284,24 +288,67 @@ export function GameView({
           </div>
         )}
 
-        {/* Active Pattern */}
-        {room.variant === "75" && room.patterns.length > 0 && (
-          <div className="flex items-center justify-center gap-2 py-0.5 shrink-0">
-            <span className="text-[10px] text-[var(--color-text-muted)]">
-              {t("game.activePattern")}:
-            </span>
-            <PatternDisplay patternIds={room.patterns} customPatterns={room.customPatterns} compact />
+        <div className="game-board-toolbar">
+          <div className="game-board-meta">
+            {/* Active Pattern */}
+            {room.variant === "75" && room.patterns.length > 0 && (
+              <div className="game-active-pattern flex items-center gap-2 shrink-0">
+                <span className="game-pattern-label text-[10px] text-[var(--color-text-muted)]">
+                  {t("game.activePattern")}:
+                </span>
+                <PatternDisplay patternIds={room.patterns} customPatterns={room.customPatterns} compact />
+              </div>
+            )}
+
+            {myCards.length > 0 && <div className="board-progress shrink-0" data-state={patternMarked ? "complete" : oneAway ? "near" : "playing"}
+              role="status" aria-live={patternMarked || oneAway ? "polite" : "off"}>
+              <span className="board-progress__dot" aria-hidden="true" />
+              <span>{patternMarked ? t("game.patternMarked") : oneAway ? t("game.oneAway") : unmarkedCalls > 0
+                ? t("game.markCalled", { count: unmarkedCalls }) : t("game.followCalls")}</span>
+              {(patternMarked || oneAway) && myCards.length > 1 && <span className="opacity-70">· {t("cards.card", { n: bestProgressIndex + 1 })}</span>}
+            </div>}
+
           </div>
-        )}
+          <div className="game-toolbar-controls">
+            {!viewAll && myCards.length > 1 && <select className="game-card-selector" aria-label={t("game.yourCard")}
+              value={activeCardIndex} onChange={event => selectCard(Number(event.target.value))}>
+              {myCards.map((card, index) => <option key={card.id} value={index}>{t("cards.card", { n: index + 1 })}</option>)}
+            </select>}
+            {/* View toggle */}
+            {myCards.length > 1 && (
+              <div className="game-view-switch flex items-center justify-center gap-1 shrink-0">
+                <button
+                  aria-pressed={!viewAll}
+                  onClick={() => setViewAll(false)}
+                  className={cn(
+                    "min-h-11 px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer",
+                    !viewAll
+                      ? "bg-[var(--color-accent)] text-white"
+                      : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
+                  )}
+                >
+                  {t("cards.singleView")}
+                </button>
+                <button
+                  aria-pressed={viewAll}
+                  onClick={() => setViewAll(true)}
+                  className={cn(
+                    "min-h-11 px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer",
+                    viewAll
+                      ? "bg-[var(--color-accent)] text-white"
+                      : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
+                  )}
+                >
+                  {t("cards.allView")}
+                </button>
+              </div>
+            )}
 
-        {myCards.length > 0 && <div className="board-progress shrink-0" data-state={patternMarked ? "complete" : oneAway ? "near" : "playing"}
-          role="status" aria-live={patternMarked || oneAway ? "polite" : "off"}>
-          <span className="board-progress__dot" aria-hidden="true" />
-          <span>{patternMarked ? t("game.patternMarked") : oneAway ? t("game.oneAway") : unmarkedCalls > 0
-            ? t("game.markCalled", { count: unmarkedCalls }) : t("game.followCalls")}</span>
-          {(patternMarked || oneAway) && myCards.length > 1 && <span className="opacity-70">· {t("cards.card", { n: bestProgressIndex + 1 })}</span>}
-        </div>}
-
+            {isHost && !gameState.paused && <button type="button" className="game-pause-control" onClick={onPauseGame} aria-label={t("game.pause")} title={t("game.pause")}>
+              <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" aria-hidden="true"><path d="M8 5v14M16 5v14" /></svg>
+            </button>}
+          </div>
+        </div>
         {/* Active power-up effects stay visible above the cards. */}
         {(shieldActive || powerUpEffects.doubleDaub || activeBlocks.length > 0) && <div role="status" className="flex flex-wrap justify-center gap-x-3 gap-y-1 text-xs px-2 py-1 shrink-0 text-[var(--color-text-secondary)]">
           {shieldActive && <span>🛡️ {t("powerups.shield")}: {callsLabel(powerUpEffects.shieldUntilCall)}</span>}
@@ -314,49 +361,19 @@ export function GameView({
         </div>}
         {powerUpError && !selectedPowerUp && <p role="alert" className="text-xs text-red-300 py-1 shrink-0">{t(`powerups.errors.${powerUpError}`, { defaultValue: t("powerups.errors.failed") })}</p>}
 
-        {/* View toggle */}
-        {myCards.length > 1 && (
-          <div className="flex items-center justify-center gap-1 py-0.5 shrink-0">
-            <button
-              aria-pressed={!viewAll}
-              onClick={() => setViewAll(false)}
-              className={cn(
-                "min-h-11 px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer",
-                !viewAll
-                  ? "bg-[var(--color-accent)] text-white"
-                  : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
-              )}
-            >
-              {t("cards.singleView")}
-            </button>
-            <button
-              aria-pressed={viewAll}
-              onClick={() => setViewAll(true)}
-              className={cn(
-                "min-h-11 px-3 py-1 rounded-lg text-[11px] font-semibold transition-colors cursor-pointer",
-                viewAll
-                  ? "bg-[var(--color-accent)] text-white"
-                  : "bg-[var(--color-bg-secondary)] text-[var(--color-text-muted)] hover:bg-[var(--color-bg-tertiary)]",
-              )}
-            >
-              {t("cards.allView")}
-            </button>
-          </div>
-        )}
-
         {/* Card display */}
-        <div ref={gridContainerRef} className="flex-1 w-full min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-none" style={{ WebkitOverflowScrolling: "touch" }}>
+        <div ref={gridContainerRef} className="game-card-viewport flex-1 w-full min-h-0 overflow-y-auto overflow-x-hidden overscroll-contain scrollbar-none" style={{ WebkitOverflowScrolling: "touch" }}>
           {viewAll && myCards.length > 1 ? (
             <div
-              className="grid gap-1 w-full mx-auto items-start"
+              className="game-card-grid grid w-full mx-auto items-start"
               style={{ gridTemplateColumns: `repeat(${gridLayout.columns}, minmax(0, 1fr))`, maxWidth: `${gridLayout.maxWidth}px` }}
             >
               {myCards.map((card, ci) => (
                 <section key={card.id} aria-label={t("cards.card", { n: ci + 1 })}
                   className="min-w-0 w-full"
                   style={myCards.length === 3 && ci === 2 && gridLayout.columns === 2
-                    ? { gridColumn: "1 / -1", width: "calc((100% - 0.25rem) / 2)", justifySelf: "center" } : undefined}>
-                  <button type="button" className="w-full min-h-7 mb-0.5 text-xs font-semibold text-[var(--color-text-secondary)] cursor-pointer"
+                    ? { gridColumn: "1 / -1", width: "calc((100% - 8px) / 2)", justifySelf: "center" } : undefined}>
+                  <button type="button" className="game-card-label w-full min-h-7 text-xs font-semibold text-[var(--color-text-secondary)] cursor-pointer"
                     aria-label={t("cards.enlarge", { n: ci + 1 })}
                     onClick={() => { selectCard(ci); setViewAll(false); }}>
                     {t("cards.card", { n: ci + 1 })} <span aria-hidden="true">↗</span>
@@ -408,9 +425,10 @@ export function GameView({
               currentNumber={gameState.currentNumber}
               calledNumbers={calledNumbers}
               progress={cardProgress}
+              cardMaxWidth={gridLayout.maxWidth}
             />
           ) : (
-            <div style={{ maxWidth: `${Math.min(gridLayout.maxWidth, 420)}px` }} className="w-full mx-auto">
+            <div style={{ maxWidth: `${gridLayout.maxWidth}px` }} className="game-single-card w-full mx-auto">
               {myCard && (
                 <>
                   {room.variant === "75" ? (
@@ -467,18 +485,10 @@ export function GameView({
           </div>
         )}
 
-        {/* Host pause control (floating, subtle) */}
-        {isHost && !gameState.paused && (
-          <div className="absolute top-1 right-2 z-10">
-            <Button variant="ghost" size="sm" onClick={onPauseGame} className="text-[10px] px-2 py-0.5 opacity-60 hover:opacity-100">
-              {t("game.pause")}
-            </Button>
-          </div>
-        )}
         </div>{/* end card column */}
 
         {/* Desktop sidebar - visible on lg+ */}
-        <div className="hidden lg:flex flex-col w-80 border-l border-[var(--color-border)] bg-[var(--color-bg-secondary)]/50">
+        <aside className="game-sidebar flex-col border-l border-[var(--color-border)] bg-[var(--color-bg-secondary)]/50">
           {/* Player list */}
           <div className="border-b border-[var(--color-border)] overflow-y-auto max-h-[40%]">
             <div className="px-4 py-3 border-b border-[var(--color-border)]">
@@ -556,24 +566,26 @@ export function GameView({
               </button>
             </form>
           </div>
-        </div>
+        </aside>
       </div>{/* end main area flex row */}
 
-      {/* Action bar */}
-      <ActionBar
-        powerups={myPowerUps}
-        onUsePowerUp={(id) => { onClearPowerUpPrompt?.(); setWildTargetCard(null); setSelectedPowerUp(id); }}
-        disabled={powerupsUnavailable || pendingPowerUp !== null || wildTargetCard !== null}
-        pendingPowerUp={pendingPowerUp}
-        onToggleChat={() => setChatOpen(!chatOpen)}
-        onToggleEmoji={() => setEmojiOpen(!emojiOpen)}
-        onTogglePlayers={() => setPlayersOpen(true)}
-        unreadChat={unreadChat}
-        chatOpen={chatOpen}
-      />
+      <footer className="game-controls">
+        {/* Action bar */}
+        <ActionBar
+          powerups={myPowerUps}
+          onUsePowerUp={(id) => { onClearPowerUpPrompt?.(); setWildTargetCard(null); setSelectedPowerUp(id); }}
+          disabled={powerupsUnavailable || pendingPowerUp !== null || wildTargetCard !== null}
+          pendingPowerUp={pendingPowerUp}
+          onToggleChat={() => setChatOpen(!chatOpen)}
+          onToggleEmoji={() => setEmojiOpen(!emojiOpen)}
+          onTogglePlayers={() => setPlayersOpen(true)}
+          unreadChat={unreadChat}
+          chatOpen={chatOpen}
+        />
 
-      {/* BINGO button (in-flow, not fixed) */}
-      <GameBottomBar onClaim={onClaimBingo} disabled={powerupsUnavailable || wildTargetCard !== null} ready={patternMarked} />
+        {/* BINGO button (in-flow, not fixed) */}
+        <GameBottomBar onClaim={onClaimBingo} disabled={powerupsUnavailable || wildTargetCard !== null} ready={patternMarked} />
+      </footer>
       <PowerUpDialog powerupId={selectedPowerUp} cardCount={myCards.length} activeCardIndex={activeCardIndex} pending={pendingPowerUp !== null} disabled={powerupsUnavailable} choices={callerChoices} error={powerUpError} onUse={onUsePowerUp} onClose={closePowerUp} onTarget={cardIndex => { selectCard(cardIndex); setViewAll(false); setWildTargetCard(cardIndex); closePowerUp(); }} />
 
       {/* Emoji picker overlay */}
@@ -586,7 +598,7 @@ export function GameView({
           />
           <div
             className={cn(
-              "fixed bottom-[100px] left-1/2 -translate-x-1/2",
+              "game-emoji-picker fixed left-1/2 -translate-x-1/2",
               "flex flex-wrap justify-center gap-1 p-2",
               "bg-[var(--color-bg-secondary)] border border-[var(--color-border)]",
               "rounded-xl shadow-xl",
@@ -600,7 +612,7 @@ export function GameView({
                 key={emoji}
                 onClick={() => handleEmojiSend(emoji)}
                 className={cn(
-                  "w-10 h-10 flex items-center justify-center",
+                  "w-11 h-11 flex items-center justify-center",
                   "rounded-lg hover:bg-[var(--color-bg-tertiary)]",
                   "transition-colors text-xl select-none cursor-pointer",
                   "active:scale-90",

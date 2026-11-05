@@ -131,7 +131,7 @@ function Review() {
     };
     return <GameView room={room} gameState={gameState} myCards={cards.slice(0, count)}
       myDabs={dabs.slice(0, count)} activeCardIndex={activeCard} myPowerUps={[]}
-      peekedNumbers={[]} chatMessages={[]} reactions={[]} isHost={false}
+      peekedNumbers={[]} chatMessages={[]} reactions={[]} isHost={reviewParams.get("host") === "1"}
       onSetActiveCard={setActiveCard} onDab={cell => mark(activeCard, cell)} onDabMulti={mark}
       onClaimBingo={() => setMessage("Local review only: a claim is never sent to the server.")}
       onPauseGame={() => setPaused(true)} onResumeGame={() => setPaused(false)}
