@@ -1,0 +1,135 @@
+{
+  "engine": "5.8.4-58902052+++UE5+Release-5.8",
+  "renderer": "Unreal Movie Render Queue / software Lumen",
+  "resolution": 2048,
+  "spatial_samples": 64,
+  "exposure_bias": -5.0,
+  "render_status": {
+    "path": "assets-src/unreal-lookdev/AppIcon/renders/status.json",
+    "phase": "complete",
+    "success": true,
+    "completed_jobs": [
+      "bingo-royale-icon"
+    ],
+    "sha256": "64c746807d40deeda681713f4e2ee5b3f0f1e41d4b7b7d63ccf41289e0b36278"
+  },
+  "source_render": {
+    "path": "assets-src/unreal-lookdev/AppIcon/renders/bingo-royale-icon.0000.png",
+    "size": [
+      2048,
+      2048
+    ],
+    "mode": "RGBA8",
+    "opaque": true,
+    "bytes": 4389582,
+    "sha256": "2559893c04a8217eb71d9b3efe8484f0584d66d7acb90d17a8f6c34a34dc8c71"
+  },
+  "blender_mesh": {
+    "path": "assets-src/unreal-lookdev/AppIcon/SourceMeshes/SM_BingoRoyaleAppIcon.fbx",
+    "sha256": "c7fa2061b5df98a38c457a6ac7576cc182db5110706a085d33df7483acb0636e",
+    "vertices": 55274,
+    "triangles": 108051
+  },
+  "editable_blend": {
+    "path": "assets-src/unreal-lookdev/AppIcon/bingo-royale-app-icon.blend",
+    "sha256": "dfa3edd9612a74ffde135b52c16d6d35f58abe9d7312f8a9169842c3ac39ce03"
+  },
+  "master": {
+    "path": "assets-src/unreal-lookdev/AppIcon/masters/bingo-royale-icon-2048.png",
+    "size": [
+      2048,
+      2048
+    ],
+    "mode": "RGBA8",
+    "opaque": true,
+    "bytes": 4389582,
+    "sha256": "2559893c04a8217eb71d9b3efe8484f0584d66d7acb90d17a8f6c34a34dc8c71"
+  },
+  "resampler": "/usr/bin/sips; resampling and uniform navy padding only",
+  "assets": {
+    "app_192": {
+      "path": "apps/client/public/icons/icon-192.png",
+      "size": [
+        192,
+        192
+      ],
+      "mode": "RGBA8",
+      "opaque": true,
+      "bytes": 48337,
+      "sha256": "91a7bb3d0aade772f899b32ae25270dd3df83a9673954863455181ff18c25797"
+    },
+    "app_512": {
+      "path": "apps/client/public/icons/icon-512.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA8",
+      "opaque": true,
+      "bytes": 320261,
+      "sha256": "ef57dd0a2c98b5170cdc043684cfc15477df9cda189d6234dfc713785bf222c5"
+    },
+    "apple_touch": {
+      "path": "apps/client/public/apple-touch-icon.png",
+      "size": [
+        180,
+        180
+      ],
+      "mode": "RGBA8",
+      "opaque": true,
+      "bytes": 42888,
+      "sha256": "74de04a24266dc4c2f6204d6dac91495b2a099d3501b555f8b613502c00e7512"
+    },
+    "favicon_32": {
+      "path": "apps/client/public/icons/favicon-32.png",
+      "size": [
+        32,
+        32
+      ],
+      "mode": "RGBA8",
+      "opaque": true,
+      "bytes": 2464,
+      "sha256": "f4b2d1e1a59758e593ce6e46f9e81dacebc5fe4e91e6442a6d716ac60963ca42"
+    },
+    "favicon_64": {
+      "path": "apps/client/public/icons/favicon-64.png",
+      "size": [
+        64,
+        64
+      ],
+      "mode": "RGBA8",
+      "opaque": true,
+      "bytes": 7448,
+      "sha256": "43ce21d7b6a61480e6c2d0e8f45d59897ddbd0103483a741e1d9dc48c3eb6269"
+    },
+    "download_1024": {
+      "path": "apps/client/public/icons/bingo-royale-icon-1024.png",
+      "size": [
+        1024,
+        1024
+      ],
+      "mode": "RGBA8",
+      "opaque": true,
+      "bytes": 1231373,
+      "sha256": "59692e7660b39416ab51c0362431966dbe0d8671dd0925a2b7b359fbe7ad8bc6"
+    },
+    "maskable_512": {
+      "path": "apps/client/public/icons/maskable-512.png",
+      "size": [
+        512,
+        512
+      ],
+      "mode": "RGBA8",
+      "opaque": true,
+      "bytes": 266201,
+      "sha256": "254e74492f85daa077bbb9960162a34dbb16516306cbd4a3fa07c7693513dedb",
+      "padding_px_per_side": 26,
+      "padding_color": "#00010f",
+      "safe_zone": {
+        "circle_radius_fraction": 0.4,
+        "critical_crown_ball_radius_fraction_estimate": 0.3662,
+        "method": "Conservative model geometry and orthographic framing; visual review required"
+      }
+    }
+  }
+}

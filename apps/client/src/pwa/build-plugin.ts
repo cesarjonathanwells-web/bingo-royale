@@ -12,7 +12,8 @@ export function pwaBuild(): Plugin {
     configResolved(config) { root = config.root; },
     generateBundle(_options, bundle) {
       const template = readFileSync(path.join(root, 'src/pwa/service-worker.js'), 'utf8');
-      const files = ['/offline.html', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/maskable-512.png', '/apple-touch-icon.png'];
+      const files = ['/offline.html', '/icons/icon-192.png', '/icons/icon-512.png', '/icons/maskable-512.png',
+        '/icons/favicon-32.png', '/icons/favicon-64.png', '/apple-touch-icon.png'];
       for (const folder of ['unreal-balls', 'unreal-icons']) {
         files.push(...readdirSync(path.join(root, 'public/images', folder)).filter(name => name.endsWith('.png')).sort()
           .map(name => `/images/${folder}/${name}`));

@@ -1,0 +1,10 @@
+renders/
+masters/
+__pycache__/
+*.blend1
+*.blend
+SourceMeshes/*.fbx
+blender-preview.png
+engine-probe.json
+scene-probe.json
+probe_engine.py
