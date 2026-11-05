@@ -13,10 +13,27 @@ import {
   MAX_PATTERN_NAME_LENGTH,
   SPEED_PRESETS,
   WIN_PATTERNS,
+  getLetterForNumber,
 } from '@bingo/shared';
 import type { AuthenticatedSocket } from '../../services/auth.js';
 import * as roomStore from '../../redis/room-store.js';
 import { CallerManager } from '../../services/caller.js';
+import { withRoomLock } from '../../services/room-lock.js';
+import { sendPowerUpState } from '../../services/powerups.js';
+
+async function restoreGame(socket: AuthenticatedSocket, room: Room, io: Server): Promise<void> {
+  if (room.state !== 'in_progress') return;
+  const caller = await roomStore.getCallerState(room.code);
+  if (!caller) return;
+  socket.emit('game:started', { variant: room.variant, speed: room.speed, patterns: room.patterns, startedAt: room.createdAt });
+  const number = caller.called.at(-1);
+  if (number !== undefined) socket.emit('game:number_called', {
+    number, calledNumbers: caller.called, remaining: caller.pool.length,
+    ...(room.variant === '75' ? { letter: getLetterForNumber(number) } : {}),
+  });
+  if (caller.paused) socket.emit('game:paused', {});
+  await sendPowerUpState(room.code, socket.data.user.id, io);
+}
 
 /**
  * Generate a 6-character alphanumeric room code.
@@ -54,10 +71,24 @@ export function registerRoomHandlers(
   io: Server,
 ): void {
   const user = socket.data.user;
+  const on = (event: string, handler: (...args: any[]) => Promise<void>) => {
+    socket.on(event, (...args: any[]) => {
+      const currentCode = socket.data.roomCode;
+      const code = event === 'room:join' && typeof args[0]?.code === 'string' ? args[0].code : currentCode ?? socket.id;
+      return withRoomLock(code, () => {
+        if (socket.data.roomCode !== currentCode) {
+          const callback = args.find((argument) => typeof argument === 'function');
+          if (callback) callback({ success: false, error: 'Room changed' });
+          return Promise.resolve();
+        }
+        return handler(...args);
+      });
+    });
+  };
 
   // --------------- room:create ---------------
 
-  socket.on('room:create', async (data, callback) => {
+  on('room:create', async (data, callback) => {
     try {
       // Validate variant is '75' or '90'
       if (data?.variant !== undefined && data.variant !== '75' && data.variant !== '90') {
@@ -71,7 +102,7 @@ export function registerRoomHandlers(
           ? data.speed
           : SPEED_PRESETS[1]!.ms; // Default to 'normal'
       // Default patterns: rows + diagonals + blackout if none specified
-      const defaultPatterns = ['top_row', 'middle_row', 'bottom_row', 'diagonal_down', 'diagonal_up', 'four_corners', 'blackout'];
+      const defaultPatterns = variant === '90' ? ['one_line', 'two_lines', 'full_house'] : ['top_row', 'middle_row', 'bottom_row', 'diagonal_down', 'diagonal_up', 'four_corners', 'blackout'];
       const patterns: string[] = Array.isArray(data?.patterns) && data.patterns.length > 0
         ? data.patterns
         : defaultPatterns;
@@ -133,7 +164,7 @@ export function registerRoomHandlers(
 
   // --------------- room:join ---------------
 
-  socket.on('room:join', async (data, callback) => {
+  on('room:join', async (data, callback) => {
     try {
       const code = data?.code as string;
       if (!code) {
@@ -172,6 +203,7 @@ export function registerRoomHandlers(
           callback({ success: true, room: updatedRoom });
         }
         socket.emit('room:state', updatedRoom);
+        if (updatedRoom) await restoreGame(socket, updatedRoom, io);
         io.to(code).emit('room:player_updated', {
           playerId: user.id,
           connected: true,
@@ -216,6 +248,7 @@ export function registerRoomHandlers(
         callback({ success: true, room: updatedRoom });
       }
       socket.emit('room:state', updatedRoom);
+      if (updatedRoom) await restoreGame(socket, updatedRoom, io);
     } catch (err) {
       console.error('[Room] Error joining room:', err);
       const errorMsg =
@@ -229,7 +262,7 @@ export function registerRoomHandlers(
 
   // --------------- room:leave ---------------
 
-  socket.on('room:leave', async (_, callback) => {
+  on('room:leave', async (_, callback) => {
     try {
       const code = socket.data.roomCode;
       if (!code) {
@@ -289,7 +322,7 @@ export function registerRoomHandlers(
 
   // --------------- room:update_settings ---------------
 
-  socket.on('room:update_settings', async (data, callback) => {
+  on('room:update_settings', async (data, callback) => {
     try {
       const code = socket.data.roomCode;
       if (!code) {
@@ -383,3 +416,4 @@ export function registerRoomHandlers(
     }
   });
 }
+

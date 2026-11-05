@@ -10,6 +10,9 @@ interface BingoCardProps {
   onDab: (cellIndex: number) => void;
   disabled?: boolean;
   className?: string;
+  blockedCells?: Set<number>;
+  wildCells?: Set<number>;
+  targetableCells?: Set<number>;
 }
 
 export function BingoCard({
@@ -18,6 +21,9 @@ export function BingoCard({
   onDab,
   disabled = false,
   className,
+  blockedCells,
+  wildCells,
+  targetableCells,
 }: BingoCardProps) {
 
   const getCellValue = useCallback(
@@ -75,7 +81,10 @@ export function BingoCard({
                 column={col}
                 dabbed={isDabbed}
                 onDab={onDab}
-                disabled={disabled}
+                disabled={disabled || (targetableCells !== undefined && !targetableCells.has(index))}
+                blocked={blockedCells?.has(index)}
+                wild={wildCells?.has(index)}
+                targetable={targetableCells?.has(index)}
               />
             );
           }),

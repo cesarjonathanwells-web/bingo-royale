@@ -15,6 +15,10 @@ interface CardCarouselProps {
   onDab: (cardIndex: number, cellIndex: number) => void;
   activeIndex: number;
   onIndexChange: (index: number) => void;
+  blockedCells?: Set<number>[];
+  wildCells?: Set<number>[];
+  targetableCells?: Set<number>[];
+  disabled?: boolean;
 }
 
 export function CardCarousel({
@@ -24,6 +28,10 @@ export function CardCarousel({
   onDab,
   activeIndex,
   onIndexChange,
+  blockedCells,
+  wildCells,
+  targetableCells,
+  disabled,
 }: CardCarouselProps) {
   const scrollRef = useRef<HTMLDivElement>(null);
   const settleTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
@@ -100,12 +108,20 @@ export function CardCarousel({
                   card={card as BingoCard75}
                   dabs={dabs[i] ?? new Set()}
                   onDab={(cellIndex) => onDab(i, cellIndex)}
+                  blockedCells={blockedCells?.[i]}
+                  wildCells={wildCells?.[i]}
+                  targetableCells={targetableCells?.[i]}
+                  disabled={disabled}
                 />
               ) : (
                 <BingoCard90
                   card={card as BingoCard90Type}
                   dabs={dabs[i] ?? new Set()}
                   onDab={(cellIndex) => onDab(i, cellIndex)}
+                  blockedCells={blockedCells?.[i]}
+                  wildCells={wildCells?.[i]}
+                  targetableCells={targetableCells?.[i]}
+                  disabled={disabled}
                 />
               )}
             </div>

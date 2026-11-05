@@ -12,8 +12,8 @@ export const POWER_UPS: PowerUpDef[] = [
     id: 'double_daub',
     name: 'Double Daub',
     nameEs: 'Doble Marca',
-    description: 'Mark two numbers on next call',
-    descriptionEs: 'Marca dos numeros en la proxima llamada',
+    description: 'On the next call, automatically mark up to two numbers on the selected card, including uncalled bonus numbers',
+    descriptionEs: 'En la próxima llamada, marca hasta dos números del cartón seleccionado, incluidos números de bonificación aún no cantados',
     icon: '\u270C\uFE0F', // victory hand
   },
   {
@@ -28,16 +28,16 @@ export const POWER_UPS: PowerUpDef[] = [
     id: 'wild_square',
     name: 'Wild Square',
     nameEs: 'Comodin',
-    description: 'Place a wildcard on any empty square',
-    descriptionEs: 'Coloca un comodin en cualquier casilla vacia',
+    description: 'Choose an unmarked number on any of your cards to mark as a wildcard',
+    descriptionEs: 'Elige un número sin marcar de cualquiera de tus cartones para marcarlo como comodín',
     icon: '\u2B50', // star
   },
   {
     id: 'shield',
     name: 'Shield',
     nameEs: 'Escudo',
-    description: 'Protect your card from Scramble for 2 turns',
-    descriptionEs: 'Protege tu carton de Revolver por 2 turnos',
+    description: 'Protect all your cards from Scramble and Ink Blot through the next two calls',
+    descriptionEs: 'Protege todos tus cartones de Revolver y Mancha de Tinta durante las próximas dos llamadas',
     icon: '\uD83D\uDEE1\uFE0F', // shield
     duration: 2,
   },
@@ -45,24 +45,24 @@ export const POWER_UPS: PowerUpDef[] = [
     id: 'scramble',
     name: 'Scramble',
     nameEs: 'Revolver',
-    description: "Shuffle uncalled numbers on a random opponent's card",
-    descriptionEs: 'Revuelve los numeros no cantados en el carton de un oponente',
+    description: "Change unmarked, uncalled numbers on a random opponent's card while preserving its valid layout",
+    descriptionEs: 'Cambia números sin marcar y aún no cantados del cartón de un oponente al azar, conservando su formato válido',
     icon: '\uD83C\uDF00', // cyclone
   },
   {
     id: 'callers_choice',
     name: "Caller's Choice",
     nameEs: 'Eleccion del Cantor',
-    description: 'Vote on one of three numbers to be called next',
-    descriptionEs: 'Vota por uno de tres numeros para la proxima llamada',
+    description: 'Choose one of up to three upcoming numbers to be called next',
+    descriptionEs: 'Elige uno de hasta tres próximos números para que sea el siguiente en salir',
     icon: '\uD83C\uDFAF', // target
   },
   {
     id: 'ink_blot',
     name: 'Ink Blot',
     nameEs: 'Mancha de Tinta',
-    description: "Block one square on a random opponent's card for 2 numbers",
-    descriptionEs: 'Bloquea una casilla del carton de un oponente por 2 numeros',
+    description: "Block an unmarked number on a random opponent's card through the next two calls",
+    descriptionEs: 'Bloquea un número sin marcar del cartón de un oponente al azar durante las próximas dos llamadas',
     icon: '\uD83D\uDC9C', // purple heart
     duration: 2,
   },
@@ -70,8 +70,8 @@ export const POWER_UPS: PowerUpDef[] = [
     id: 'turbo_stamp',
     name: 'Turbo Stamp',
     nameEs: 'Sello Turbo',
-    description: 'Auto-daub all called numbers on your card instantly',
-    descriptionEs: 'Marca automaticamente todos los numeros cantados en tu carton',
+    description: 'Instantly mark every called, unblocked number on the selected card',
+    descriptionEs: 'Marca al instante todos los números cantados y sin bloquear del cartón seleccionado',
     icon: '\u26A1', // lightning
   },
 ];
@@ -92,3 +92,4 @@ export function dealPowerUps(count: number): PowerUpId[] {
   const clamped = Math.min(count, POWER_UPS.length);
   return shuffleArray(POWER_UPS.map((p) => p.id)).slice(0, clamped);
 }
+

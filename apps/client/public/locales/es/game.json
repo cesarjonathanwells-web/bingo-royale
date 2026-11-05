@@ -122,7 +122,44 @@
     "turbo_stamp": "Sello Turbo",
     "used": "Usado",
     "activated": "¡{{name}} usó {{powerup}}!",
-    "comingSoon": "¡Próximamente!"
+    "chooseCard": "Elige un cartón",
+    "chooseNumber": "Elige el próximo número. Las opciones cambian si se canta otro número.",
+    "pickSquare": "Elegir casilla",
+    "showChoices": "Ver tres opciones",
+    "use": "Usar poder",
+    "cancel": "Cancelar",
+    "tapSquare": "Toca un número resaltado del Cartón {{n}} para colocar el comodín.",
+    "callsRemaining_one": "Queda {{count}} llamada",
+    "callsRemaining_other": "Quedan {{count}} llamadas",
+    "untilNextCall": "hasta la próxima llamada",
+    "doubleReady": "Doble Marca listo para el Cartón {{n}} en la próxima llamada",
+    "inkOnCard": "Tinta en el Cartón {{n}}",
+    "blockedCell": "bloqueada por tinta",
+    "wildCell": "marcada con comodín",
+    "markedCell": "marcada",
+    "blankCell": "vacía",
+    "shieldBlocked": "Tu escudo bloqueó {{powerup}} de {{name}}.",
+    "scrambledCard": "{{name}} revolvió el Cartón {{n}}.",
+    "inkedCard": "{{name}} bloqueó una casilla del Cartón {{n}}.",
+    "errors": {
+      "failed": "No se pudo usar el poder. Tu poder sin usar sigue disponible.",
+      "timeout": "El servidor aún no lo ha confirmado. Reconéctate antes de reintentar.",
+      "disconnected": "Reconéctate para usar poderes.",
+      "game_not_running": "Los poderes solo se pueden usar durante una partida.",
+      "spectator": "Los espectadores no pueden usar poderes.",
+      "no_cards": "No hay cartones activos.",
+      "invalid_request": "La solicitud no es válida. Inténtalo de nuevo.",
+      "invalid_powerup": "Este poder no está disponible.",
+      "game_paused": "Reanuda la partida antes de usar poderes.",
+      "unavailable": "Ese poder ya se usó o no está disponible.",
+      "invalid_card": "Elige un cartón disponible.",
+      "no_numbers": "No quedan números para este poder.",
+      "invalid_target": "Elige un número sin marcar ni bloquear en tu cartón.",
+      "no_targets": "No hay casillas disponibles. Tu poder no se ha usado.",
+      "already_active": "Doble Marca ya está esperando la próxima llamada.",
+      "stale_choice": "Los próximos números cambiaron. Elige una de las nuevas opciones.",
+      "no_opponents": "Debe haber otro jugador para usar este poder."
+    }
   },
   "cards": {
     "count": "Número de cartones",
@@ -163,4 +200,3 @@
     "variant90": "90 bolas"
   }
 }
-

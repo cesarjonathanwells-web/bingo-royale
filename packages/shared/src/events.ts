@@ -3,6 +3,7 @@
 // ============================================================
 
 import { z } from 'zod';
+import type { PowerUpUseResult } from './types.js';
 
 // =====================================================================
 // Event name constants
@@ -33,6 +34,8 @@ export const S2C_ROOM_HOST_CHANGED = 'room:host_changed' as const;
 export const S2C_GAME_STARTED = 'game:started' as const;
 export const S2C_GAME_CARD_DEALT = 'game:card_dealt' as const;
 export const S2C_GAME_POWERUPS_DEALT = 'game:powerups_dealt' as const;
+export const S2C_GAME_POWERUP_STATE = 'game:powerup_state' as const;
+export const S2C_GAME_POWERUP_BLOCKED = 'game:powerup_blocked' as const;
 export const S2C_GAME_NUMBER_CALLED = 'game:number_called' as const;
 export const S2C_GAME_NUMBER_PEEK = 'game:number_peek' as const;
 export const S2C_GAME_WILD_SQUARE_APPLIED = 'game:wild_square_applied' as const;
@@ -147,11 +150,14 @@ export const GameStartSchema = z.object({
 });
 
 export const GameDabSchema = z.object({
-  cellIndex: z.number().int().min(0),
+  cellIndex: z.number().int().min(0).max(26),
+  cardIndex: z.number().int().min(0).max(3).optional(),
 });
 
 export const GameClaimBingoSchema = z.object({
   markedCells: z.array(z.number().int().min(0)),
+  cardIndex: z.number().int().min(0).max(3).optional(),
+  stage: z.enum(['one_line', 'two_lines', 'full_house']).optional(),
 });
 
 export const GamePauseSchema = z.object({});
@@ -163,7 +169,7 @@ export const ChatMessageSendSchema = z.object({
 });
 
 export const RoomSetCardCountSchema = z.object({
-  count: z.number().int().min(1).max(6),
+  count: z.number().int().min(1).max(4),
 });
 
 export const RoomUpdateSettingsSchema = z.object({
@@ -176,9 +182,16 @@ export const RoomUpdateSettingsSchema = z.object({
 
 export const GameNewRoundSchema = z.object({});
 
+export const PowerUpIdSchema = z.enum([
+  'double_daub', 'number_peek', 'wild_square', 'shield',
+  'scramble', 'callers_choice', 'ink_blot', 'turbo_stamp',
+]);
+
 export const GameUsePowerupSchema = z.object({
-  powerupId: z.string().min(1),
-  targetCellIndex: z.number().int().min(0).optional(),
+  powerupId: PowerUpIdSchema,
+  cardIndex: z.number().int().min(0).max(3).optional(),
+  targetCellIndex: z.number().int().min(0).max(26).optional(),
+  selectedNumber: z.number().int().min(1).max(90).optional(),
 });
 
 export const ChatReactionSendSchema = z.object({
@@ -249,12 +262,51 @@ export const GameCardDealtPayloadSchema = z.object({
 });
 
 const PlayerPowerUpSchema = z.object({
-  id: z.string(),
+  id: PowerUpIdSchema,
   used: z.boolean(),
 });
 
 export const GamePowerupsDealtPayloadSchema = z.object({
   powerups: z.array(PlayerPowerUpSchema),
+});
+
+export const PowerUpEffectsSchema = z.object({
+  wildCells: z.array(z.object({
+    cardIndex: z.number().int().min(0).max(3),
+    cellIndex: z.number().int().min(0).max(26),
+    grantedAtCall: z.number().int().min(0),
+  })),
+  blockedCells: z.array(z.object({
+    cardIndex: z.number().int().min(0).max(3),
+    cellIndex: z.number().int().min(0).max(26),
+    expiresAtCall: z.number().int().min(0),
+  })),
+  shieldUntilCall: z.number().int().min(0),
+  doubleDaub: z.object({
+    cardIndex: z.number().int().min(0).max(3),
+    activateAtCall: z.number().int().min(0),
+  }).optional(),
+});
+
+export const GamePowerupStatePayloadSchema = z.object({
+  roomCode: z.string(),
+  cards: z.array(BingoCardSchema),
+  dabs: z.array(z.array(z.number().int().min(0).max(26))),
+  powerups: z.array(PlayerPowerUpSchema),
+  effects: PowerUpEffectsSchema,
+  calledCount: z.number().int().min(0),
+});
+
+export const GameUsePowerupResultSchema = z.object({
+  success: z.boolean(),
+  error: z.string().optional(),
+  errorCode: z.string().optional(),
+  choices: z.array(z.number().int().min(1).max(90)).max(3).optional(),
+});
+
+export const GamePowerupBlockedPayloadSchema = z.object({
+  powerupId: PowerUpIdSchema,
+  byPlayer: z.string(),
 });
 
 export const GameNumberPeekPayloadSchema = z.object({
@@ -277,6 +329,7 @@ export const GameShieldActivePayloadSchema = z.object({
 
 export const GameScrambledPayloadSchema = z.object({
   byPlayer: z.string(),
+  cardIndex: z.number().int().min(0).max(3),
 });
 
 export const GameCallersChoicePendingPayloadSchema = z.object({
@@ -290,8 +343,7 @@ export const GamePowerupUsedPayloadSchema = z.object({
 });
 
 export const GameInkBlotPayloadSchema = z.object({
-  cellIndex: z.number().int().min(0),
-  duration: z.number(),
+  cardIndex: z.number().int().min(0).max(3),
   byPlayer: z.string(),
 });
 
@@ -330,6 +382,8 @@ export type RoomHostChangedPayload = z.infer<typeof RoomHostChangedPayloadSchema
 export type GameStartedPayload = z.infer<typeof GameStartedPayloadSchema>;
 export type GameCardDealtPayload = z.infer<typeof GameCardDealtPayloadSchema>;
 export type GamePowerupsDealtPayload = z.infer<typeof GamePowerupsDealtPayloadSchema>;
+export type GamePowerupStatePayload = z.infer<typeof GamePowerupStatePayloadSchema>;
+export type GamePowerupBlockedPayload = z.infer<typeof GamePowerupBlockedPayloadSchema>;
 export type GameNumberCalledPayload = z.infer<typeof GameNumberCalledPayloadSchema>;
 export type GameNumberPeekPayload = z.infer<typeof GameNumberPeekPayloadSchema>;
 export type GameWildSquareAppliedPayload = z.infer<typeof GameWildSquareAppliedPayloadSchema>;
@@ -359,12 +413,12 @@ export interface ClientToServerEvents {
   [C2S_ROOM_SET_CARD_COUNT]: (payload: RoomSetCardCountPayload) => void;
   [C2S_ROOM_UPDATE_SETTINGS]: (payload: RoomUpdateSettingsPayload) => void;
   [C2S_GAME_START]: (payload: GameStartPayload) => void;
-  [C2S_GAME_DAB]: (payload: GameDabPayload) => void;
+  [C2S_GAME_DAB]: (payload: GameDabPayload, callback?: (result: { success: boolean }) => void) => void;
   [C2S_GAME_CLAIM_BINGO]: (payload: GameClaimBingoPayload) => void;
   [C2S_GAME_PAUSE]: (payload: GamePausePayload) => void;
   [C2S_GAME_RESUME]: (payload: GameResumePayload) => void;
   [C2S_GAME_NEW_ROUND]: (payload: GameNewRoundPayload) => void;
-  [C2S_GAME_USE_POWERUP]: (payload: GameUsePowerupPayload) => void;
+  [C2S_GAME_USE_POWERUP]: (payload: GameUsePowerupPayload, callback?: (result: PowerUpUseResult) => void) => void;
   [C2S_CHAT_MESSAGE]: (payload: ChatMessageSendPayload) => void;
   [C2S_CHAT_REACTION]: (payload: ChatReactionSendPayload) => void;
 }
@@ -378,6 +432,8 @@ export interface ServerToClientEvents {
   [S2C_GAME_STARTED]: (payload: GameStartedPayload) => void;
   [S2C_GAME_CARD_DEALT]: (payload: GameCardDealtPayload) => void;
   [S2C_GAME_POWERUPS_DEALT]: (payload: GamePowerupsDealtPayload) => void;
+  [S2C_GAME_POWERUP_STATE]: (payload: GamePowerupStatePayload) => void;
+  [S2C_GAME_POWERUP_BLOCKED]: (payload: GamePowerupBlockedPayload) => void;
   [S2C_GAME_NUMBER_CALLED]: (payload: GameNumberCalledPayload) => void;
   [S2C_GAME_NUMBER_PEEK]: (payload: GameNumberPeekPayload) => void;
   [S2C_GAME_WILD_SQUARE_APPLIED]: (payload: GameWildSquareAppliedPayload) => void;
@@ -396,4 +452,5 @@ export interface ServerToClientEvents {
   [S2C_CHAT_REACTION]: (payload: ChatReactionPayload) => void;
   [S2C_ERROR]: (payload: ErrorPayload) => void;
 }
+
 

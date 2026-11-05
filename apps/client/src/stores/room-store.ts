@@ -12,6 +12,11 @@ import type {
   WinPattern,
   PlayerPowerUp,
   PowerUpId,
+  PowerUpEffects,
+  PowerUpState,
+  PowerUpUseOptions,
+  PowerUpUseResult,
+  WinStage90,
 } from "@bingo/shared";
 import { FREE_SPACE_INDEX } from "@bingo/shared";
 import { getSocket } from "@/socket";
@@ -67,6 +72,12 @@ interface RoomState {
   peekedNumbers: number[];
   reactions: EmojiReaction[];
   autoDaub: boolean;
+  powerUpEffects: PowerUpEffects;
+  powerUpCalledCount: number;
+  pendingPowerUp: PowerUpId | null;
+  callerChoices: number[];
+  powerUpError: string | null;
+  socketReady: boolean;
 
   // Actions
   createRoom: (variant: BingoVariant) => void;
@@ -76,7 +87,7 @@ interface RoomState {
   newRound: () => void;
   setCardCount: (count: number) => void;
   setActiveCard: (index: number) => void;
-  dabCell: (cellIndex: number) => void;
+  dabCell: (cellIndex: number, cardIndex?: number) => void;
   claimBingo: () => void;
   pauseGame: () => void;
   resumeGame: () => void;
@@ -87,7 +98,8 @@ interface RoomState {
     playerLimit?: number;
     customPatterns?: WinPattern[];
   }) => void;
-  usePowerUp: (powerupId: PowerUpId, targetCellIndex?: number) => void;
+  usePowerUp: (powerupId: PowerUpId, options?: PowerUpUseOptions) => void;
+  clearPowerUpPrompt: () => void;
   sendReaction: (emoji: string) => void;
   toggleAutoDaub: () => void;
 
@@ -111,49 +123,51 @@ const initialState = {
   myPowerUps: [] as PlayerPowerUp[],
   peekedNumbers: [] as number[],
   reactions: [] as EmojiReaction[],
+  powerUpEffects: { wildCells: [], blockedCells: [], shieldUntilCall: 0 } as PowerUpEffects,
+  powerUpCalledCount: 0,
+  pendingPowerUp: null as PowerUpId | null,
+  callerChoices: [] as number[],
+  powerUpError: null as string | null,
+  socketReady: false,
   autoDaub: typeof window !== "undefined" && localStorage.getItem("bingo-auto-daub") === "true",
 };
 
 // Module-level variable for peek timeout (not reactive state)
 let _peekTimeoutId: ReturnType<typeof setTimeout> | null = null;
+let _powerUpTimeoutId: ReturnType<typeof setTimeout> | null = null;
+let _powerUpRequest = 0;
+const _pendingDabs = new Set<string>();
 
-/**
- * Scans all cards for the called number and auto-dabs matching cells.
- * Emits a dab event to the server for each match.
- */
-function performAutoDaub(
-  calledNumber: number,
-  get: () => RoomState,
-  set: (partial: Partial<RoomState> | ((state: RoomState) => Partial<RoomState>)) => void,
-): void {
-  const { myCards, myDabs } = get();
-  if (myCards.length === 0) return;
+function clearPowerUpRequest(): void {
+  _powerUpRequest++;
+  if (_powerUpTimeoutId !== null) clearTimeout(_powerUpTimeoutId);
+  _powerUpTimeoutId = null;
+}
 
-  const newDabs = [...myDabs];
-  let changed = false;
+function isBlocked(state: RoomState, cardIndex: number, cellIndex: number): boolean {
+  return state.powerUpEffects.blockedCells.some(cell => cell.cardIndex === cardIndex && cell.cellIndex === cellIndex && cell.expiresAtCall >= state.powerUpCalledCount);
+}
 
-  for (let ci = 0; ci < myCards.length; ci++) {
-    const card = myCards[ci];
-    if (!card) continue;
 
-    const cardDabs = newDabs[ci] ?? new Set<number>();
-    const cellIndex =
-      card.grid.length === 5
-        ? findCellIndex75(card as BingoCard75, calledNumber)
-        : findCellIndex90(card as BingoCard90, calledNumber);
+function requestDab(cardIndex: number, cellIndex: number): void {
+  const socket = getSocket();
+  if (socket.connected === false) return;
+  const key = `${cardIndex}:${cellIndex}`;
+  if (_pendingDabs.has(key)) return;
+  _pendingDabs.add(key);
+  socket.emit("game:dab", { cellIndex, cardIndex }, () => { _pendingDabs.delete(key); });
+}
 
-    if (cellIndex !== null && !cardDabs.has(cellIndex)) {
-      const updated = new Set(cardDabs);
-      updated.add(cellIndex);
-      newDabs[ci] = updated;
-      changed = true;
-
-      const socket = getSocket();
-      socket.emit("game:dab", { cellIndex, cardIndex: ci });
-    }
-  }
-
-  if (changed) set({ myDabs: newDabs });
+/** Auto-daub requests obey the same server confirmation and ink rules as taps. */
+function performAutoDaub(calledNumber: number, get: () => RoomState): void {
+  const state = get();
+  if (state.room?.state !== "in_progress" || state.gameState?.paused) return;
+  state.myCards.forEach((card, ci) => {
+    const cellIndex = card.grid.length === 5
+      ? findCellIndex75(card as BingoCard75, calledNumber)
+      : findCellIndex90(card as BingoCard90, calledNumber);
+    if (cellIndex !== null && !state.myDabs[ci]?.has(cellIndex) && !isBlocked(state, ci, cellIndex)) requestDab(ci, cellIndex);
+  });
 }
 
 export const useRoomStore = create<RoomState>()((set, get) => ({
@@ -172,13 +186,18 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
   },
 
   leaveRoom: () => {
+    clearPowerUpRequest();
+    _pendingDabs.clear();
+    if (_peekTimeoutId !== null) clearTimeout(_peekTimeoutId);
+    _peekTimeoutId = null;
+    const socketReady = get().socketReady;
     try {
       const socket = getSocket();
       socket.emit("room:leave");
     } catch {
       // Socket may not be connected — still reset local state
     }
-    set({ ...initialState, myDabs: [], myCards: [], myPowerUps: [], peekedNumbers: [], reactions: [] });
+    set({ ...initialState, socketReady, myDabs: [], myCards: [], myPowerUps: [], peekedNumbers: [], reactions: [] });
   },
 
   startGame: () => {
@@ -205,38 +224,46 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     }
   },
 
-  // Dabs are one-way: once dabbed, a cell stays dabbed (matches server behavior)
-  dabCell: (cellIndex) => {
-    const { myDabs, activeCardIndex, myCards, gameState, room } = get();
-    const currentDabs = myDabs[activeCardIndex];
-    if (!currentDabs || currentDabs.has(cellIndex)) return; // Already dabbed, no-op
-
-    // Only allow dabbing numbers that have been called
-    const card = myCards[activeCardIndex];
-    if (card && gameState && room) {
-      const value = getCellValue(card, cellIndex, room.variant);
-      if (value !== null && !gameState.calledNumbers.includes(value)) return;
-    }
-
-    const newCardDabs = new Set(currentDabs);
-    newCardDabs.add(cellIndex);
-    const newDabs = [...myDabs];
-    newDabs[activeCardIndex] = newCardDabs;
-    set({ myDabs: newDabs });
-
-    const socket = getSocket();
-    socket.emit("game:dab", { cellIndex, cardIndex: activeCardIndex });
+  // The server confirms every mark; blocked and uncalled cells never become local marks.
+  dabCell: (cellIndex, cardIndex = get().activeCardIndex) => {
+    const state = get();
+    const { myDabs, myCards, gameState, room } = state;
+    if (room?.state !== "in_progress" || !gameState || gameState.paused || !Number.isInteger(cellIndex)) return;
+    const card = myCards[cardIndex];
+    const currentDabs = myDabs[cardIndex];
+    if (!card || !currentDabs || currentDabs.has(cellIndex) || isBlocked(state, cardIndex, cellIndex)) return;
+    const value = getCellValue(card, cellIndex, room.variant);
+    if (!value || !gameState.calledNumbers.includes(value)) return;
+    requestDab(cardIndex, cellIndex);
   },
 
   claimBingo: () => {
-    const { myDabs, activeCardIndex } = get();
+    const { room, myCards, myDabs, activeCardIndex } = get();
     const currentDabs = myDabs[activeCardIndex];
-    const socket = getSocket();
-    // Send current card's dabs as hint, but server checks ALL cards
-    socket.emit("game:claim_bingo", {
-      markedCells: Array.from(currentDabs ?? []),
-      cardIndex: activeCardIndex,
-    });
+    if (!room || !myCards.length) return;
+    let stage: WinStage90 | undefined;
+    if (room.variant === "90") {
+      // Prefer the highest enabled completed stage across every card.
+      const stages: WinStage90[] = ["full_house", "two_lines", "one_line"];
+      const configuredStages = stages.filter(candidate => room.patterns.includes(candidate));
+      const enabledStages = configuredStages.length ? configuredStages : stages;
+      stage = enabledStages.find(candidate =>
+        myCards.some((card, ci) => {
+          // Dab requests precede this claim on the socket and are serialized by the server.
+          const marks = new Set(myDabs[ci] ?? []);
+          for (const pending of _pendingDabs) {
+            const [pendingCard, cell] = pending.split(":").map(Number);
+            if (pendingCard === ci) marks.add(cell);
+          }
+          let rows = 0;
+          for (let row = 0; row < 3; row++) {
+            if (card.grid.every((column, col) => !column[row] || marks.has(row * 9 + col))) rows++;
+          }
+          return rows >= (candidate === "full_house" ? 3 : candidate === "two_lines" ? 2 : 1);
+        }),
+      ) ?? enabledStages[enabledStages.length - 1];
+    }
+    getSocket().emit("game:claim_bingo", { markedCells: Array.from(currentDabs ?? []), cardIndex: activeCardIndex, ...(stage ? { stage } : {}) });
   },
 
   pauseGame: () => {
@@ -271,16 +298,34 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     set({ autoDaub: next });
   },
 
-  usePowerUp: (powerupId, targetCellIndex) => {
+  usePowerUp: (powerupId, options = {}) => {
+    const state = get();
     const socket = getSocket();
-    // Optimistically mark as used
-    set((state) => ({
-      myPowerUps: state.myPowerUps.map((p) =>
-        p.id === powerupId ? { ...p, used: true } : p,
-      ),
-    }));
-    socket.emit("game:use_powerup", { powerupId, targetCellIndex });
+    if (state.pendingPowerUp || state.room?.state !== "in_progress" || state.gameState?.paused || !state.myCards.length) return;
+    if (socket.connected === false) { set({ powerUpError: "disconnected" }); return; }
+    clearPowerUpRequest();
+    const request = _powerUpRequest;
+    const roomCode = state.room.code;
+    set({ pendingPowerUp: powerupId, powerUpError: null });
+    _powerUpTimeoutId = setTimeout(() => {
+      if (request !== _powerUpRequest) return;
+      set({ pendingPowerUp: null, powerUpError: "timeout" });
+      _powerUpTimeoutId = null;
+    }, 8000);
+    socket.emit("game:use_powerup", { powerupId, ...options }, (result: PowerUpUseResult & { errorCode?: string }) => {
+      if (request !== _powerUpRequest || get().room?.code !== roomCode) return;
+      if (_powerUpTimeoutId !== null) clearTimeout(_powerUpTimeoutId);
+      _powerUpTimeoutId = null;
+      if (!result?.success) {
+        set({ pendingPowerUp: null, powerUpError: result?.errorCode ?? "failed", ...(result?.choices ? { callerChoices: result.choices } : {}) });
+        return;
+      }
+      set({ pendingPowerUp: null, powerUpError: null, callerChoices: result.choices ?? [] });
+      // The private server snapshot is authoritative. Acknowledgment alone never consumes a power-up locally.
+    });
   },
+
+  clearPowerUpPrompt: () => set({ callerChoices: [], powerUpError: null }),
 
   setupListeners: () => {
     const socket = getSocket();
@@ -292,6 +337,12 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       // A response already in flight can arrive after Exit resets local state.
       // Accept initial room data only while a create/join request is pending.
       if (!get().room && !get().isConnecting) return;
+      if (room.state === "lobby") {
+        clearPowerUpRequest();
+        _pendingDabs.clear();
+        if (_peekTimeoutId !== null) clearTimeout(_peekTimeoutId);
+        _peekTimeoutId = null;
+      }
       set((state) => ({
         room,
         isConnecting: false,
@@ -305,6 +356,11 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
               activeCardIndex: 0,
               myPowerUps: [],
               peekedNumbers: [],
+              powerUpEffects: { wildCells: [], blockedCells: [], shieldUntilCall: 0 },
+              powerUpCalledCount: 0,
+              pendingPowerUp: null,
+              callerChoices: [],
+              powerUpError: null,
               chatMessages: state.chatMessages, // Preserve chat
             }
           : {}),
@@ -445,9 +501,11 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
             : null,
         }));
 
+        set(state => ({ peekedNumbers: state.peekedNumbers.filter(number => !data.calledNumbers.includes(number)) }));
+
         // Auto-daub: scan all cards for the called number
         if (get().autoDaub) {
-          performAutoDaub(data.number, get, set);
+          performAutoDaub(data.number, get);
         }
       },
     );
@@ -505,6 +563,9 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
         winners: WinEvent[];
         calledNumbers?: number[];
       }) => {
+        clearPowerUpRequest();
+        _pendingDabs.clear();
+        set({ pendingPowerUp: null, callerChoices: [], powerUpError: null });
         set((state) => ({
           gameState: state.gameState
             ? {
@@ -522,6 +583,22 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
     );
 
     // ---- Power-up listeners ----
+
+    socket.on("game:powerup_state", (data: PowerUpState) => {
+      if (get().room?.state !== "in_progress" || data.roomCode !== get().room?.code) return;
+      const myDabs = data.cards.map((card, ci) => {
+        const marks = new Set(data.dabs[ci] ?? []);
+        if (card.grid.length === 5) marks.add(FREE_SPACE_INDEX);
+        return marks;
+      });
+      myDabs.forEach((marks, ci) => marks.forEach(index => _pendingDabs.delete(`${ci}:${index}`)));
+      set({ myCards: data.cards, myDabs, myPowerUps: data.powerups, powerUpEffects: data.effects, powerUpCalledCount: data.calledCount });
+      // Catch up numbers that were called while a cell was blocked.
+      if (get().autoDaub && get().room?.state === "in_progress") {
+        for (const number of get().gameState?.calledNumbers ?? []) performAutoDaub(number, get);
+      }
+    });
+
 
     socket.on(
       "game:powerups_dealt",
@@ -545,36 +622,6 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       }, 10000);
     });
 
-    socket.on(
-      "game:turbo_stamp_applied",
-      (data: { dabs: number[]; cardIndex?: number }) => {
-        set((state) => {
-          const newDabs = [...state.myDabs];
-          const idx = data.cardIndex ?? state.activeCardIndex;
-          if (idx >= 0 && idx < newDabs.length) {
-            newDabs[idx] = new Set(data.dabs);
-          }
-          return { myDabs: newDabs };
-        });
-      },
-    );
-
-    socket.on(
-      "game:wild_square_applied",
-      (data: { cellIndex: number }) => {
-        set((state) => {
-          const newDabs = [...state.myDabs];
-          const idx = state.activeCardIndex;
-          if (newDabs[idx]) {
-            const updated = new Set(newDabs[idx]);
-            updated.add(data.cellIndex);
-            newDabs[idx] = updated;
-          }
-          return { myDabs: newDabs };
-        });
-      },
-    );
-
     // ---- Chat and reaction listeners ----
 
     socket.on("chat:message", (message: ChatMessage) => {
@@ -594,6 +641,12 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       setTimeout(() => {
         set((state) => ({ reactions: state.reactions.filter((r) => r.id !== id) }));
       }, 3000);
+    });
+
+    socket.on("disconnect", () => {
+      _pendingDabs.clear();
+      clearPowerUpRequest();
+      set({ pendingPowerUp: null, callerChoices: [], socketReady: false });
     });
 
     // ---- Error listener ----
@@ -620,12 +673,14 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
       "game:bingo_claimed",
       "game:finished",
       "game:powerups_dealt",
+      "game:powerup_state",
       "game:number_peek",
       "game:turbo_stamp_applied",
       "game:wild_square_applied",
       "chat:message",
       "chat:reaction",
       "error",
+      "disconnect",
     ];
     for (const event of events) {
       socket.off(event);
@@ -633,6 +688,8 @@ export const useRoomStore = create<RoomState>()((set, get) => ({
   },
 
   reset: () => {
+    clearPowerUpRequest();
+    _pendingDabs.clear();
     if (_peekTimeoutId !== null) {
       clearTimeout(_peekTimeoutId);
       _peekTimeoutId = null;

@@ -25,6 +25,7 @@ export function useSocket(): void {
       }
 
       const socket = getSocket();
+      useRoomStore.setState({ socketReady: socket.connected });
 
       // On reconnect, re-auth and rejoin room if we were in one
       const handleReconnect = () => {
@@ -32,7 +33,7 @@ export function useSocket(): void {
           socket.auth = { token };
         }
         // Clear any disconnect error state
-        useRoomStore.setState({ error: null });
+        useRoomStore.setState({ error: null, socketReady: true });
         // If we were in a room, attempt to rejoin
         const room = useRoomStore.getState().room;
         if (room) {
@@ -44,6 +45,9 @@ export function useSocket(): void {
         // Only set error for unexpected disconnects (not user-initiated)
         if (reason !== "io client disconnect") {
           useRoomStore.setState({
+            socketReady: false,
+            pendingPowerUp: null,
+            callerChoices: [],
             error: "Connection lost. Reconnecting...",
           });
         }
@@ -65,3 +69,4 @@ export function useSocket(): void {
     }
   }, [isAuthenticated, token, setupListeners, cleanupListeners]);
 }
+

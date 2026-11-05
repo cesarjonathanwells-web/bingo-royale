@@ -3,14 +3,16 @@
 // ============================================================
 
 import type { Server } from 'socket.io';
-import type { Room, RoomState, WinStage90, PowerUpId, PlayerPowerUp } from '@bingo/shared';
-import { generateCallerPool75, generateCallerPool90, dealPowerUps, POWER_UP_MAP } from '@bingo/shared';
+import type { Room, RoomState, WinStage90, PlayerPowerUp } from '@bingo/shared';
+import { generateCallerPool75, generateCallerPool90, dealPowerUps } from '@bingo/shared';
 import type { AuthenticatedSocket } from '../../services/auth.js';
 import * as roomStore from '../../redis/room-store.js';
 import { CallerManager } from '../../services/caller.js';
 import { generateCardsForRoom } from '../../services/card-generator.js';
-import { validateBingo75, validateBingo90, isPatternExpired75, isStageExpired90 } from '../../services/win-validator.js';
+import { validateBingo75, validateBingo90, isPatternExpired75, isStageExpired90, type ValidationResult } from '../../services/win-validator.js';
 import { persistGameResult } from '../../services/game-persistence.js';
+import { withRoomLock } from '../../services/room-lock.js';
+import { usePowerUp, sendPowerUpState, PowerUpError, cellValue, isCellBlocked } from '../../services/powerups.js';
 
 // --------------- Shared handler helpers ---------------
 
@@ -85,10 +87,23 @@ export function registerGameHandlers(
   io: Server,
 ): void {
   const user = socket.data.user;
+  const on = (event: string, handler: (...args: any[]) => Promise<void>) => {
+    socket.on(event, (...args: any[]) => {
+      const code = socket.data.roomCode ?? socket.id;
+      return withRoomLock(code, () => {
+        if ((socket.data.roomCode ?? socket.id) !== code) {
+          fail(args.find((argument) => typeof argument === 'function'), 'Room changed');
+          return Promise.resolve();
+        }
+        return handler(...args);
+      });
+    });
+  };
+
 
   // --------------- room:set_card_count ---------------
 
-  socket.on('room:set_card_count', async (data, callback) => {
+  on('room:set_card_count', async (data, callback) => {
     try {
       const ctx = await requireRoom(socket, callback, 'lobby');
       if (!ctx) return;
@@ -111,7 +126,7 @@ export function registerGameHandlers(
 
   // --------------- game:start ---------------
 
-  socket.on('game:start', async (_, callback) => {
+  on('game:start', async (_, callback) => {
     try {
       const ctx = await requireRoom(socket, callback, 'lobby');
       if (!ctx) return;
@@ -172,6 +187,8 @@ export function registerGameHandlers(
           used: false,
         }));
         await roomStore.setPowerUps(code, player.id, playerPowerUps);
+        await roomStore.setPowerUpEffects(code, player.id, roomStore.emptyPowerUpEffects());
+        await roomStore.setDabs(code, player.id, (cards.get(player.id) ?? []).map((card) => card.grid.length === 5 ? [12] : []));
 
         // Send power-ups to the specific player socket
         for (const roomSocket of roomSockets) {
@@ -192,6 +209,8 @@ export function registerGameHandlers(
         startedAt: Date.now(),
       });
 
+      for (const player of activePlayers) await sendPowerUpState(code, player.id, io);
+
       // Start the number caller
       CallerManager.startCalling(code, room.speed, room.variant, io);
 
@@ -206,51 +225,50 @@ export function registerGameHandlers(
 
   // --------------- game:dab ---------------
 
-  socket.on('game:dab', async (data) => {
+  on('game:dab', async (data, callback) => {
     try {
       const code = socket.data.roomCode;
-      if (!code) return;
-
-      // Check if player has cards (spectators won't)
+      if (!code) return void fail(callback, 'Not in a room');
+      const room = await roomStore.getRoom(code);
+      if (room?.state !== 'in_progress' || !room.players.some((player) => player.id === user.id && !player.isSpectator)) return void fail(callback, 'No active game');
+      const caller = await roomStore.getCallerState(code);
       const cards = await roomStore.getCard(code, user.id);
-      if (!cards || cards.length === 0) return;
-
-      const cellIndex = data?.cellIndex as number;
-      const cardIndex = typeof data?.cardIndex === 'number' ? data.cardIndex : 0;
-      if (typeof cellIndex !== 'number' || !Number.isInteger(cellIndex) || cellIndex < 0) return;
-      if (cardIndex < 0 || cardIndex >= cards.length) return;
-
-      // Validate cellIndex upper bound based on card grid size
-      // 75-ball: 5x5 = 25 cells (0-24), 90-ball: 9x3 = 27 cells (0-26)
-      const card = cards[cardIndex];
-      const maxCell = card.grid.length === 5 ? 24 : 26;
-      if (cellIndex > maxCell) return;
-
-      // Get current dabs (array of arrays) and add new one to the right card
+      if (!caller || !cards?.length) return void fail(callback, 'No active cards');
+      if (caller.paused) return void fail(callback, 'Game is paused');
+      const cellIndex = data?.cellIndex;
+      const cardIndex = data?.cardIndex ?? 0;
+      if (!Number.isInteger(cardIndex) || cardIndex < 0 || cardIndex >= cards.length) return void fail(callback, 'Invalid card');
+      const value = cellValue(cards[cardIndex], cellIndex);
+      if (value === null || !caller.called.includes(value)) return void fail(callback, 'Number not called');
+      const effects = await roomStore.getPowerUpEffects(code, user.id);
+      if (isCellBlocked(effects, cardIndex, cellIndex, caller.called.length)) return void fail(callback, 'Cell is blocked');
       const allDabs = await roomStore.getDabs(code, user.id);
-      // Ensure the array has enough entries for all cards
-      while (allDabs.length < cards.length) {
-        allDabs.push([]);
-      }
+      while (allDabs.length < cards.length) allDabs.push([]);
       if (!allDabs[cardIndex].includes(cellIndex)) {
         allDabs[cardIndex].push(cellIndex);
         await roomStore.setDabs(code, user.id, allDabs);
+        await sendPowerUpState(code, user.id, io);
       }
+      succeed(callback);
     } catch (err) {
       console.error('[Game] Error recording dab:', err);
       socket.emit('error', { message: 'Failed to record dab' });
+      fail(callback, 'Failed to record dab');
     }
   });
 
   // --------------- game:claim_bingo ---------------
 
-  socket.on('game:claim_bingo', async (data, callback) => {
+  on('game:claim_bingo', async (data, callback) => {
     try {
       const ctx = await requireRoom(socket, callback, 'in_progress');
       if (!ctx) return;
       const { code, room } = ctx;
 
       const stage: WinStage90 | undefined = data?.stage;
+      if (!room.players.some((player) => player.id === user.id && !player.isSpectator)) {
+        return void fail(callback, 'Spectators cannot claim bingo');
+      }
 
       // Get all cards and server-stored dabs for this player
       const cards = await roomStore.getCard(code, user.id);
@@ -262,7 +280,8 @@ export function registerGameHandlers(
 
       // Try ALL cards with server-stored dabs (not client-sent dabs)
       // This prevents desync between client and server dab state
-      let result: { valid: boolean; pattern?: string } = { valid: false };
+      let result: ValidationResult = { valid: false };
+      let expiredCandidate: { result: ValidationResult; cardIndex: number } | undefined;
       let winningCardIndex = 0;
 
       for (let ci = 0; ci < cards.length; ci++) {
@@ -280,6 +299,7 @@ export function registerGameHandlers(
         }
 
         if (cardResult.valid) {
+          if (cardResult.expired) { expiredCandidate ??= { result: cardResult, cardIndex: ci }; continue; }
           result = cardResult;
           winningCardIndex = ci;
           break;
@@ -298,9 +318,17 @@ export function registerGameHandlers(
             result = await validateBingo90(code, user.id, rawMarkedCells, stage, cardIndex);
           }
           if (result.valid) {
-            winningCardIndex = cardIndex;
+            if (result.expired) {
+              expiredCandidate ??= { result, cardIndex };
+              result = { valid: false };
+            } else winningCardIndex = cardIndex;
           }
         }
+      }
+
+      if (!result.valid && expiredCandidate) {
+        result = expiredCandidate.result;
+        winningCardIndex = expiredCandidate.cardIndex;
       }
 
       // Check if the winning pattern/stage was already completable before the
@@ -401,7 +429,7 @@ export function registerGameHandlers(
 
   // --------------- game:pause ---------------
 
-  socket.on('game:pause', async (_, callback) => {
+  on('game:pause', async (_, callback) => {
     try {
       const ctx = await requireRoom(socket, callback, 'in_progress');
       if (!ctx) return;
@@ -422,7 +450,7 @@ export function registerGameHandlers(
 
   // --------------- game:resume ---------------
 
-  socket.on('game:resume', async (_, callback) => {
+  on('game:resume', async (_, callback) => {
     try {
       const ctx = await requireRoom(socket, callback, 'in_progress');
       if (!ctx) return;
@@ -432,7 +460,7 @@ export function registerGameHandlers(
         return void fail(callback, 'Only the host can resume the game');
       }
 
-      CallerManager.resumeCalling(code, io);
+      await CallerManager.resumeCalling(code, io);
       io.to(code).emit('game:resumed', { resumedBy: user.name });
 
       succeed(callback);
@@ -443,173 +471,23 @@ export function registerGameHandlers(
 
   // --------------- game:use_powerup ---------------
 
-  socket.on('game:use_powerup', async (data, callback) => {
+  on('game:use_powerup', async (data, callback) => {
     try {
       const ctx = await requireRoom(socket, callback, 'in_progress');
       if (!ctx) return;
-      const { code, room } = ctx;
-
-      const powerupId = data?.powerupId as PowerUpId;
-      const targetCellIndex = data?.targetCellIndex as number | undefined;
-
-      // Validate powerupId is a non-empty string and a known power-up
-      if (!powerupId || typeof powerupId !== 'string' || !POWER_UP_MAP[powerupId]) {
-        return void fail(callback, 'Invalid power-up');
-      }
-
-      // 1. Verify player has this power-up and hasn't used it
-      const powerups = await roomStore.getPowerUps(code, user.id);
-      const powerup = powerups.find((p) => p.id === powerupId && !p.used);
-      if (!powerup) {
-        return void fail(callback, 'Power-up not available');
-      }
-
-      // 2. Mark it as used in Redis
-      powerup.used = true;
-      await roomStore.setPowerUps(code, user.id, powerups);
-
-      // 3. Apply the effect based on power-up type
-      switch (powerupId) {
-        case 'number_peek': {
-          // Read next 3 from caller pool, emit to this player only
-          const callerState = await roomStore.getCallerState(code);
-          const peekedNumbers = callerState?.pool.slice(0, 3) ?? [];
-          socket.emit('game:number_peek', { numbers: peekedNumbers });
-          break;
-        }
-
-        case 'wild_square': {
-          // Mark the target cell as dabbed in server store (first card)
-          if (typeof targetCellIndex === 'number' && targetCellIndex >= 0) {
-            const allDabs = await roomStore.getDabs(code, user.id);
-            const cardDabs = allDabs[0] ?? [];
-            if (!cardDabs.includes(targetCellIndex)) {
-              cardDabs.push(targetCellIndex);
-            }
-            allDabs[0] = cardDabs;
-            await roomStore.setDabs(code, user.id, allDabs);
-            socket.emit('game:wild_square_applied', { cellIndex: targetCellIndex });
-          }
-          break;
-        }
-
-        case 'turbo_stamp': {
-          // Get all called numbers, auto-dab all matching cells on player's first card
-          const cards = await roomStore.getCard(code, user.id);
-          const callerData = await roomStore.getCallerState(code);
-          if (cards && cards.length > 0 && callerData) {
-            const firstCard = cards[0];
-            const calledSet = new Set(callerData.called);
-            const allDabs = await roomStore.getDabs(code, user.id);
-            const cardDabs = allDabs[0] ?? [];
-            const dabSet = new Set(cardDabs);
-
-            // Iterate through the card grid and dab any called numbers
-            const grid = firstCard.grid;
-            for (let col = 0; col < grid.length; col++) {
-              for (let row = 0; row < grid[col].length; row++) {
-                const cellValue = grid[col][row];
-                if (cellValue !== null && cellValue !== 0 && calledSet.has(cellValue as number)) {
-                  // Convert col/row to row-major index
-                  const cellIdx = grid.length === 5
-                    ? row * 5 + col
-                    : row * 9 + col;
-                  dabSet.add(cellIdx);
-                }
-              }
-            }
-
-            const newDabs = Array.from(dabSet);
-            allDabs[0] = newDabs;
-            await roomStore.setDabs(code, user.id, allDabs);
-            socket.emit('game:turbo_stamp_applied', { dabs: newDabs });
-          }
-          break;
-        }
-
-        case 'double_daub': {
-          // Set a flag so the player gets notified; actual logic is client-side hint
-          socket.emit('game:double_daub_active', {});
-          break;
-        }
-
-        case 'shield': {
-          // Placeholder - emit confirmation
-          socket.emit('game:shield_active', { duration: 2 });
-          break;
-        }
-
-        case 'scramble': {
-          // Pick a random other player and notify them
-          const otherPlayers = room.players.filter(
-            (p) => p.id !== user.id && !p.isSpectator,
-          );
-          if (otherPlayers.length > 0) {
-            const target =
-              otherPlayers[Math.floor(Math.random() * otherPlayers.length)];
-            const roomSockets = await io.in(code).fetchSockets();
-            for (const rs of roomSockets) {
-              if (rs.data.user?.id === target.id) {
-                rs.emit('game:scrambled', { byPlayer: user.name });
-              }
-            }
-          }
-          break;
-        }
-
-        case 'callers_choice': {
-          // Not fully implemented - emit a toast-worthy event
-          socket.emit('game:callers_choice_pending', { message: 'Coming soon!' });
-          break;
-        }
-
-        case 'ink_blot': {
-          // Pick random opponent, emit ink_blot to them with a random cell
-          const opponents = room.players.filter(
-            (p) => p.id !== user.id && !p.isSpectator,
-          );
-          if (opponents.length > 0) {
-            const target =
-              opponents[Math.floor(Math.random() * opponents.length)];
-            const targetCards = await roomStore.getCard(code, target.id);
-            if (targetCards && targetCards.length > 0) {
-              const firstCard = targetCards[0];
-              const totalCells =
-                firstCard.grid.length === 5 ? 25 : 27; // 5x5 or 9x3
-              const blockedCell = Math.floor(Math.random() * totalCells);
-              const roomSockets = await io.in(code).fetchSockets();
-              for (const rs of roomSockets) {
-                if (rs.data.user?.id === target.id) {
-                  rs.emit('game:ink_blot', {
-                    cellIndex: blockedCell,
-                    duration: 2,
-                    byPlayer: user.name,
-                  });
-                }
-              }
-            }
-          }
-          break;
-        }
-      }
-
-      // 4. Emit 'game:powerup_used' to room
-      io.to(code).emit('game:powerup_used', {
-        playerId: user.id,
-        playerName: user.name,
-        powerupId,
-      });
-
-      // 5. Callback with success
-      succeed(callback);
+      const result = await usePowerUp(ctx.code, user.id, data, io);
+      succeed(callback, result);
     } catch (err) {
-      handleError(socket, 'using power-up', callback, err);
+      if (err instanceof PowerUpError) {
+        if (typeof callback === 'function') callback({ success: false, error: err.message, errorCode: err.code, ...(err.choices ? { choices: err.choices } : {}) });
+        else socket.emit('error', { message: err.message });
+      } else handleError(socket, 'using power-up', callback, err);
     }
   });
 
   // --------------- game:new_round ---------------
 
-  socket.on('game:new_round', async (_, callback) => {
+  on('game:new_round', async (_, callback) => {
     try {
       const ctx = await requireRoom(socket, callback, 'finished');
       if (!ctx) return;
@@ -633,6 +511,7 @@ export function registerGameHandlers(
       for (const player of players) {
         await roomStore.setDabs(code, player.id, []);
         await roomStore.setPowerUps(code, player.id, []);
+        await roomStore.setPowerUpEffects(code, player.id, roomStore.emptyPowerUpEffects());
       }
 
       const updatedRoom = await roomStore.getRoom(code);
@@ -644,3 +523,4 @@ export function registerGameHandlers(
     }
   });
 }
+

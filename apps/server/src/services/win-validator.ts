@@ -1,258 +1,72 @@
-// ============================================================
-// Bingo Royale - Win Validation Service (Anti-Cheat)
-// ============================================================
+import type { BingoCard, BingoCard75, BingoCard90, WinStage90, PowerUpEffects, WinPattern } from '@bingo/shared';
+import { checkWin75, checkWinStage90, FREE_SPACE_INDEX, WIN_PATTERNS, resolvePattern } from '@bingo/shared';
+import * as store from '../redis/room-store.js';
+import { cellValue } from './powerups.js';
 
-import type { BingoCard, BingoCard75, BingoCard90, WinStage90 } from '@bingo/shared';
-import {
-  checkWin75,
-  checkWinStage90,
-  FREE_SPACE_INDEX,
-  WIN_PATTERNS,
-  resolvePattern,
-} from '@bingo/shared';
-import type { WinPattern } from '@bingo/shared';
-import * as roomStore from '../redis/room-store.js';
+export interface ValidationResult { valid: boolean; pattern?: string; expired?: boolean }
 
-export interface ValidationResult {
-  valid: boolean;
-  pattern?: string;
+async function context(code: string, playerId: string, cardIndex: number) {
+  const cards = await store.getCard(code, playerId);
+  if (!cards || !Number.isInteger(cardIndex) || cardIndex < 0 || cardIndex >= cards.length) return null;
+  const caller = await store.getCallerState(code);
+  const room = await store.getRoom(code);
+  if (!caller || !room) return null;
+  return { card: cards[cardIndex], caller, room, effects: await store.getPowerUpEffects(code, playerId) };
 }
 
-// --------------- Common helpers ---------------
-
-/**
- * Retrieve a player's card and the room's called numbers for validation.
- * Returns null if the card or caller state is not available.
- */
-async function getValidationContext(
-  roomCode: string,
-  playerId: string,
-  cardIndex: number,
-): Promise<{ card: BingoCard; calledSet: Set<number> } | null> {
-  const cards = await roomStore.getCard(roomCode, playerId);
-  if (!cards || cards.length === 0) return null;
-
-  const safeIndex = Math.max(0, Math.min(cardIndex, cards.length - 1));
-  const card = cards[safeIndex];
-  if (!card) return null;
-
-  const callerState = await roomStore.getCallerState(roomCode);
-  if (!callerState) return null;
-
-  return { card, calledSet: new Set(callerState.called) };
+function eligible(card: BingoCard, index: number, effects: PowerUpEffects, cardIndex: number, called: number[], count: number): boolean {
+  if (!Number.isInteger(index) || index < 0 || index >= (card.grid.length === 5 ? 25 : 27)) return false;
+  if (card.grid.length === 5 && index === FREE_SPACE_INDEX) return true;
+  const value = cellValue(card, index);
+  if (value === null) return false;
+  // Historical block records let expiration distinguish a newly unblocked win
+  // from one that the player could have claimed before the last draw.
+  if (effects.blockedCells.some((cell) => cell.cardIndex === cardIndex && cell.cellIndex === index && cell.expiresAtCall >= count && cell.expiresAtCall - 2 <= count)) return false;
+  if (effects.wildCells.some((cell) => cell.cardIndex === cardIndex && cell.cellIndex === index && cell.grantedAtCall <= count)) return true;
+  return called.slice(0, count).includes(value);
 }
 
-// --------------- 75-ball validation ---------------
-
-/**
- * Validate a 75-ball bingo claim.
- *
- * Steps:
- * 1. Get the player's card from the store (by cardIndex)
- * 2. Get the called numbers for the room
- * 3. Verify all marked cells correspond to numbers that have been called (or FREE space)
- * 4. Check if the marked cells satisfy any active win pattern
- */
-export async function validateBingo75(
-  roomCode: string,
-  playerId: string,
-  markedCells: number[],
-  cardIndex: number = 0,
-): Promise<ValidationResult> {
-  const ctx = await getValidationContext(roomCode, playerId, cardIndex);
-  if (!ctx) return { valid: false };
-
-  const card = ctx.card as BingoCard75;
-  const { calledSet } = ctx;
-
-  // Verify each marked cell corresponds to a called number or is the FREE space
-  for (const cellIndex of markedCells) {
-    if (cellIndex === FREE_SPACE_INDEX) continue;
-
-    // Convert cell index (row-major) to grid value (column-major)
-    const row = Math.floor(cellIndex / 5);
-    const col = cellIndex % 5;
-    const cellValue = card.grid[col]?.[row];
-
-    if (cellValue === null || cellValue === undefined) {
-      // FREE space or invalid cell
-      continue;
-    }
-
-    if (!calledSet.has(cellValue)) {
-      // Player marked a number that hasn't been called
-      return { valid: false };
-    }
+export async function validateBingo75(code: string, playerId: string, markedCells: number[], cardIndex = 0): Promise<ValidationResult> {
+  const ctx = await context(code, playerId, cardIndex);
+  if (!ctx || ctx.card.grid.length !== 5 || !Array.isArray(markedCells)) return { valid: false };
+  const { card, effects, caller, room } = ctx;
+  if (!markedCells.every((index) => eligible(card, index, effects, cardIndex, caller.called, caller.called.length))) return { valid: false };
+  const patterns = room.patterns.length ? room.patterns.map((id) => resolvePattern(id, room.customPatterns)).filter((pattern): pattern is WinPattern => Boolean(pattern)) : WIN_PATTERNS;
+  const marked = new Set(markedCells);
+  let expiredPattern: string | undefined;
+  for (const pattern of patterns) {
+    if (!checkWin75(marked, pattern)) continue;
+    const expired = await isPatternExpired75(code, playerId, pattern.id, cardIndex);
+    if (!expired) return { valid: true, pattern: pattern.id, expired: false };
+    expiredPattern ??= pattern.id;
   }
-
-  // Get active patterns for the room
-  const room = await roomStore.getRoom(roomCode);
-  if (!room) return { valid: false };
-
-  const dabbedSet = new Set(markedCells);
-
-  // Build active patterns list (built-in + custom)
-  const customPatterns = room.customPatterns ?? [];
-  const activePatterns = room.patterns
-    .map((id) => resolvePattern(id, customPatterns))
-    .filter((p): p is WinPattern => p !== undefined);
-
-  for (const pattern of activePatterns) {
-    if (checkWin75(dabbedSet, pattern)) {
-      return { valid: true, pattern: pattern.id };
-    }
-  }
-
-  // If no specific patterns are set, check all built-in patterns
-  if (room.patterns.length === 0) {
-    for (const pattern of WIN_PATTERNS) {
-      if (checkWin75(dabbedSet, pattern)) {
-        return { valid: true, pattern: pattern.id };
-      }
-    }
-  }
-
-  return { valid: false };
+  return expiredPattern ? { valid: true, pattern: expiredPattern, expired: true } : { valid: false };
 }
 
-// --------------- 90-ball validation ---------------
-
-/**
- * Validate a 90-ball bingo claim.
- *
- * Steps:
- * 1. Get the player's card from the store (by cardIndex)
- * 2. Get the called numbers for the room
- * 3. Verify all marked cells correspond to called numbers
- * 4. Check if the marked cells satisfy the claimed win stage
- */
-export async function validateBingo90(
-  roomCode: string,
-  playerId: string,
-  markedCells: number[],
-  stage: WinStage90,
-  cardIndex: number = 0,
-): Promise<ValidationResult> {
-  const ctx = await getValidationContext(roomCode, playerId, cardIndex);
-  if (!ctx) return { valid: false };
-
-  const card = ctx.card as BingoCard90;
-  const { calledSet } = ctx;
-
-  // Verify each marked cell corresponds to a called number
-  // 90-ball card: grid[col][row], 9 columns x 3 rows, 0 = blank
-  for (const cellIndex of markedCells) {
-    const row = Math.floor(cellIndex / 9);
-    const col = cellIndex % 9;
-    const cellValue = card.grid[col]?.[row];
-
-    if (cellValue === 0 || cellValue === undefined) {
-      // Blank cell - player shouldn't have marked this
-      return { valid: false };
-    }
-
-    if (!calledSet.has(cellValue)) {
-      return { valid: false };
-    }
-  }
-
-  // Check the win stage
-  const dabbedSet = new Set(markedCells);
-  const isWin = checkWinStage90(card, dabbedSet, stage);
-
-  if (isWin) {
-    return { valid: true, pattern: stage };
-  }
-
-  return { valid: false };
+export async function validateBingo90(code: string, playerId: string, markedCells: number[], stage: WinStage90, cardIndex = 0): Promise<ValidationResult> {
+  const ctx = await context(code, playerId, cardIndex);
+  if (!ctx || ctx.card.grid.length !== 9 || !['one_line', 'two_lines', 'full_house'].includes(stage) || !Array.isArray(markedCells)) return { valid: false };
+  const enabledStages = ctx.room.patterns.filter((pattern) => ['one_line', 'two_lines', 'full_house'].includes(pattern));
+  if (enabledStages.length && !enabledStages.includes(stage)) return { valid: false };
+  if (!markedCells.every((index) => eligible(ctx.card, index, ctx.effects, cardIndex, ctx.caller.called, ctx.caller.called.length))) return { valid: false };
+  if (!checkWinStage90(ctx.card as BingoCard90, new Set(markedCells), stage)) return { valid: false };
+  return { valid: true, pattern: stage, expired: await isStageExpired90(code, playerId, stage, cardIndex) };
 }
 
-// --------------- Bingo expiration checks ---------------
-
-/**
- * Check if a 75-ball pattern was already completable before the most recently
- * called number.  If it was, the player missed their window to claim bingo
- * with this pattern (they should have called before the next number was drawn).
- */
-export async function isPatternExpired75(
-  roomCode: string,
-  playerId: string,
-  patternId: string,
-  cardIndex: number,
-): Promise<boolean> {
-  const cards = await roomStore.getCard(roomCode, playerId);
-  if (!cards || cards.length === 0) return false;
-
-  const safeIndex = Math.max(0, Math.min(cardIndex, cards.length - 1));
-  const card = cards[safeIndex] as BingoCard75;
-
-  const callerState = await roomStore.getCallerState(roomCode);
-  if (!callerState || callerState.called.length <= 1) return false;
-
-  // Numbers called before the most recent one
-  const previousCalled = new Set(callerState.called.slice(0, -1));
-
-  const room = await roomStore.getRoom(roomCode);
-  const pattern = resolvePattern(patternId, room?.customPatterns);
-  if (!pattern) return false;
-
-  // If every cell value in the pattern was already called before the last
-  // number, the pattern was completable earlier → expired.
-  for (const cellIndex of pattern.cells) {
-    if (cellIndex === FREE_SPACE_INDEX) continue;
-
-    const row = Math.floor(cellIndex / 5);
-    const col = cellIndex % 5;
-    const cellValue = card.grid[col]?.[row];
-
-    if (cellValue === null || cellValue === undefined) continue;
-    if (!previousCalled.has(cellValue)) return false;
-  }
-
-  return true;
+export async function isPatternExpired75(code: string, playerId: string, patternId: string, cardIndex: number): Promise<boolean> {
+  const ctx = await context(code, playerId, cardIndex);
+  if (!ctx) return false;
+  const pattern = resolvePattern(patternId, ctx.room.customPatterns);
+  if (!pattern || ctx.caller.called.length === 0) return false;
+  const previousCount = ctx.caller.called.length - 1;
+  return pattern.cells.every((index) => eligible(ctx.card, index, ctx.effects, cardIndex, ctx.caller.called, previousCount));
 }
 
-/**
- * Check if a 90-ball stage was already completable before the most recently
- * called number.
- */
-export async function isStageExpired90(
-  roomCode: string,
-  playerId: string,
-  stage: WinStage90,
-  cardIndex: number,
-): Promise<boolean> {
-  const cards = await roomStore.getCard(roomCode, playerId);
-  if (!cards || cards.length === 0) return false;
-
-  const safeIndex = Math.max(0, Math.min(cardIndex, cards.length - 1));
-  const card = cards[safeIndex] as BingoCard90;
-
-  const callerState = await roomStore.getCallerState(roomCode);
-  if (!callerState || callerState.called.length <= 1) return false;
-
-  const previousCalled = new Set(callerState.called.slice(0, -1));
-
-  // Count rows where every non-blank cell value was called before the last number
-  let completableRows = 0;
-  for (let row = 0; row < 3; row++) {
-    let rowComplete = true;
-    for (let col = 0; col < 9; col++) {
-      const value = card.grid[col]?.[row] ?? 0;
-      if (value !== 0 && !previousCalled.has(value)) {
-        rowComplete = false;
-        break;
-      }
-    }
-    if (rowComplete) completableRows++;
-  }
-
-  switch (stage) {
-    case 'one_line':
-      return completableRows >= 1;
-    case 'two_lines':
-      return completableRows >= 2;
-    case 'full_house':
-      return completableRows >= 3;
-  }
+export async function isStageExpired90(code: string, playerId: string, stage: WinStage90, cardIndex: number): Promise<boolean> {
+  const ctx = await context(code, playerId, cardIndex);
+  if (!ctx || ctx.caller.called.length === 0 || !['one_line', 'two_lines', 'full_house'].includes(stage)) return false;
+  const previousCount = ctx.caller.called.length - 1;
+  const previousMarks = new Set(Array.from({ length: 27 }, (_, index) => index)
+    .filter((index) => eligible(ctx.card, index, ctx.effects, cardIndex, ctx.caller.called, previousCount)));
+  return checkWinStage90(ctx.card as BingoCard90, previousMarks, stage);
 }
