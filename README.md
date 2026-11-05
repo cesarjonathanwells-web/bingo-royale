@@ -59,20 +59,22 @@ pnpm --filter @bingo/server db:migrate
 
 ## Deployment
 
-Push to `main` to auto-deploy to Railway via GitHub Actions.
+Railway production uses the `master` branch, with deployments pinned to the merged commit.
 
 The app is containerized with a multi-stage Docker build. In production, the Express server serves the client's built static files as a single service.
 
 
-## Blender visual enhancements
+## Unreal-rendered artwork
 
-The existing interface uses Blender-rendered ball surfaces, eight power-up icons, a free-space star, and the winner crown. Original layout, palette, number labels, animation timing, and game behavior are retained. Artwork uses transparent PNGs and the existing HTML/CSS fallbacks, with no new runtime dependencies or WebGL requirement.
+The interface loads five ball surfaces and nine power-up/crown icons from `public/images/unreal-balls/` and `public/images/unreal-icons/`. These transparent PNGs use the existing HTML/CSS fallbacks, with no new runtime dependencies or WebGL requirement. Number labels remain live HTML.
 
-Editable sources and rebuild scripts are in `assets-src/blender-balls/`. Run `build.py` and `icons.py` from Blender to regenerate the artwork. With the client dev server running, `/blender-review.html` displays the actual enhanced components for local review; this page is separate from the production app entry and does not connect to multiplayer.
+The dedicated Unreal Engine 5.8.4 project is `assets-src/unreal-lookdev/BingoRoyaleLookdev.uproject`. Editable Blender source meshes remain in `assets-src/blender-balls/`; run `export_blender_icons.py` in Blender to export the nine beveled icons and smooth ball to `SourceMeshes/`. In Unreal, run `render_unreal.py` to rebuild the studio materials, maps, and sequences, then render through Movie Render Queue. Generated Unreal content and raw renders stay local and can be rebuilt from these scripts. `prepare_web_assets.py` downsamples the transparent renders to 256px ball textures and 192px icon textures.
 
-The studio look uses deterministic Cycles CPU renders (64 samples, denoising, seed 21), transparent RGBA PNGs, and the same AgX / None / exposure 0 / gamma 1 color pipeline for balls and icons. The upper-left key is 350 W at 5000 K; cool fill is 40 W at 7000 K; the soft rim is 60 W at 6500 K. Icons add a broad 150 W frontal reflection card to keep gold readable at small sizes. Resin uses metallic 0 and procedural roughness 0.27–0.33, with a 0.28 clear coat on the balls; gold uses metallic 1 and roughness 0.25. These values are calibrated to the source scripts' studio dimensions.
+The studio configuration uses software Lumen GI/reflections, a fixed manual exposure compensation of −5 EV, and a filmic tone curve. A 2100 lm / 5000 K upper-left rectangular key (120 × 180 cm, position 210, 170, 190 cm) establishes the shape; a broad 400 lm / 7000 K lower fill (300 × 300 cm, position 180, −130, −115 cm) lifts the shadows, and a 550 lm / 6500 K rim (140 × 160 cm, position −145, −95, 125 cm) separates the silhouette. Icons add a 750 lm / 5500 K frontal reflection card (300 × 250 cm, position 300, 100, 130 cm).
 
-Home, current-call, and history balls share one neutral shadow treatment. Only the current call receives a restrained accent halo; CSS shading remains an image-error fallback. Home floor shadows stay anchored as the balls float. Power-up controls use the authored artwork at 24px and dialogs at 28px, with emoji loading/error fallbacks. Decorative ball motion respects reduced-motion preferences. The review page includes the actual power-up bar and dialog for checking both native-size artwork and accessible control labels.
+Resin uses metallic 0 with subtle roughness variation. Material Attributes control the balls' 0.28 clearcoat weight / 0.16 coat roughness and the enamel icons' 0.20 / 0.23 values. Gold uses metallic 1, roughness near 0.25, and no clearcoat. The ball mesh retains the smooth 96 × 64 Blender source topology (about 12,000 triangles). The final batch rendered all 14 assets as 1024px RGBA PNGs with 32 spatial samples and 64 warm-up frames; `render-manifest.json` records the verified outputs, delivery dimensions, and hashes.
+
+Home, current-call, and history balls share one neutral shadow treatment. Only the current call receives a restrained accent halo; CSS shading remains an image-error fallback. Home floor shadows stay anchored as the balls float. Power-up controls use the authored artwork at 24px and dialogs at 28px, with emoji loading/error fallbacks. Decorative ball motion respects reduced-motion preferences. With the client dev server running, `/blender-review.html` retains its existing URL and displays the actual components, power-up bar, and dialog for local visual review without connecting to multiplayer.
 
 ## Mobile multi-card layout
 
@@ -84,7 +86,7 @@ Use `/mobile-cards-review.html` on the client dev server to review four local ca
 
 Bingo Royale can be installed from the **Install app** button on Home or Settings. Supported Chromium browsers use their native install prompt; iPhone/iPad users get Safari's Share → Add to Home Screen instructions. The manifest launches the app at `/` in a standalone window, supports both orientations, and includes 192px/512px icons, a maskable icon, and an Apple touch icon derived from the existing favicon.
 
-Production builds generate a versioned `/sw.js` automatically. It precaches the built JavaScript/CSS, Blender PNGs, install icons, and a small English/Spanish offline page. HTML navigation stays network-first; API/authentication responses, Socket.IO traffic, and voice recordings are never cached by the worker. Live multiplayer requires an internet connection. Offline launches show reconnect/retry controls instead of stale room state.
+Production builds generate a versioned `/sw.js` automatically. It precaches the built JavaScript/CSS, Unreal-rendered PNGs, install icons, and a small English/Spanish offline page. HTML navigation stays network-first; API/authentication responses, Socket.IO traffic, and voice recordings are never cached by the worker. Live multiplayer requires an internet connection. Offline launches show reconnect/retry controls instead of stale room state.
 
 Updates wait until all existing app tabs/windows close; there is no forced reload during a game. Settings shows when an update is waiting. Production serves HTML, the manifest, and the worker with `Cache-Control: no-cache`; hashed build assets are immutable. Direct links such as `/room/ABC123` use the Express 5 SPA fallback, while missing API endpoints and assets remain 404s.
 

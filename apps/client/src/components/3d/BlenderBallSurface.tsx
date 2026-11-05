@@ -5,7 +5,7 @@ interface BlenderBallSurfaceProps {
   onReadyChange?: (ready: boolean) => void;
 }
 
-/** Polished Blender artwork over the existing CSS ball; labels remain live HTML. */
+/** Unreal-rendered artwork over the existing CSS ball; labels remain live HTML. */
 export function BlenderBallSurface({ letter, onReadyChange }: BlenderBallSurfaceProps) {
   const [failed, setFailed] = useState(false);
   const paletteKey = "BINGO".includes(letter) && letter.length === 1 ? letter : "O";
@@ -13,7 +13,7 @@ export function BlenderBallSurface({ letter, onReadyChange }: BlenderBallSurface
 
   return (
     <img
-      src={`/images/blender-balls/${paletteKey.toLowerCase()}.png`}
+      src={`/images/unreal-balls/${paletteKey.toLowerCase()}.png`}
       alt=""
       aria-hidden="true"
       draggable={false}

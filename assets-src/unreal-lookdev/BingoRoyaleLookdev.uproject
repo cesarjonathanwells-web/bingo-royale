@@ -1,0 +1,13 @@
+{
+  "FileVersion": 3,
+  "EngineAssociation": "5.8",
+  "Category": "Rendering",
+  "Description": "Unreal Engine studio render source for Bingo Royale UI artwork.",
+  "Plugins": [
+    { "Name": "PythonScriptPlugin", "Enabled": true },
+    { "Name": "EditorScriptingUtilities", "Enabled": true },
+    { "Name": "MovieRenderPipeline", "Enabled": true },
+    { "Name": "SequencerScripting", "Enabled": true },
+    { "Name": "AndroidFileServer", "Enabled": false }
+  ]
+}

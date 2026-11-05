@@ -1,0 +1,422 @@
+{
+  "schema_version": 1,
+  "source_blend": "/Users/cesarwells/Developer/bingo-royale/assets-src/blender-balls/original-style-icons.blend",
+  "blender_version": "4.5.15 LTS",
+  "geometry": "Evaluated source meshes, bevels and curves; no source edits.",
+  "units": "centimeters; 1 exported unit = 1 cm",
+  "front": "+X",
+  "up": "+Z",
+  "fbx_axis_note": "Blender axis_forward -X is the viewing direction; FBX FrontVector is +X toward the camera, matching Unreal force_front_x_axis.",
+  "pivot": "Combined evaluated bounding-box center for each icon.",
+  "fbx_export": {
+    "axis_forward": "-X",
+    "axis_up": "Z",
+    "use_space_transform": false,
+    "apply_unit_scale": true,
+    "global_scale": 1.0,
+    "apply_scale_options": "FBX_SCALE_NONE",
+    "scene_scale_length": 0.01
+  },
+  "unreal_import": {
+    "convert_scene": true,
+    "force_front_x_axis": true,
+    "convert_scene_unit": true,
+    "import_uniform_scale": 1.0,
+    "import_rotation_degrees": [
+      0.0,
+      0.0,
+      0.0
+    ],
+    "normal_import_method": "FBXNIM_IMPORT_NORMALS",
+    "import_materials": false,
+    "import_textures": false,
+    "combine_meshes": true
+  },
+  "materials": {
+    "M_GoldMetal": {
+      "source_name": "Gold • polished metal",
+      "fbx_material_name": "M_GoldMetal",
+      "base_color": [
+        1.0,
+        0.5600000023841858,
+        0.03500000014901161,
+        1.0
+      ],
+      "metallic": 1.0,
+      "roughness": 0.25,
+      "coat": 0.0,
+      "coat_roughness": 0.23000000417232513,
+      "color_space": "linear RGB values from Blender Principled BSDF"
+    },
+    "M_BlueEnamel": {
+      "source_name": "Blue • enamel",
+      "fbx_material_name": "M_BlueEnamel",
+      "base_color": [
+        0.03999999910593033,
+        0.30000001192092896,
+        0.8999999761581421,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.30000001192092896,
+      "coat": 0.20000000298023224,
+      "coat_roughness": 0.23000000417232513,
+      "color_space": "linear RGB values from Blender Principled BSDF"
+    },
+    "M_LilacEnamel": {
+      "source_name": "Lilac • enamel",
+      "fbx_material_name": "M_LilacEnamel",
+      "base_color": [
+        0.41999998688697815,
+        0.20000000298023224,
+        0.800000011920929,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.30000001192092896,
+      "coat": 0.20000000298023224,
+      "coat_roughness": 0.23000000417232513,
+      "color_space": "linear RGB values from Blender Principled BSDF"
+    },
+    "M_PearlEnamel": {
+      "source_name": "Pearl • enamel",
+      "fbx_material_name": "M_PearlEnamel",
+      "base_color": [
+        0.8199999928474426,
+        0.8199999928474426,
+        0.8600000143051147,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.3199999928474426,
+      "coat": 0.20000000298023224,
+      "coat_roughness": 0.23000000417232513,
+      "color_space": "linear RGB values from Blender Principled BSDF"
+    },
+    "M_DarkResin": {
+      "source_name": "Pupil • dark resin",
+      "fbx_material_name": "M_DarkResin",
+      "base_color": [
+        0.012000000104308128,
+        0.017999999225139618,
+        0.03500000014901161,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.3199999928474426,
+      "coat": 0.20000000298023224,
+      "coat_roughness": 0.23000000417232513,
+      "color_space": "linear RGB values from Blender Principled BSDF"
+    },
+    "M_RedEnamel": {
+      "source_name": "Red • enamel",
+      "fbx_material_name": "M_RedEnamel",
+      "base_color": [
+        0.8999999761581421,
+        0.05999999865889549,
+        0.10000000149011612,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.30000001192092896,
+      "coat": 0.20000000298023224,
+      "coat_roughness": 0.23000000417232513,
+      "color_space": "linear RGB values from Blender Principled BSDF"
+    },
+    "M_SkinResin": {
+      "source_name": "Victory hand • satin resin",
+      "fbx_material_name": "M_SkinResin",
+      "base_color": [
+        0.949999988079071,
+        0.5600000023841858,
+        0.1899999976158142,
+        1.0
+      ],
+      "metallic": 0.0,
+      "roughness": 0.3799999952316284,
+      "coat": 0.07999999821186066,
+      "coat_roughness": 0.23000000417232513,
+      "color_space": "linear RGB values from Blender Principled BSDF"
+    }
+  },
+  "assets": [
+    {
+      "name": "SM_WildSquare",
+      "source_name": "wild_square",
+      "fbx": "SM_WildSquare.fbx",
+      "source_collection": "Icon • wild_square",
+      "source_objects": [
+        "wild_square.003"
+      ],
+      "dimensions_cm": [
+        1.14241,
+        10.0,
+        9.51577
+      ],
+      "source_bounds_center": [
+        0.0,
+        0.0,
+        0.07869046926498413
+      ],
+      "material_slots": [
+        "M_GoldMetal"
+      ],
+      "vertex_count": 380,
+      "triangle_count": 756,
+      "has_source_uvs": false,
+      "normal_source": "evaluated source corner normals, transformed and baked"
+    },
+    {
+      "name": "SM_Shield",
+      "source_name": "shield",
+      "fbx": "SM_Shield.fbx",
+      "source_collection": "Icon • shield",
+      "source_objects": [
+        "Shield crest.001",
+        "shield.001"
+      ],
+      "dimensions_cm": [
+        1.365496,
+        7.915483,
+        10.0
+      ],
+      "source_bounds_center": [
+        0.0,
+        0.0,
+        2.401198387145996
+      ],
+      "material_slots": [
+        "M_GoldMetal",
+        "M_BlueEnamel"
+      ],
+      "vertex_count": 400,
+      "triangle_count": 792,
+      "has_source_uvs": false,
+      "normal_source": "evaluated source corner normals, transformed and baked"
+    },
+    {
+      "name": "SM_TurboStamp",
+      "source_name": "turbo_stamp",
+      "fbx": "SM_TurboStamp.fbx",
+      "source_collection": "Icon • turbo_stamp",
+      "source_objects": [
+        "turbo_stamp.001"
+      ],
+      "dimensions_cm": [
+        0.961634,
+        7.155586,
+        10.0
+      ],
+      "source_bounds_center": [
+        2.3895184993743896,
+        0.0,
+        2.414093017578125
+      ],
+      "material_slots": [
+        "M_GoldMetal"
+      ],
+      "vertex_count": 266,
+      "triangle_count": 528,
+      "has_source_uvs": false,
+      "normal_source": "evaluated source corner normals, transformed and baked"
+    },
+    {
+      "name": "SM_InkBlot",
+      "source_name": "ink_blot",
+      "fbx": "SM_InkBlot.fbx",
+      "source_collection": "Icon • ink_blot",
+      "source_objects": [
+        "ink_blot.001"
+      ],
+      "dimensions_cm": [
+        1.899668,
+        10.0,
+        9.037085
+      ],
+      "source_bounds_center": [
+        -2.4000000953674316,
+        -0.06997200101613998,
+        -0.13355571031570435
+      ],
+      "material_slots": [
+        "M_LilacEnamel"
+      ],
+      "vertex_count": 780,
+      "triangle_count": 1556,
+      "has_source_uvs": false,
+      "normal_source": "evaluated source corner normals, transformed and baked"
+    },
+    {
+      "name": "SM_NumberPeek",
+      "source_name": "number_peek",
+      "fbx": "SM_NumberPeek.fbx",
+      "source_collection": "Icon • number_peek",
+      "source_objects": [
+        "Eye glint.001",
+        "Eye.001",
+        "Iris.001",
+        "Pupil.001"
+      ],
+      "dimensions_cm": [
+        2.532468,
+        10.0,
+        5.8
+      ],
+      "source_bounds_center": [
+        0.0,
+        -0.1249999850988388,
+        0.0
+      ],
+      "material_slots": [
+        "M_PearlEnamel",
+        "M_BlueEnamel",
+        "M_DarkResin"
+      ],
+      "vertex_count": 2214,
+      "triangle_count": 4416,
+      "has_source_uvs": true,
+      "normal_source": "evaluated source corner normals, transformed and baked"
+    },
+    {
+      "name": "SM_Scramble",
+      "source_name": "scramble",
+      "fbx": "SM_Scramble.fbx",
+      "source_collection": "Icon • scramble",
+      "source_objects": [
+        "scramble.001"
+      ],
+      "dimensions_cm": [
+        1.245763,
+        9.631874,
+        10.0
+      ],
+      "source_bounds_center": [
+        2.428354263305664,
+        -0.01466771587729454,
+        0.0789080560207367
+      ],
+      "material_slots": [
+        "M_BlueEnamel"
+      ],
+      "vertex_count": 1680,
+      "triangle_count": 3336,
+      "has_source_uvs": true,
+      "normal_source": "evaluated source corner normals, transformed and baked"
+    },
+    {
+      "name": "SM_CallersChoice",
+      "source_name": "callers_choice",
+      "fbx": "SM_CallersChoice.fbx",
+      "source_collection": "Icon • callers_choice",
+      "source_objects": [
+        "Bullseye.001",
+        "Target ring.003",
+        "Target ring.004",
+        "Target ring.005"
+      ],
+      "dimensions_cm": [
+        1.294118,
+        10.0,
+        10.0
+      ],
+      "source_bounds_center": [
+        -2.4000000953674316,
+        -0.039999935775995255,
+        -2.4000000953674316
+      ],
+      "material_slots": [
+        "M_GoldMetal",
+        "M_RedEnamel",
+        "M_PearlEnamel"
+      ],
+      "vertex_count": 2786,
+      "triangle_count": 5568,
+      "has_source_uvs": true,
+      "normal_source": "evaluated source corner normals, transformed and baked"
+    },
+    {
+      "name": "SM_DoubleDaub",
+      "source_name": "double_daub",
+      "fbx": "SM_DoubleDaub.fbx",
+      "source_collection": "Icon • double_daub",
+      "source_objects": [
+        "Folded fingers.001",
+        "Index finger.001",
+        "Index tip.001",
+        "Middle finger.001",
+        "Middle tip.001",
+        "Palm.001",
+        "Thumb.001"
+      ],
+      "dimensions_cm": [
+        2.616279,
+        5.290696,
+        10.0
+      ],
+      "source_bounds_center": [
+        -0.004999876022338867,
+        -0.06499996781349182,
+        -2.2899999618530273
+      ],
+      "material_slots": [
+        "M_SkinResin"
+      ],
+      "vertex_count": 2458,
+      "triangle_count": 4848,
+      "has_source_uvs": true,
+      "normal_source": "evaluated source corner normals, transformed and baked"
+    },
+    {
+      "name": "SM_Crown",
+      "source_name": "crown",
+      "fbx": "SM_Crown.fbx",
+      "source_collection": "Icon • crown",
+      "source_objects": [
+        "Crown band.001",
+        "Crown gemstone.003",
+        "Crown gemstone.004",
+        "Crown gemstone.005",
+        "Original crown.001"
+      ],
+      "dimensions_cm": [
+        1.868964,
+        10.0,
+        9.014467
+      ],
+      "source_bounds_center": [
+        2.4000000953674316,
+        -0.04499998688697815,
+        -2.2923972606658936
+      ],
+      "material_slots": [
+        "M_GoldMetal",
+        "M_RedEnamel",
+        "M_BlueEnamel",
+        "M_LilacEnamel"
+      ],
+      "vertex_count": 1864,
+      "triangle_count": 3708,
+      "has_source_uvs": true,
+      "normal_source": "evaluated source corner normals, transformed and baked"
+    }
+  ],
+  "source_scene": "Bingo Royale • Collectible icon studio.003",
+  "ball_mesh": {
+    "name": "SM_BingoBall",
+    "fbx": "SM_BingoBall.fbx",
+    "source_blend": "/Users/cesarwells/Developer/bingo-royale/assets-src/blender-balls/original-style-balls.blend",
+    "source_object": "Bingo ball • resin shell.002",
+    "dimensions_cm": [
+      9.999996,
+      10.0,
+      9.999993
+    ],
+    "material_slots": [
+      "M_BallResin"
+    ],
+    "vertex_count": 6050,
+    "triangle_count": 12096,
+    "has_source_uvs": true,
+    "normal_source": "smooth evaluated source sphere normals"
+  }
+}

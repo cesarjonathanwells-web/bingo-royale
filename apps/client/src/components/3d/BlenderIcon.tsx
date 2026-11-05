@@ -7,7 +7,7 @@ interface BlenderIconProps {
   children: ReactNode;
 }
 
-/** Enhances the existing icon while retaining it as a loading/error fallback. */
+/** Unreal-rendered icon with the existing loading/error fallback. */
 export function BlenderIcon({ name, className, children }: BlenderIconProps) {
   const [readyName, setReadyName] = useState<string | null>(null);
   const [failedName, setFailedName] = useState<string | null>(null);
@@ -17,7 +17,7 @@ export function BlenderIcon({ name, className, children }: BlenderIconProps) {
     <span className={cn("relative inline-flex items-center justify-center shrink-0", className)} aria-hidden="true">
       <span className="inline-flex items-center justify-center" style={{ visibility: ready && !failed ? "hidden" : "visible" }}>{children}</span>
       {!failed && <img
-        src={`/images/blender-icons/${name}.png`}
+        src={`/images/unreal-icons/${name}.png`}
         alt=""
         draggable={false}
         width={192}
