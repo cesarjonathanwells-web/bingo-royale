@@ -12,9 +12,11 @@ interface BallCall3DProps {
   number: number | null;
   is75?: boolean;
   className?: string;
+  /** On the call stage the ball is larger and rolls in from the machine. */
+  stage?: boolean;
 }
 
-export function BallCall3D({ number, is75 = true, className }: BallCall3DProps) {
+export function BallCall3D({ number, is75 = true, className, stage = false }: BallCall3DProps) {
   const reducedMotion = usePrefersReducedMotion();
   const { letter, color } = useMemo(() => {
     if (!number) return { letter: "", color: "#f59e0b" };
@@ -31,8 +33,10 @@ export function BallCall3D({ number, is75 = true, className }: BallCall3DProps) 
         <motion.div
           key={number}
           className="flex items-center justify-center"
-          initial={reducedMotion ? false : { y: -40, scale: 0.3, opacity: 0 }}
-          animate={{ y: 0, scale: 1, opacity: 1 }}
+          initial={reducedMotion ? false : stage
+            ? { x: "-110%", scale: 0.45, opacity: 0, rotate: -220 }
+            : { y: -40, scale: 0.3, opacity: 0 }}
+          animate={stage ? { x: 0, scale: 1, opacity: 1, rotate: 0 } : { y: 0, scale: 1, opacity: 1 }}
           exit={reducedMotion ? { opacity: 0 } : { scale: 0.5, opacity: 0 }}
           transition={reducedMotion ? { duration: 0 } : {
             type: "spring",
@@ -41,10 +45,10 @@ export function BallCall3D({ number, is75 = true, className }: BallCall3DProps) 
             mass: 0.8,
           }}
         >
-          <BingoBallBody letter={letter} color={color} active className="w-12 h-12 sm:w-14 sm:h-14">
+          <BingoBallBody letter={letter} color={color} active className={stage ? "call-stage__ball" : "w-12 h-12 sm:w-14 sm:h-14"}>
             {/* Inner white circle */}
             <div
-              className="w-8 h-8 sm:w-9 sm:h-9 rounded-full flex flex-col items-center justify-center z-10"
+              className={`${stage ? "call-stage__disc" : "w-8 h-8 sm:w-9 sm:h-9"} rounded-full flex flex-col items-center justify-center z-10`}
               style={{
                 background: "radial-gradient(circle at 48% 38%, #ffffff, #f4f4f4 60%, #e8e8e8 85%, #ddd 100%)",
                 boxShadow: "inset 0 1px 3px rgba(0,0,0,0.12)",
@@ -53,14 +57,14 @@ export function BallCall3D({ number, is75 = true, className }: BallCall3DProps) 
               {is75 && number <= 75 && (
                 <span
                   className="font-bold leading-none"
-                  style={{ color, fontSize: "7px" }}
+                  style={{ color, fontSize: stage ? "0.2em" : "7px" }}
                 >
                   {letter}
                 </span>
               )}
               <span
                 className="font-extrabold leading-none"
-                style={{ color: "#0f1330", fontSize: "13px" }}
+                style={{ color: "#0f1330", fontSize: stage ? "0.36em" : "13px" }}
               >
                 {number}
               </span>

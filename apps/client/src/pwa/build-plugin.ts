@@ -18,6 +18,7 @@ export function pwaBuild(): Plugin {
         files.push(...readdirSync(path.join(root, 'public/images', folder)).filter(name => name.endsWith('.png')).sort()
           .map(name => `/images/${folder}/${name}`));
       }
+      files.push('/images/stage/machine-back.webp', '/images/stage/machine-front.webp');
       const hash = createHash('sha256').update(template);
       for (const file of files) hash.update(readFileSync(path.join(root, 'public', file)));
       for (const [file, output] of Object.entries(bundle).sort(([a], [b]) => a.localeCompare(b))) {

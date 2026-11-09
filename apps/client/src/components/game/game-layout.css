@@ -120,3 +120,8 @@
   .game-header .game-top-bar { border: 0 !important; background: transparent; box-shadow: none; backdrop-filter: none; -webkit-backdrop-filter: none; }
   .game-header .game-call-strip { border-bottom: 0; background: transparent; }
 }
+/* The call stage has moved beside the card: the top bar takes the whole header. */
+@media (min-width: 768px) {
+  .game-header.game-header--solo { display: block; }
+  .game-header--solo .game-called-history { left: 16px; right: auto; }
+}

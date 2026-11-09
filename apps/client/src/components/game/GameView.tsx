@@ -31,6 +31,7 @@ import { getAvatarColor } from "@/lib/avatar";
 import { PowerUpDialog } from "@/components/bingo/PowerUpDialog";
 import { getCardLayout } from "@/lib/card-layout";
 import { getCardProgress } from "@/lib/board-progress";
+import { useMediaQuery } from "@/hooks/useMediaQuery";
 import "./game-layout.css";
 
 interface EmojiReaction {
@@ -100,6 +101,8 @@ export function GameView({
   const { t } = useTranslation("game");
 
   const gridContainerRef = useRef<HTMLDivElement>(null);
+  // With room to spare, the call stage moves out of the header and beside the card.
+  const stageBesideCard = useMediaQuery("(min-width: 1180px) and (min-height: 640px)");
   const [gridLayout, setGridLayout] = useState({ columns: 1, maxWidth: 420 });
   const [viewAll, setViewAll] = useState(myCards.length > 1);
 
@@ -240,7 +243,7 @@ export function GameView({
 
   return (
     <div className="game-shell fixed inset-0 h-[100dvh] flex flex-col min-h-0 bg-[var(--color-bg-primary)]" data-variant={room.variant} style={{ paddingTop: "env(safe-area-inset-top)", paddingLeft: "env(safe-area-inset-left)", paddingRight: "env(safe-area-inset-right)" }}>
-      <header className="game-header">
+      <header className={cn("game-header", stageBesideCard && "game-header--solo")}>
         {/* Top bar with room code + controls */}
         <GameTopBar
           gameState={gameState}
@@ -250,12 +253,12 @@ export function GameView({
           onLeave={onLeave}
         />
 
-        {/* Ball call strip: current ball (25% larger) + last 3 called */}
-        <BallCallStrip
+        {/* Call stage: machine, current ball and the last 3 calls */}
+        {!stageBesideCard && <BallCallStrip
           gameState={gameState}
           variant={room.variant}
           onPress={() => setNumbersOpen(!numbersOpen)}
-        />
+        />}
         {/* Called numbers dropdown */}
         <CalledNumbersDropdown
           open={numbersOpen}
@@ -268,6 +271,15 @@ export function GameView({
 
       {/* Main area: on desktop, card left + sidebar right. On mobile, card only */}
       <div className="game-main flex-1 min-h-0 flex overflow-hidden">
+        {/* Wide screens: the call stage stands beside the card */}
+        {stageBesideCard && <aside className="game-call-panel">
+          <BallCallStrip
+            layout="panel"
+            gameState={gameState}
+            variant={room.variant}
+            onPress={() => setNumbersOpen(!numbersOpen)}
+          />
+        </aside>}
         {/* Card column */}
         <div className="game-board-column flex-1 min-w-0 min-h-0 flex flex-col items-center overflow-hidden relative">
         {/* Paused overlay */}

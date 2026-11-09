@@ -76,6 +76,14 @@ Resin uses metallic 0 with subtle roughness variation. Material Attributes contr
 
 Home, current-call, and history balls share one neutral shadow treatment. Only the current call receives a restrained accent halo; CSS shading remains an image-error fallback. Home floor shadows stay anchored as the balls float. Power-up controls use the authored artwork at 24px and dialogs at 28px, with emoji loading/error fallbacks. Decorative ball motion respects reduced-motion preferences. With the client dev server running, `/blender-review.html` retains its existing URL and displays the actual components, power-up bar, and dialog for local visual review without connecting to multiplayer.
 
+## Call stage
+
+Every call happens on a stage: a gold and glass ball machine with live balls tumbling inside it, the called ball rolling out of its chute onto a rail, and the most recent calls lined up newest first. Phones and tablets show the stage in the header (machine, current ball, last three calls). Screens at least 1180px wide and 640px tall move it beside the card as a large panel with the last five calls and the called count. Tapping the stage still opens the full list of called numbers.
+
+The machine is two rendered layers with a canvas between them. `machine-back.webp` is the whole machine without balls; `machine-front.webp` is only what stands in front of the globe's centre plane (glass highlights, the front of the rings, cup and chute), so the balls sit inside the glass. `src/lib/machine-physics.ts` simulates up to 18 balls in two depth layers inside the globe: a blower burst on each call, a gentle pop between calls, and rest while the game is paused. Balls carry only numbers that are still to be called, in their column's colour; the globe empties over the last 18 calls. The loop sleeps when the pile is at rest, the stage is off screen, or the tab is hidden. With reduced motion the pile is drawn once and never animated.
+
+The model is `assets-src/blender-stage/ball-machine.blend` (Blender 5.2, Cycles). Re-render both layers with `Blender -b ball-machine.blend -P render_layers.py`; the script prints the globe and rail positions used by `MACHINE_ART` in `src/components/stage/BallMachine.tsx`. Open `/call-stage-review.html` on the client dev server to watch the stage with a local caller (`?variant=90`, `?count=4`, `?speed=1500`, `?start=60`, `?paused=1`, `?theme=light`). Run `pnpm --filter @bingo/client test` for the simulation tests.
+
 ## Board interaction
 
 Both 75-ball and 90-ball boards share a short ink-stamp impact, six droplets, a fading ring, and a small number settle on newly confirmed marks. Seeded ink shapes stay consistent across renders. Existing marks, restored cards, and card switches do not replay the stamp. The daub sound follows confirmed marks, including auto-daub and power-ups, with one quiet pop per batch; invalid taps stay silent and the existing mute setting applies.
