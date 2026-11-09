@@ -13,14 +13,14 @@ import { GameFinished } from "@/components/game/GameFinished";
 import { getSocket } from "@/socket";
 import { Button } from "@/components/ui/Button";
 import type { PowerUpId, PowerUpUseOptions } from "@bingo/shared";
-import { POWER_UP_MAP } from "@bingo/shared";
+import { POWER_UP_MAP, resolvePattern } from "@bingo/shared";
 
 interface RoomPageProps {
   code: string;
 }
 
 export function Room({ code }: RoomPageProps) {
-  const { t } = useTranslation("game");
+  const { t, i18n } = useTranslation("game");
   const room = useRoomStore((s) => s.room);
   const gameState = useRoomStore((s) => s.gameState);
   const myCards = useRoomStore((s) => s.myCards);
@@ -57,6 +57,7 @@ export function Room({ code }: RoomPageProps) {
   const { toast } = useToast();
   const navigate = useNavigate();
   const joinAttempted = useRef(false);
+  const leaveTimer = useRef<ReturnType<typeof setTimeout> | null>(null);
   const dabSnapshot = useRef<{
     key: string;
     marks: Set<number>[];
@@ -92,15 +93,19 @@ export function Room({ code }: RoomPageProps) {
     };
 
     window.addEventListener("beforeunload", handleBeforeUnload);
+    // React's development double-mount runs this cleanup and setup back to
+    // back; cancelling the queued leave keeps the player in the room.
+    if (leaveTimer.current !== null) clearTimeout(leaveTimer.current);
+    leaveTimer.current = null;
 
     return () => {
       window.removeEventListener("beforeunload", handleBeforeUnload);
-      joinAttempted.current = false;
-      // If we still have a room when unmounting, leave it
-      const currentRoom = useRoomStore.getState().room;
-      if (currentRoom) {
-        leaveRoom();
-      }
+      leaveTimer.current = setTimeout(() => {
+        leaveTimer.current = null;
+        joinAttempted.current = false;
+        // If we still have a room after a real unmount, leave it
+        if (useRoomStore.getState().room) leaveRoom();
+      }, 0);
     };
   }, [leaveRoom]);
 
@@ -152,13 +157,15 @@ export function Room({ code }: RoomPageProps) {
     }) => {
       if (data.valid) {
         play("bingoWin");
-        toast(
-          t("game.winnerAnnouncement", {
-            name: data.playerName,
-            pattern: data.pattern ?? "",
-          }),
-          "success",
-        );
+        // The server sends the pattern id; show its name in the player's language.
+        const id = data.pattern ?? "";
+        const custom = resolvePattern(id, useRoomStore.getState().room?.customPatterns);
+        const pattern = id
+          ? t(`patterns.${id}`, {
+              defaultValue: custom ? (i18n.language.startsWith("es") ? custom.nameEs : custom.name) : id,
+            })
+          : "";
+        toast(t("game.winnerAnnouncement", { name: data.playerName, pattern }), "success");
       } else if (data.playerId === user?.id) {
         play("bingoInvalid");
         toast(t("game.bingoInvalid"), "error");
@@ -181,7 +188,7 @@ export function Room({ code }: RoomPageProps) {
       socket.off("game:bingo_claimed", handleBingoClaimed);
       socket.off("game:number_called", handleNumberCalled);
     };
-  }, [play, announce, toast, t, user?.id, room?.variant]);
+  }, [play, announce, toast, t, i18n.language, user?.id, room?.variant]);
 
   // Listen for power-up used events
   useEffect(() => {

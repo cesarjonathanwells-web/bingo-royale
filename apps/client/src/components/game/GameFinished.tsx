@@ -186,7 +186,7 @@ export function GameFinished({
                           className={
                             isActive
                               ? "w-5 h-5 sm:w-6 sm:h-6 rounded-sm bg-[var(--color-accent)] shadow-[0_0_6px_var(--color-accent)]"
-                              : "w-5 h-5 sm:w-6 sm:h-6 rounded-sm bg-[var(--color-bg-tertiary)]/40"
+                              : "w-5 h-5 sm:w-6 sm:h-6 rounded-sm bg-white/10"
                           }
                         />
                       );
@@ -219,9 +219,7 @@ export function GameFinished({
               {gameState.calledNumbers.length}
             </p>
             <p className="text-sm text-[var(--color-text-muted)] uppercase tracking-wider">
-              {t("game.numbersCalled", {
-                count: gameState.calledNumbers.length,
-              })}
+              {t("game.numbersCalledLabel")}
             </p>
           </motion.div>
 
