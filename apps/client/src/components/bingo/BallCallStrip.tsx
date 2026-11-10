@@ -4,94 +4,105 @@ import { useTranslation } from "react-i18next";
 import { motion, AnimatePresence } from "framer-motion";
 import type { GameState, BingoVariant } from "@bingo/shared";
 import { BallCall3D } from "@/components/3d/BallCall3D";
+import { BallMachine } from "@/components/stage/BallMachine";
 import { NumberBall } from "./NumberBall";
 import { cn } from "@/lib/utils";
+import "./call-stage.css";
 
 interface BallCallStripProps {
   gameState: GameState;
   variant: BingoVariant;
   onPress: () => void;
+  /** "strip" sits in the header; "panel" is the large stage beside the card on wide screens. */
+  layout?: "strip" | "panel";
 }
 
 /**
- * Always-visible strip showing the current ball (25% larger) and
- * the last 3 called balls with progressive fade.
+ * The call stage: the ball machine, the current ball rolling out of its chute,
+ * and the most recent calls lined up newest first.
  * Tapping opens the full called numbers dropdown.
  */
 export function BallCallStrip({
   gameState,
   variant,
   onPress,
+  layout = "strip",
 }: BallCallStripProps) {
   const { t } = useTranslation("game");
   const reducedMotion = usePrefersReducedMotion();
   const is75 = variant === "75";
+  const total = is75 ? 75 : 90;
+  const panel = layout === "panel";
+  const called = gameState.calledNumbers;
 
-  const { currentNumber, previousThree } = useMemo(() => {
-    const called = gameState.calledNumbers;
+  const { currentNumber, previous } = useMemo(() => {
     const current = called.length > 0 ? called[called.length - 1]! : null;
-    // Last 3 before the current, newest first
-    const prev = called.length > 1
-      ? called.slice(-4, -1).reverse()
-      : [];
-    return { currentNumber: current, previousThree: prev };
-  }, [gameState.calledNumbers]);
+    // Calls before the current one, newest first.
+    const earlier = called.length > 1 ? called.slice(panel ? -6 : -4, -1).reverse() : [];
+    return { currentNumber: current, previous: earlier };
+  }, [called, panel]);
+
+  const history = (
+    <span className="call-stage__history">
+      <AnimatePresence mode="popLayout" initial={false}>
+        {previous.map((n, idx) => (
+          <motion.span
+            key={n}
+            className="call-stage__past"
+            layout={!reducedMotion}
+            initial={reducedMotion ? false : { scale: 0.6, opacity: 0, x: -24 }}
+            animate={{ scale: 1, opacity: 1 - idx * (panel ? 0.14 : 0.22), x: 0 }}
+            exit={reducedMotion ? { opacity: 0 } : { scale: 0.6, opacity: 0, x: 16 }}
+            transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 32 }}
+          >
+            <NumberBall number={n} is75={is75} size={panel ? "md" : "sm"} />
+          </motion.span>
+        ))}
+      </AnimatePresence>
+    </span>
+  );
 
   return (
     <button
       onClick={onPress}
       className={cn(
-        "game-call-strip w-full flex items-center justify-center gap-3 px-3 py-1.5",
-        "bg-[var(--color-bg-secondary)]/60 border-b border-[var(--color-border)]/40",
-        "cursor-pointer select-none hover:bg-[var(--color-bg-secondary)]/80 transition-colors",
+        "game-call-strip call-stage cursor-pointer select-none transition-colors",
+        panel ? "call-stage--panel" : cn(
+          "w-full px-3 bg-[var(--color-bg-secondary)]/60 border-b border-[var(--color-border)]/40",
+          "hover:bg-[var(--color-bg-secondary)]/80",
+        ),
       )}
       aria-label={t("game.tapHistory")}
     >
-      {/* Previous 3 balls - oldest to newest (left to right) */}
-      <div className="flex items-center gap-2">
-        <AnimatePresence mode="popLayout">
-          {previousThree.length > 0
-            ? [...previousThree].reverse().map((n, idx) => {
-                const opacity = 0.35 + idx * 0.2;
-                return (
-                  <motion.div
-                    key={n}
-                    initial={reducedMotion ? false : { scale: 0, opacity: 0, x: 30 }}
-                    animate={{ scale: 1, opacity, x: 0 }}
-                    exit={reducedMotion ? { opacity: 0 } : { scale: 0, opacity: 0, x: -20 }}
-                    transition={reducedMotion ? { duration: 0 } : { type: "spring", stiffness: 500, damping: 30 }}
-                  >
-                    <NumberBall number={n} is75={is75} size="sm" />
-                  </motion.div>
-                );
-              })
-            : Array.from({ length: 3 }, (_, i) => (
-                <div
-                  key={`empty-${i}`}
-                  className="w-9 h-9 rounded-full bg-[var(--color-bg-tertiary)]/40 border border-[var(--color-border)]/30"
-                  style={{ opacity: 0.35 + i * 0.2 }}
-                />
-              ))}
-        </AnimatePresence>
-      </div>
+      <span className="call-stage__inner">
+        <BallMachine
+          className="call-stage__machine"
+          called={called}
+          is75={is75}
+          running={!gameState.paused}
+        />
+        <span className="call-stage__rail" aria-hidden="true" />
 
-      {/* Divider */}
-      <div className="w-px h-8 bg-[var(--color-border)]/40" />
+        {/* The current ball rolls out of the chute */}
+        <span className="call-stage__current">
+          {currentNumber ? (
+            <BallCall3D number={currentNumber} is75={is75} stage />
+          ) : (
+            <span className="call-stage__waiting">{t("game.noNumberYet")}</span>
+          )}
+        </span>
 
-      {/* Current ball - 3D animated */}
-      <div className="relative">
-        {currentNumber ? (
-          <BallCall3D
-            number={currentNumber}
-            is75={is75}
-          />
-        ) : (
-          <div className="w-9 h-9 rounded-full bg-[var(--color-bg-tertiary)]/60 border border-[var(--color-border)] flex items-center justify-center">
-            <span className="text-[8px] text-[var(--color-text-muted)]">--</span>
-          </div>
-        )}
-      </div>
+        {!panel && history}
+      </span>
+
+      {panel && (
+        <span className="call-stage__recent">
+          {history}
+          <span className="call-stage__count">
+            {t("game.calledOf", { called: called.length, total })}
+          </span>
+        </span>
+      )}
     </button>
   );
 }
-

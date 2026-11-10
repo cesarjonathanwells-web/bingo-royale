@@ -1,0 +1,152 @@
+/* The call stage: ball machine, the current ball, and the rail of recent calls. */
+.call-stage {
+  --stage-h: clamp(60px, 12dvh, 116px);
+  --call-ball: calc(var(--stage-h) * 0.6);
+  /* Rail height above the bottom of the machine artwork (see MACHINE_ART.railY). */
+  --rail-lift: calc(var(--stage-h) * 0.1205);
+  display: block;
+  padding-block: 4px;
+  overflow: hidden;
+}
+.call-stage__inner {
+  position: relative;
+  display: flex;
+  align-items: flex-end;
+  justify-content: flex-start;
+  width: 100%;
+  max-width: 520px;
+  height: var(--stage-h);
+  margin-inline: auto;
+  padding-bottom: var(--rail-lift);
+}
+
+/* Machine artwork with the live balls between its back and front layers. */
+.ball-machine {
+  position: relative;
+  display: block;
+  flex: none;
+  aspect-ratio: 900 / 920;
+  pointer-events: none;
+  user-select: none;
+}
+.ball-machine__layer {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+.call-stage__machine {
+  z-index: 2;
+  height: var(--stage-h);
+  margin-bottom: calc(var(--rail-lift) * -1);
+  filter: drop-shadow(0 6px 10px rgba(0, 0, 0, 0.45));
+}
+
+/* Gold rail the balls rest on, running out from the chute mouth. */
+.call-stage__rail {
+  position: absolute;
+  z-index: 1;
+  left: calc(var(--stage-h) * 0.8);
+  right: 0;
+  bottom: calc(var(--rail-lift) - 4px);
+  height: 4px;
+  border-radius: 2px;
+  background: linear-gradient(90deg, #f1c765 0%, #d9a441 40%, rgba(217, 164, 65, 0.35) 78%, rgba(217, 164, 65, 0) 100%);
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.5), inset 0 1px 0 rgba(255, 255, 255, 0.35);
+}
+.call-stage__current {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  flex: none;
+  align-items: flex-end;
+  min-width: var(--call-ball);
+  height: var(--call-ball);
+  margin-left: calc(var(--stage-h) * -0.1);
+  /* The ball artwork has a hair of clear margin; sit it on the rail. */
+  margin-bottom: calc(var(--call-ball) * -0.03);
+}
+.call-stage__ball { width: var(--call-ball); height: var(--call-ball); font-size: var(--call-ball); }
+.call-stage__disc { width: 66%; height: 66%; }
+.call-stage__waiting {
+  align-self: center;
+  padding-left: 16px;
+  color: var(--color-text-muted);
+  font-size: 12px;
+  white-space: nowrap;
+}
+.call-stage__history {
+  position: relative;
+  z-index: 3;
+  display: flex;
+  min-width: 0;
+  align-items: flex-end;
+  gap: clamp(4px, 1.6vw, 10px);
+  margin-left: clamp(6px, 2vw, 14px);
+}
+.call-stage__past { display: block; flex: none; margin-bottom: -1px; }
+
+/* Tall phones have room above the card for a larger stage. */
+@media (max-width: 767px) and (min-height: 780px) {
+  .call-stage { --stage-h: clamp(60px, 14.5dvh, 132px); }
+}
+@media (min-width: 768px) {
+  .call-stage { --stage-h: clamp(64px, 11dvh, 132px); }
+}
+/* Landscape phones: a short stage, with the current ball still the largest. */
+@media (min-width: 600px) and (max-height: 520px) {
+  .call-stage { --stage-h: 58px; --call-ball: calc(var(--stage-h) * 0.76); }
+  .call-stage__past { zoom: 0.8; }
+}
+
+/* Wide screens: the stage stands beside the card. */
+.game-call-panel {
+  display: flex;
+  flex: none;
+  align-items: center;
+  justify-content: center;
+  width: clamp(320px, 30vw, 480px);
+  padding: 12px 0 12px 20px;
+}
+.call-stage--panel {
+  --panel-w: clamp(300px, calc(30vw - 20px), 460px);
+  --stage-h: min(calc(var(--panel-w) * 0.8), 46dvh);
+  --call-ball: calc(var(--stage-h) * 0.36);
+  width: var(--panel-w);
+  padding: 0;
+  overflow: visible;
+  border-radius: 20px;
+}
+.call-stage--panel:focus-visible { outline: 2px solid var(--color-gold); outline-offset: 6px; }
+.call-stage--panel .call-stage__inner { max-width: none; }
+/* A soft pool of light behind the machine. */
+.call-stage--panel .call-stage__inner::before {
+  content: "";
+  position: absolute;
+  z-index: 0;
+  left: -12%;
+  top: -14%;
+  width: 104%;
+  height: 112%;
+  background: radial-gradient(closest-side, rgba(212, 162, 76, 0.13), rgba(120, 100, 220, 0.05) 60%, transparent 100%);
+  pointer-events: none;
+}
+.call-stage--panel .call-stage__current { margin-left: calc(var(--stage-h) * -0.13); }
+.call-stage--panel .call-stage__machine { filter: drop-shadow(0 14px 22px rgba(0, 0, 0, 0.5)); }
+.call-stage--panel .call-stage__rail { height: 6px; bottom: calc(var(--rail-lift) - 6px); border-radius: 3px; }
+.call-stage--panel .call-stage__waiting { font-size: 13px; white-space: normal; text-align: left; }
+.call-stage__recent {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  margin-top: 22px;
+}
+.call-stage--panel .call-stage__history { min-height: 48px; margin-left: 0; gap: 10px; justify-content: center; }
+.call-stage__count {
+  color: var(--color-text-secondary);
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.08em;
+  font-variant-numeric: tabular-nums;
+}
