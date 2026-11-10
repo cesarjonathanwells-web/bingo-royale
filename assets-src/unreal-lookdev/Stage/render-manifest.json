@@ -1,0 +1,35 @@
+{
+  "engine": "Unreal Engine Movie Render Queue",
+  "layers": {
+    "machine-back": {
+      "source_png_sha256": {
+        "machine-back": "8d3bc5abe489c4edf523390204d8368cd3f8858b13e332af3e5f8195b76b710b"
+      },
+      "webp": "apps/client/public/images/stage/machine-back.webp",
+      "webp_bytes": 63048,
+      "webp_sha256": "a873c980042289ff77173963570c899356508dc92cae0cf50a834420b0597943",
+      "size": [
+        900,
+        920
+      ],
+      "glass_highlight_pixels": 0
+    },
+    "machine-front": {
+      "source_png_sha256": {
+        "machine-front": "6dac312981a9f31b0a31fe495a404301068ada8ec5a9004e31b8b1eec618b767",
+        "machine-glass": "887555ff1ff3f81fd9e8a0657718e6c5c457e8523dad61b2e47ab938b8f049d5"
+      },
+      "webp": "apps/client/public/images/stage/machine-front.webp",
+      "webp_bytes": 74814,
+      "webp_sha256": "192816c7aedd10f55982771dc5d30a65156dfa22c32472fb0469f6c925675019",
+      "size": [
+        900,
+        920
+      ],
+      "glass_highlight_pixels": 11627
+    }
+  },
+  "unreal_version": "5.8.4-58902052+++UE5+Release-5.8",
+  "spatial_samples": 32,
+  "exposure": -5.0
+}

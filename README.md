@@ -82,7 +82,15 @@ Every call happens on a stage: a gold and glass ball machine with live balls tum
 
 The machine is two rendered layers with a canvas between them. `machine-back.webp` is the whole machine without balls; `machine-front.webp` is only what stands in front of the globe's centre plane (glass highlights, the front of the rings, cup and chute), so the balls sit inside the glass. `src/lib/machine-physics.ts` simulates up to 18 balls in two depth layers inside the globe: a blower burst on each call, a gentle pop between calls, and rest while the game is paused. Balls carry only numbers that are still to be called, in their column's colour; the globe empties over the last 18 calls. The loop sleeps when the pile is at rest, the stage is off screen, or the tab is hidden. With reduced motion the pile is drawn once and never animated.
 
-The model is `assets-src/blender-stage/ball-machine.blend` (Blender 5.2, Cycles). Re-render both layers with `Blender -b ball-machine.blend -P render_layers.py`; the script prints the globe and rail positions used by `MACHINE_ART` in `src/components/stage/BallMachine.tsx`. Open `/call-stage-review.html` on the client dev server to watch the stage with a local caller (`?variant=90`, `?count=4`, `?speed=1500`, `?start=60`, `?paused=1`, `?theme=light`). Run `pnpm --filter @bingo/client test` for the simulation tests.
+The machine is modelled in Blender (`assets-src/blender-stage/ball-machine.blend`, Blender 5.2) and rendered in the same Unreal studio as the balls, power-up icons and crown, with the same lights and exposure. To rebuild it:
+
+1. `Blender -b assets-src/blender-stage/ball-machine.blend -P assets-src/blender-stage/export_machine_fbx.py` writes three meshes to `assets-src/unreal-lookdev/Stage/SourceMeshes/`: the machine without its glass, the front half of the machine, and the front half of the glass globe.
+2. Open `assets-src/unreal-lookdev/BingoRoyaleLookdev.uproject` and run `Stage/render_machine.py` (see its header). It imports the meshes into `/Game/BingoStage`, builds one studio map per pass and queues three Movie Render Queue stills at 900 × 920 with 32 spatial samples. The glass is rendered as a dark mirror so the studio lights leave clean highlights.
+3. `python3 assets-src/unreal-lookdev/Stage/prepare_stage_assets.py` turns the glass pass into see-through highlights, puts the front metal over it, converts to straight alpha and writes both WebP layers (needs `cwebp`). `Stage/render-manifest.json` records the hashes.
+
+The Unreal camera in `render_machine.py` copies the Blender camera, so the globe and rail positions in `MACHINE_ART` (`src/components/stage/BallMachine.tsx`) stay valid; change them if the camera or model moves. In UE 5.8, rebuilding a studio map after Movie Render Queue has used it in the same editor session is fatal, so the script refuses and asks for an editor restart; its `materials` action changes materials and re-renders without touching the maps.
+
+Open `/call-stage-review.html` on the client dev server to watch the stage with a local caller (`?variant=90`, `?count=4`, `?speed=1500`, `?start=60`, `?paused=1`, `?theme=light`). Run `pnpm --filter @bingo/client test` for the simulation tests.
 
 ## Board interaction
 

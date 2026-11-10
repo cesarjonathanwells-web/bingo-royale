@@ -1,0 +1,71 @@
+{
+  "target": [
+    0.33500000834465027,
+    0.0,
+    1.5
+  ],
+  "units": "1 Blender unit = 100 cm",
+  "front": "+X",
+  "meshes": [
+    {
+      "name": "SM_BallMachine",
+      "fbx": "SM_BallMachine.fbx",
+      "triangles": 56860,
+      "bounds_min": [
+        -1.13,
+        -1.465,
+        -1.5
+      ],
+      "bounds_max": [
+        1.13,
+        1.2543,
+        1.53
+      ],
+      "material_slots": [
+        "M_GoldMetal",
+        "M_MidnightEnamel",
+        "M_MachineGlass"
+      ]
+    },
+    {
+      "name": "SM_BallMachineFront",
+      "fbx": "SM_BallMachineFront.fbx",
+      "triangles": 30238,
+      "bounds_min": [
+        -0.0,
+        -1.465,
+        -1.5
+      ],
+      "bounds_max": [
+        1.13,
+        1.2543,
+        1.53
+      ],
+      "material_slots": [
+        "M_GoldMetal",
+        "M_MidnightEnamel",
+        "M_MachineGlass"
+      ]
+    },
+    {
+      "name": "SM_MachineGlassFront",
+      "fbx": "SM_MachineGlassFront.fbx",
+      "triangles": 4704,
+      "bounds_min": [
+        -0.0,
+        -1.335,
+        -0.75
+      ],
+      "bounds_max": [
+        1.0,
+        0.665,
+        1.25
+      ],
+      "material_slots": [
+        "M_GoldMetal",
+        "M_MidnightEnamel",
+        "M_MachineGlass"
+      ]
+    }
+  ]
+}
